@@ -5,9 +5,11 @@
  */
 package org.bitbucket.ucchy.fnafim.effect;
 
+import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -30,7 +32,8 @@ public class HideNametagEffect implements SpecialEffect {
     public void start() {
         slime = (Slime)player.getWorld().spawnEntity(player.getLocation(), EntityType.SLIME);
         slime.setSize(1);
-        slime.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 3, true, false));
+        slime.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 3, true));
+        slime.setMetadata(TYPE, new FixedMetadataValue(FiveNightsAtFreddysInMinecraft.getInstance(), true));
         player.setPassenger(slime);
     }
 

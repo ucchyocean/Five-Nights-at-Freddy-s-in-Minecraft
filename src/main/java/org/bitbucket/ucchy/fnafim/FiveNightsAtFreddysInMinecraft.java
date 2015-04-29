@@ -9,6 +9,8 @@ import java.io.File;
 import java.util.List;
 
 import org.bitbucket.ucchy.fnafim.game.GameSession;
+import org.bitbucket.ucchy.fnafim.game.GameSessionListener;
+import org.bitbucket.ucchy.fnafim.game.GameSessionPhase;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -40,6 +42,9 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
 
         // 地点管理のロード
         locationManager = LocationManager.load(new File(getDataFolder(), "location.yml"));
+
+        // リスナーの登録
+        getServer().getPluginManager().registerEvents(new GameSessionListener(), this);
     }
 
     /**
@@ -50,7 +55,8 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
     public void onDisable() {
 
         // セッションが残っている場合は、強制中断する。
-        if ( session != null ) {
+        if ( session != null && session.getPhase() != GameSessionPhase.CANCELED
+                && session.getPhase() != GameSessionPhase.END ) {
             session.cancelGame();
             session = null;
         }

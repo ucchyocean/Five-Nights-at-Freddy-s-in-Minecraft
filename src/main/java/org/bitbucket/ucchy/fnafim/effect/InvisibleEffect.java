@@ -26,7 +26,7 @@ public class InvisibleEffect implements SpecialEffect {
     @Override
     public void start() {
         player.addPotionEffect(new PotionEffect(
-                PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 3, true, false));
+                PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 3, true));
     }
 
     @Override

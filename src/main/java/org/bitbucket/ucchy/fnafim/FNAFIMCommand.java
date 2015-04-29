@@ -211,6 +211,11 @@ public class FNAFIMCommand implements TabExecutor {
 
         // ゲームセッションがあるならエラー
         GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session != null && (session.getPhase() == GameSessionPhase.CANCELED
+                || session.getPhase() == GameSessionPhase.END) ) {
+            FiveNightsAtFreddysInMinecraft.getInstance().removeGameSession();
+            session = null;
+        }
         if ( session != null ) {
             sendErrorMessage(sender, "既にゲームがあるため、募集を開始できません。");
             return;
@@ -254,6 +259,7 @@ public class FNAFIMCommand implements TabExecutor {
 
         // 募集を中断する。
         session.closeInvitation(sender);
+        FiveNightsAtFreddysInMinecraft.getInstance().removeGameSession();
         sendInformationMessage(sender, "募集を中断しました。");
     }
 
@@ -326,6 +332,7 @@ public class FNAFIMCommand implements TabExecutor {
 
         // ゲームを強制中断する。
         session.cancelGame();
+        FiveNightsAtFreddysInMinecraft.getInstance().removeGameSession();
         sendInformationMessage(sender, "ゲームを強制中断しました。");
     }
 

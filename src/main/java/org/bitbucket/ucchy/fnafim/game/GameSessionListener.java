@@ -6,7 +6,9 @@
 package org.bitbucket.ucchy.fnafim.game;
 
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
+import org.bitbucket.ucchy.fnafim.effect.HideNametagEffect;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -18,7 +20,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
  * リスナークラス
  * @author ucchy
  */
-public class PlayerListener implements Listener {
+public class GameSessionListener implements Listener {
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
@@ -45,6 +47,16 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
 
+        // ネームタグ隠し用のスライムなら、ダメージを無効化
+        if ( event.getEntity() instanceof Slime ) {
+            Slime slime = (Slime)event.getEntity();
+            if ( slime.hasMetadata(HideNametagEffect.TYPE) ) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+
+        // 以降はプレイヤーに対してのみ実行する
         if ( !(event.getEntity() instanceof Player) ) {
             return;
         }

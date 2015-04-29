@@ -30,6 +30,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -61,6 +62,7 @@ public class GameSession {
 
     private TemporaryStorage storage;
     private EffectManager effectManager;
+    private ScoreboardDisplay scoreboardDisplay;
 
     private Night night;
 
@@ -118,8 +120,6 @@ public class GameSession {
         phase = GameSessionPhase.CANCELED;
         sendBroadcastAnnounce(owner.getName()
                 + "が Five Nights at Freddy's in Minecraft の参加者募集を中断しました。");
-
-        FiveNightsAtFreddysInMinecraft.getInstance().removeGameSession();
     }
 
     /**
@@ -253,10 +253,21 @@ public class GameSession {
         locationMap.put(bonnie, lmanager.getBonnie());
         locationMap.put(foxy, lmanager.getFoxy());
 
-        new DelayedTeleportTask(locationMap, 3, 20).startTask();
+        new DelayedTeleportTask(locationMap, 3).startTask();
+
+        // サイドバーを用意する
+        scoreboardDisplay = new ScoreboardDisplay("fnafim");
+        for ( Player player : entrants ) {
+            scoreboardDisplay.setShowPlayer(player);
+        }
+        for ( Player player : spectators ) {
+            scoreboardDisplay.setShowPlayer(player);
+        }
+        scoreboardDisplay.setTitle(ChatColor.RED + night.toString());
+        scoreboardDisplay.setRemainTime(config.getSecondsOfOneHour() * 6);
+        scoreboardDisplay.setRemainPlayer(players.size());
 
         // そのままゲームを開始する。
-        sendInGameAnnounce(night.toString());
         startGame();
     }
 
@@ -266,6 +277,7 @@ public class GameSession {
     private void startGame() {
 
         phase = GameSessionPhase.IN_GAME;
+        sendInGameAnnounce(night.toString());
 
         // タイマーの生成と開始
         FNAFIMConfig config = FiveNightsAtFreddysInMinecraft.getInstance().getFNAFIMConfig();
@@ -294,6 +306,15 @@ public class GameSession {
             timer = null;
         }
 
+        // サイドバーの除去
+        scoreboardDisplay.remove();
+        for ( Player player : entrants ) {
+            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        }
+        for ( Player player : spectators ) {
+            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        }
+
         // エフェクトをクリア
         for ( Player player : entrants ) {
             effectManager.removeAllEffect(player);
@@ -301,6 +322,9 @@ public class GameSession {
 
         // プレイヤーに持ち物を返す
         for ( Player player : entrants ) {
+            storage.restoreFromTemp(player);
+        }
+        for ( Player player : spectators ) {
             storage.restoreFromTemp(player);
         }
 
@@ -313,7 +337,7 @@ public class GameSession {
         for ( Player player : spectators ) {
             locationMap.put(player, lmanager.getLobby());
         }
-        new DelayedTeleportTask(locationMap, 3, 20).startTask();
+        new DelayedTeleportTask(locationMap, 3).startTask();
     }
 
     /**
@@ -333,6 +357,12 @@ public class GameSession {
         entrants.remove(player);
         players.remove(player);
 
+        // スコアボードを更新
+        scoreboardDisplay.setRemainPlayer(players.size());
+
+        // スコアボードを非表示にする
+        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+
         // 預かっていた持ち物を返す
         storage.restoreFromTemp(player);
 
@@ -341,7 +371,6 @@ public class GameSession {
         player.teleport(lobby, TeleportCause.PLUGIN);
 
         // TODO アイテムを預かったままにして、ロビーに送らず、そのまま観客として参加するようにしたい。
-
 
         // 全滅したら、onGameover() を呼びだす。
         if ( players.size() <= 0 ) {
@@ -371,7 +400,8 @@ public class GameSession {
             battery.onSeconds();
         }
 
-        // TODO サイドバーの更新
+        // サイドバーの更新
+        scoreboardDisplay.setRemainTime(remain);
     }
 
     /**
@@ -406,7 +436,7 @@ public class GameSession {
 
         // 懐中電灯のアイテム処理
         if ( name.equals(DISPLAYNAME_FLASHLIGHT) ) {
-            boolean isOn = (item.getType() == Material.REDSTONE_TORCH_OFF);
+            boolean isOn = (item.getType() == flashlightOff.getType());
             if ( batteries.containsKey(player) ) {
                 if ( batteries.get(player).getPower() <= 0 ) {
                     player.sendMessage(ChatColor.RED + "電力が無いので操作できない！");
@@ -458,7 +488,7 @@ public class GameSession {
 
         // シャッターのアイテム処理
         if ( name.equals(DISPLAYNAME_SHUTTER) ) {
-            boolean isOn = (item.getType() == Material.IRON_DOOR);
+            boolean isOn = (item.getType() == shutterOff.getType());
             if ( batteries.containsKey(player) ) {
                 if ( batteries.get(player).getPower() <= 0 ) {
                     player.sendMessage(ChatColor.RED + "電力が無いので操作できない！");
@@ -497,11 +527,9 @@ public class GameSession {
             effectManager.removeEffect(player, BindEffect.TYPE);
             effectManager.applyEffect(player, new SpeedEffect(player, 3));
             player.sendMessage(ChatColor.AQUA + "30秒間行動できるようになった！");
-            final GameSession session = this;
             new BukkitRunnable() {
                 public void run() {
-                    if ( session.getPhase() == GameSessionPhase.IN_GAME
-                            && player.isOnline() ) {
+                    if ( phase == GameSessionPhase.IN_GAME && player.isOnline() ) {
                         player.sendMessage(ChatColor.AQUA + "行動時間が終了した。");
                         Location respawn = FiveNightsAtFreddysInMinecraft
                                 .getInstance().getLocationManager().getFoxy();
@@ -556,6 +584,13 @@ public class GameSession {
 
             // プレイヤーの持ち物を預かる
             storage.sendToTemp(player);
+
+            // ポーション効果を除去する、回復しておく
+            for ( PotionEffect e : player.getActivePotionEffects() ) {
+                player.removePotionEffect(e.getType());
+            }
+            player.setFoodLevel(20);
+            player.setHealth(player.getMaxHealth());
 
             sendInGameAnnounce(player.getName() + "がゲームに参加しました。");
         }
@@ -705,12 +740,12 @@ public class GameSession {
      */
     private void makeItems() {
 
-        flashlightOff = new ItemStack(Material.REDSTONE_TORCH_OFF);
+        flashlightOff = new ItemStack(Material.IRON_INGOT);
         ItemMeta meta = flashlightOff.getItemMeta();
         meta.setDisplayName(DISPLAYNAME_FLASHLIGHT);
         flashlightOff.setItemMeta(meta);
 
-        flashlightOn = new ItemStack(Material.REDSTONE_TORCH_ON);
+        flashlightOn = new ItemStack(Material.GOLD_INGOT);
         meta = flashlightOn.getItemMeta();
         meta.setDisplayName(DISPLAYNAME_FLASHLIGHT);
         flashlightOn.setItemMeta(meta);
@@ -725,7 +760,7 @@ public class GameSession {
         meta.setDisplayName(DISPLAYNAME_SHUTTER);
         shutterOff.setItemMeta(meta);
 
-        shutterOn = new ItemStack(Material.IRON_DOOR);
+        shutterOn = new ItemStack(Material.WOOD_DOOR);
         meta = shutterOn.getItemMeta();
         meta.setDisplayName(DISPLAYNAME_SHUTTER);
         shutterOn.setItemMeta(meta);

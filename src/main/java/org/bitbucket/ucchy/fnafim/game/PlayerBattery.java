@@ -38,6 +38,8 @@ public class PlayerBattery {
      */
     protected void onSeconds() {
 
+        System.out.println("onSeconds start : " + power);
+
         // 基本使用量
         power -= 1/7;
 
@@ -52,6 +54,8 @@ public class PlayerBattery {
         }
 
         refreshExpBar();
+
+        System.out.println("onSeconds end : " + power);
     }
 
     /**
