@@ -1,0 +1,63 @@
+name: ${project.name}
+version: ${project.version}
+main: org.bitbucket.ucchy.fnafim.FiveNightAtFreddysInMinecraft
+Description: Five Nights at Freddy's in Minecraft
+author: ucchy
+authors: [yuuneran]
+
+commands:
+  fnaf:
+    description: FNAFIM command.
+    aliases: [fn]
+    usage: |
+           /<command> join - Join the game.
+           /<command> leave - Leave the game.
+           /<command> open - Open player invitation.
+           /<command> close - Close player invitation.
+           /<command> start night<1-7> - Start new game.
+           /<command> cancel - Cancel game.
+           /<command> set <lobby|player|spectate|freddy|chica|bonny|foxy> - Set each respawn point.
+           /<command> reload - Reload config data.
+    permission: fnafim.command
+    permission-message: 'You don''t have a permission "<permission>".'
+
+permissions:
+  fnafim.command:
+    description: Permission of command.
+    default: true
+  fnafim.join:
+    description: Permission of join command.
+    default: true
+  fnafim.leave:
+    description: Permission of leave command.
+    default: true
+  fnafim.open:
+    description: Permission of open command.
+    default: op
+  fnafim.close:
+    description: Permission of close command.
+    default: op
+  fnafim.start:
+    description: Permission of start command.
+    default: op
+  fnafim.cancel:
+    description: Permission of cancel command.
+    default: op
+  fnafim.set:
+    description: Permission of set command.
+    default: op
+  fnafim.reload:
+    description: Permission of reload command.
+    default: op
+  fnafim.*:
+    description: All permission.
+    children:
+      fnafim.command: true
+      fnafim.join: true
+      fnafim.leave: true
+      fnafim.open: true
+      fnafim.close: true
+      fnafim.start: true
+      fnafim.cancel: true
+      fnafim.set: true
+      fnafim.reload: true

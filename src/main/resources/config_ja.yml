@@ -1,0 +1,23 @@
+# ${project.name} v${project.version}
+# @author     ucchy
+# @license    LGPLv3
+# @copyright  Copyright ucchy 2015
+
+
+# 最大参加人数。5人以上、15人以下に設定してください。
+maxPlayers: 15
+
+# ゲーム内の1時間が、実際の何秒にするか。
+secondsOfOneHour: 90
+
+# Foxyが、一晩で行動できる回数。0か、1から5が設定できます。
+# 0を設定すると、1から5がランダムで選択されます。
+foxyMovementPerNight: 3
+
+# カスタムナイトの各キャラの移動速度。
+# 各キャラの移動速度レベルを、0(ランダム)か、1から5で設定します。
+customNightMoveSpeed:
+  freddy: 4
+  chica: 4
+  bonnie: 4
+  foxy: 3
