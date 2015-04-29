@@ -147,6 +147,13 @@ public class FNAFIMCommand implements TabExecutor {
             return;
         }
 
+        // 参加者が最大人数を超えている場合はエラー
+        int maxplayer = FiveNightsAtFreddysInMinecraft.getInstance().getFNAFIMConfig().getMaxPlayers();
+        if ( session.getEntrants().size() >=  maxplayer ) {
+            sendErrorMessage(sender, "ゲームが満員のため、参加できません。");
+            return;
+        }
+
         // 参加する。
         session.joinEntrant(player);
         sendInformationMessage(sender, "ゲームに参加しました。");
@@ -282,6 +289,12 @@ public class FNAFIMCommand implements TabExecutor {
                         + "night1 から night7 までのいずれかを指定してください。");
                 return;
             }
+        }
+
+        // 人数チェック、最小人数を下回っていたらエラー
+        if ( session.getEntrants().size() < 5 ) {
+            sendErrorMessage(sender, "参加者が少なすぎるので、ゲームを開始できません。最低でも5人が必要です。");
+            return;
         }
 
         // ゲームを開始する。

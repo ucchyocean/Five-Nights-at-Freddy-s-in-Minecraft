@@ -1,6 +1,6 @@
 name: ${project.name}
 version: ${project.version}
-main: org.bitbucket.ucchy.fnafim.FiveNightAtFreddysInMinecraft
+main: org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft
 Description: Five Nights at Freddy's in Minecraft
 author: ucchy
 authors: [yuuneran]

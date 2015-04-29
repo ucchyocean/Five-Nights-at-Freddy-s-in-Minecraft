@@ -180,7 +180,8 @@ public class GameSession {
         for ( Player player : players ) {
             effectManager.applyEffect(player, new BlindnessEffect(player));
             effectManager.applyEffect(player, new ChangeDisplayNameEffect(player,
-                    ChatColor.AQUA + player.getName() + ChatColor.WHITE + "(Player)"));
+                    ChatColor.AQUA + player.getName() + ChatColor.WHITE + "(Player)"
+                            + ChatColor.RESET));
         }
 
         // Freddyのエフェクトの設定
@@ -202,7 +203,7 @@ public class GameSession {
         }
         effectManager.applyEffect(freddy, new HideNametagEffect(freddy));
         effectManager.applyEffect(freddy, new ChangeDisplayNameEffect(freddy,
-                ChatColor.GOLD + freddy.getName() + ChatColor.RED + "(Freddy)"));
+                ChatColor.GOLD + freddy.getName() + ChatColor.RED + "(Freddy)" + ChatColor.RESET));
 
         // ChicaとBonnieのエフェクト設定
         if ( nightnum <= 5 ) {
@@ -224,15 +225,15 @@ public class GameSession {
         effectManager.applyEffect(bonnie, new HideNametagEffect(bonnie));
 
         effectManager.applyEffect(chica, new ChangeDisplayNameEffect(chica,
-                ChatColor.GOLD + chica.getName() + ChatColor.RED + "(Chica)"));
+                ChatColor.GOLD + chica.getName() + ChatColor.RED + "(Chica)" + ChatColor.RESET));
         effectManager.applyEffect(bonnie, new ChangeDisplayNameEffect(bonnie,
-                ChatColor.GOLD + bonnie.getName() + ChatColor.RED + "(Bonnie)"));
+                ChatColor.GOLD + bonnie.getName() + ChatColor.RED + "(Bonnie)" + ChatColor.RESET));
 
         // Foxyのエフェクト設定、常に移動不可にしておく
         effectManager.applyEffect(foxy, new BindEffect(foxy));
         effectManager.applyEffect(foxy, new HideNametagEffect(foxy));
         effectManager.applyEffect(foxy, new ChangeDisplayNameEffect(foxy,
-                ChatColor.GOLD + foxy.getName() + ChatColor.RED + "(Foxy)"));
+                ChatColor.GOLD + foxy.getName() + ChatColor.RED + "(Foxy)" + ChatColor.RESET));
 
         // プレイヤーのバッテリー
         batteries = new HashMap<Player, PlayerBattery>();
@@ -592,6 +593,14 @@ public class GameSession {
      */
     public boolean isEntrant(Player player) {
         return entrants.contains(player);
+    }
+
+    /**
+     * 参加者を全て取得する
+     * @return 参加者
+     */
+    public List<Player> getEntrants() {
+        return entrants;
     }
 
     /**

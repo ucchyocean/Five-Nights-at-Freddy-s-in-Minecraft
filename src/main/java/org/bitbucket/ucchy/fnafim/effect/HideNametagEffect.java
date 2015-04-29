@@ -29,6 +29,7 @@ public class HideNametagEffect implements SpecialEffect {
     @Override
     public void start() {
         slime = (Slime)player.getWorld().spawnEntity(player.getLocation(), EntityType.SLIME);
+        slime.setSize(1);
         slime.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 3, true, false));
         player.setPassenger(slime);
     }

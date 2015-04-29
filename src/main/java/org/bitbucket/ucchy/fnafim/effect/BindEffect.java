@@ -26,9 +26,9 @@ public class BindEffect implements SpecialEffect {
     @Override
     public void start() {
         player.addPotionEffect(new PotionEffect(
-                PotionEffectType.SLOW, Integer.MAX_VALUE, 5, true));
+                PotionEffectType.SLOW, Integer.MAX_VALUE, 10, true));
         player.addPotionEffect(new PotionEffect(
-                PotionEffectType.JUMP, Integer.MAX_VALUE, -5, true));
+                PotionEffectType.JUMP, Integer.MAX_VALUE, -10, true));
     }
 
     @Override
