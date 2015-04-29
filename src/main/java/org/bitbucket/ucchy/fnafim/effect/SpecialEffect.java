@@ -13,4 +13,5 @@ package org.bitbucket.ucchy.fnafim.effect;
 public interface SpecialEffect {
     public void start();
     public void end();
+    public String getTypeString();
 }

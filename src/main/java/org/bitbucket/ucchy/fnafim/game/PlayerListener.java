@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -81,12 +82,33 @@ public class PlayerListener implements Listener {
             return;
         }
 
-        // Freddy側陣営プレイヤーで、他のプレイヤーにタッチした場合は、セッションで処理
-        Doll doll = session.getDollRoleString(player);
-        if ( doll != null && (event.getRightClicked() instanceof Player) ) {
-            if ( !session.onTouch(player, (Player)event.getRightClicked() ) ) {
-                event.setCancelled(true);
+        // イベントはこの時点で全てキャンセル
+        event.setCancelled(true);
+
+        // タッチしたプレイヤーも参加者プレイヤーである場合は、セッションで処理
+        if ( event.getRightClicked() instanceof Player ) {
+            Player target = (Player)event.getRightClicked();
+            if ( !session.isEntrant(target) ) {
+                return;
             }
+            session.onTouch(player, target);
+            return;
+        }
+    }
+
+    @EventHandler
+    public void onPlayerDropItem(PlayerDropItemEvent event) {
+
+        Player player = event.getPlayer();
+
+        // セッションが無いならイベントを無視
+        GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session == null ) {
+            return;
+        }
+
+        // 参加者ではないならイベントを無視
+        if ( !session.isEntrant(player) ) {
             return;
         }
 

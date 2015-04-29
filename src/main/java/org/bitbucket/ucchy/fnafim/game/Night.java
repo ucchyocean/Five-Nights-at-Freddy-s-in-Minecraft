@@ -6,7 +6,7 @@
 package org.bitbucket.ucchy.fnafim.game;
 
 /**
- *
+ * ゲームレベル
  * @author ucchy
  */
 public enum Night {

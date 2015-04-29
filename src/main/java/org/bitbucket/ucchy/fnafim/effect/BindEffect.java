@@ -15,6 +15,8 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class BindEffect implements SpecialEffect {
 
+    public static final String TYPE = "Bind";
+
     private Player player;
 
     public BindEffect(Player player) {
@@ -33,5 +35,10 @@ public class BindEffect implements SpecialEffect {
     public void end() {
         player.removePotionEffect(PotionEffectType.SLOW);
         player.removePotionEffect(PotionEffectType.JUMP);
+    }
+
+    @Override
+    public String getTypeString() {
+        return TYPE;
     }
 }

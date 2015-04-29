@@ -23,12 +23,19 @@ public class EffectManager {
         effects = new HashMap<Player, ArrayList<SpecialEffect>>();
     }
 
-    public void addEffect(Player player, SpecialEffect effect) {
+    public void applyEffect(Player player, SpecialEffect effect) {
         if ( !effects.containsKey(player) ) {
             effects.put(player, new ArrayList<SpecialEffect>());
         }
+        removeEffect(player, effect.getTypeString());
         effects.get(player).add(effect);
         effect.start();
+    }
+
+    public void removeAll() {
+        for ( Player player : effects.keySet() ) {
+            removeAllEffect(player);
+        }
     }
 
     public void removeAllEffect(Player player) {
@@ -39,5 +46,33 @@ public class EffectManager {
             effect.end();
         }
         effects.get(player).clear();
+    }
+
+    public void removeEffect(Player player, String type) {
+        if ( !effects.containsKey(player) ) {
+            return;
+        }
+        SpecialEffect founds = getSameTypeSpecialEffect(effects.get(player), type);
+        if ( founds != null ) {
+            founds.end();
+            effects.get(player).remove(founds);
+        }
+    }
+
+    public boolean hasEffect(Player player, String type) {
+        if ( !effects.containsKey(player) ) {
+            return false;
+        }
+        return (getSameTypeSpecialEffect(effects.get(player), type) != null);
+    }
+
+    private SpecialEffect getSameTypeSpecialEffect(
+            ArrayList<SpecialEffect> array, String type) {
+        for ( SpecialEffect e : array ) {
+            if ( e.getTypeString().equals(type) ) {
+                return e;
+            }
+        }
+        return null;
     }
 }

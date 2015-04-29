@@ -15,6 +15,8 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class InvisibleEffect implements SpecialEffect {
 
+    public static final String TYPE = "Invisible";
+
     private Player player;
 
     public InvisibleEffect(Player player) {
@@ -24,11 +26,16 @@ public class InvisibleEffect implements SpecialEffect {
     @Override
     public void start() {
         player.addPotionEffect(new PotionEffect(
-                PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 3, true));
+                PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 3, true, false));
     }
 
     @Override
     public void end() {
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
+    }
+
+    @Override
+    public String getTypeString() {
+        return TYPE;
     }
 }

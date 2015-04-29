@@ -16,21 +16,32 @@ import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bitbucket.ucchy.fnafim.LocationManager;
 import org.bitbucket.ucchy.fnafim.effect.BindEffect;
 import org.bitbucket.ucchy.fnafim.effect.BlindnessEffect;
+import org.bitbucket.ucchy.fnafim.effect.ChangeDisplayNameEffect;
+import org.bitbucket.ucchy.fnafim.effect.HideNametagEffect;
+import org.bitbucket.ucchy.fnafim.effect.InvisibleEffect;
 import org.bitbucket.ucchy.fnafim.effect.SpeedEffect;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * ゲームセッション
  * @author ucchy
  */
 public class GameSession {
+
+    private static final String DISPLAYNAME_FLASHLIGHT = "懐中電灯";
+    private static final String DISPLAYNAME_RADER = "レーダー";
+    private static final String DISPLAYNAME_SHUTTER = "シャッター";
+    private static final String DISPLAYNAME_LEATHER = "行動を開始 30秒の間だけ行動できます。";
 
     private GameSessionPhase phase;
 
@@ -43,6 +54,8 @@ public class GameSession {
     private Player bonnie;
     private Player foxy;
 
+    private HashMap<Player, PlayerBattery> batteries;
+
     private GameSessionTimer timer;
     private GameSessionLogger logger;
 
@@ -50,6 +63,13 @@ public class GameSession {
     private EffectManager effectManager;
 
     private Night night;
+
+    private ItemStack flashlightOn;
+    private ItemStack flashlightOff;
+    private ItemStack radar;
+    private ItemStack shutterOn;
+    private ItemStack shutterOff;
+    private ItemStack leather;
 
     /**
      * コンストラクタ
@@ -67,6 +87,8 @@ public class GameSession {
 
         File logFolder = new File(FiveNightsAtFreddysInMinecraft.getInstance().getDataFolder(), "logs");
         logger = new GameSessionLogger(logFolder);
+
+        makeItems();
 
         // そのまま募集を開始する
         openInvitation();
@@ -112,7 +134,7 @@ public class GameSession {
         // 役割を設定する。
         players.clear();
         for ( Player player : entrants ) {
-            if ( getDollRoleString(player) == null ) {
+            if ( getDollRole(player) == null ) {
                 players.add(player);
             }
         }
@@ -156,7 +178,9 @@ public class GameSession {
 
         // エフェクトの設定
         for ( Player player : players ) {
-            effectManager.addEffect(player, new BlindnessEffect(player));
+            effectManager.applyEffect(player, new BlindnessEffect(player));
+            effectManager.applyEffect(player, new ChangeDisplayNameEffect(player,
+                    ChatColor.AQUA + player.getName() + ChatColor.WHITE + "(Player)"));
         }
 
         // Freddyのエフェクトの設定
@@ -164,39 +188,57 @@ public class GameSession {
         int nightnum = night.getNum();
         if ( nightnum <= 2 ) {
             // night2までは動けない
-            effectManager.addEffect(freddy, new BindEffect(freddy));
+            effectManager.applyEffect(freddy, new BindEffect(freddy));
         } else if ( nightnum <= 5 ) {
             // night3 - 5 は移動速度エフェクト
-            effectManager.addEffect(freddy, new SpeedEffect(freddy, (nightnum - 4)));
+            effectManager.applyEffect(freddy, new SpeedEffect(freddy, (nightnum - 4)));
         } else if ( nightnum == 6 ) {
             // night6 は移動速度エフェクトlv1
-            effectManager.addEffect(freddy, new SpeedEffect(freddy, 1));
+            effectManager.applyEffect(freddy, new SpeedEffect(freddy, 1));
         } else if ( nightnum == 7 ) {
             // night7 はカスタム
-            effectManager.addEffect(freddy, new SpeedEffect(
+            effectManager.applyEffect(freddy, new SpeedEffect(
                     freddy, config.getCustomNightMoveSpeed_freddy()));
         }
+        effectManager.applyEffect(freddy, new HideNametagEffect(freddy));
+        effectManager.applyEffect(freddy, new ChangeDisplayNameEffect(freddy,
+                ChatColor.GOLD + freddy.getName() + ChatColor.RED + "(Freddy)"));
 
         // ChicaとBonnieのエフェクト設定
         if ( nightnum <= 5 ) {
             // night1 - 5 は移動速度エフェクト
-            effectManager.addEffect(chica, new SpeedEffect(chica, (nightnum - 4)));
-            effectManager.addEffect(bonnie, new SpeedEffect(bonnie, (nightnum - 4)));
+            effectManager.applyEffect(chica, new SpeedEffect(chica, (nightnum - 4)));
+            effectManager.applyEffect(bonnie, new SpeedEffect(bonnie, (nightnum - 4)));
         } else if ( nightnum <= 6 ) {
             // night6 は移動速度エフェクトlv1
-            effectManager.addEffect(chica, new SpeedEffect(chica, 1));
-            effectManager.addEffect(bonnie, new SpeedEffect(bonnie, 1));
+            effectManager.applyEffect(chica, new SpeedEffect(chica, 1));
+            effectManager.applyEffect(bonnie, new SpeedEffect(bonnie, 1));
         } else if ( nightnum == 7 ) {
             // night7 はカスタム
-            effectManager.addEffect(chica, new SpeedEffect(
+            effectManager.applyEffect(chica, new SpeedEffect(
                     chica, config.getCustomNightMoveSpeed_chica()));
-            effectManager.addEffect(bonnie, new SpeedEffect(
+            effectManager.applyEffect(bonnie, new SpeedEffect(
                     bonnie, config.getCustomNightMoveSpeed_bonnie()));
         }
+        effectManager.applyEffect(chica, new HideNametagEffect(chica));
+        effectManager.applyEffect(bonnie, new HideNametagEffect(bonnie));
+
+        effectManager.applyEffect(chica, new ChangeDisplayNameEffect(chica,
+                ChatColor.GOLD + chica.getName() + ChatColor.RED + "(Chica)"));
+        effectManager.applyEffect(bonnie, new ChangeDisplayNameEffect(bonnie,
+                ChatColor.GOLD + bonnie.getName() + ChatColor.RED + "(Bonnie)"));
 
         // Foxyのエフェクト設定、常に移動不可にしておく
-        effectManager.addEffect(foxy, new BindEffect(foxy));
+        effectManager.applyEffect(foxy, new BindEffect(foxy));
+        effectManager.applyEffect(foxy, new HideNametagEffect(foxy));
+        effectManager.applyEffect(foxy, new ChangeDisplayNameEffect(foxy,
+                ChatColor.GOLD + foxy.getName() + ChatColor.RED + "(Foxy)"));
 
+        // プレイヤーのバッテリー
+        batteries = new HashMap<Player, PlayerBattery>();
+        for ( Player player : players ) {
+            batteries.put(player, new PlayerBattery(player));
+        }
 
         // それぞれのスタート地点にTPする
         LocationManager lmanager =
@@ -237,13 +279,21 @@ public class GameSession {
 
         phase = GameSessionPhase.CANCELED;
         sendInGameAnnounce("ゲームを強制中断しました。");
+        onEnd();
+    }
+
+    /**
+     * セッションの最後に呼び出されるメソッド
+     */
+    private void onEnd() {
 
         // タイマーの停止
         if ( timer != null ) {
             timer.end();
+            timer = null;
         }
 
-        // エフェクトのステータスをクリア
+        // エフェクトをクリア
         for ( Player player : entrants ) {
             effectManager.removeAllEffect(player);
         }
@@ -259,6 +309,9 @@ public class GameSession {
         for ( Player player : entrants ) {
             locationMap.put(player, lmanager.getLobby());
         }
+        for ( Player player : spectators ) {
+            locationMap.put(player, lmanager.getLobby());
+        }
         new DelayedTeleportTask(locationMap, 3, 20).startTask();
     }
 
@@ -269,25 +322,41 @@ public class GameSession {
      */
     protected void onCaughtPlayer(Player player, Player caught) {
 
-        Doll doll = getDollRoleString(caught);
+        Doll doll = getDollRole(caught);
         sendInGameAnnounce(player.getName() + " が " + caught.getName() + "(" + doll + ") に捕まった！");
 
-        // TODO エフェクトなどのステータスをクリア
+        // エフェクトをクリア
+        effectManager.removeAllEffect(player);
 
-        // TODO プレイヤーに持ち物を返す
+        // プレイヤーおよび参加者から削除する
+        entrants.remove(player);
+        players.remove(player);
 
-        // TODO ロビーに送る
+        // 預かっていた持ち物を返す
+        storage.restoreFromTemp(player);
 
-        // TODO 全滅したら、onLoseGame() を呼びだす。
+        // ロビーに送る
+        Location lobby = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getLobby();
+        player.teleport(lobby, TeleportCause.PLUGIN);
+
+        // TODO アイテムを預かったままにして、ロビーに送らず、そのまま観客として参加するようにしたい。
+
+
+        // 全滅したら、onGameover() を呼びだす。
+        if ( players.size() <= 0 ) {
+            onGameover();
+        }
     }
 
     /**
      * プレイヤーが全滅したときに呼び出される。
      */
-    protected void onLoseGame() {
+    protected void onGameover() {
 
         phase = GameSessionPhase.END;
-        // TODO
+        sendInGameAnnounce("Gameover ");
+        sendInGameAnnounce("プレイヤーが全員捕まってしまった。。。");
+        onEnd();
     }
 
     /**
@@ -295,21 +364,24 @@ public class GameSession {
      * @param remain 残り秒数
      */
     protected void onTimerSeconds(int remain) {
-        // TODO
+
+        // バッテリーの更新
+        for ( PlayerBattery battery : batteries.values() ) {
+            battery.onSeconds();
+        }
+
+        // TODO サイドバーの更新
     }
 
     /**
      * タイマーが0になった時に呼び出される。
      */
     protected void onTimerZero() {
-        // TODO
-    }
 
-    /**
-     * タイマーがキャンセルされた時に呼び出される。
-     */
-    protected void onTimerCanceled() {
-        // TODO
+        phase = GameSessionPhase.END;
+        sendInGameAnnounce("6 AM");
+        sendInGameAnnounce(players.size() + "人のプレイヤーが生き延びた。");
+        onEnd();
     }
 
     /**
@@ -317,31 +389,159 @@ public class GameSession {
      * @param player プレイヤー
      * @return
      */
-    protected boolean onEntrantInteract(Player player) {
+    protected boolean onEntrantInteract(final Player player) {
 
         // 実行者が観客なら、全てキャンセル
         if ( spectators.contains(player) ) {
             return false;
         }
 
-        // TODO プレイヤーのアイテム処理
+        // 表示名のないアイテムを持っていたなら無視。
+        ItemStack item = player.getItemInHand();
+        String name = getDisplayName(item);
+        if ( name == null ) {
+            return true;
+        }
 
-        // TODO Foxyのアイテム処理
+        // 懐中電灯のアイテム処理
+        if ( name.equals(DISPLAYNAME_FLASHLIGHT) ) {
+            boolean isOn = (item.getType() == Material.REDSTONE_TORCH_OFF);
+            if ( batteries.containsKey(player) ) {
+                if ( batteries.get(player).getPower() <= 0 ) {
+                    player.sendMessage(ChatColor.RED + "電力が無いので操作できない！");
+                    return false;
+                }
+                batteries.get(player).setUsingFlashlight(isOn);
+            }
+            if ( isOn ) {
+                player.setItemInHand(flashlightOn.clone());
+                effectManager.removeEffect(player, BlindnessEffect.TYPE);
+            } else {
+                player.setItemInHand(flashlightOff.clone());
+                effectManager.applyEffect(player, new BlindnessEffect(player));
+            }
+            return false;
+        }
+
+        // レーダーのアイテム処理
+        if ( name.equals(DISPLAYNAME_RADER) ) {
+            if ( batteries.containsKey(player) ) {
+                if ( !batteries.get(player).hasPowerToUserRadar() ) {
+                    player.sendMessage(ChatColor.RED + "電力が足りないので使用できない！");
+                    return false;
+                }
+                batteries.get(player).decreaseToUseRadar();
+            }
+            boolean found = false;
+            for ( Entity entity : player.getNearbyEntities(10, 10, 10) ) {
+                if ( entity instanceof Player ) {
+                    Player target = (Player)entity;
+                    Doll doll = getDollRole(target);
+                    if ( doll != null ) {
+                        double distance = player.getLocation().distance(target.getLocation());
+                        if ( distance <= 10 ) {
+                            String msg = String.format(
+                                    ChatColor.RED + "%s(%s) が、%.1fｍ先にいる！！",
+                                    target.getName(), doll.toString(), distance);
+                            player.sendMessage(msg);
+                            found = true;
+                        }
+                    }
+                }
+            }
+            if ( !found ) {
+                player.sendMessage(ChatColor.AQUA + "誰も近くにいないようだ。。。");
+            }
+            return false;
+        }
+
+        // シャッターのアイテム処理
+        if ( name.equals(DISPLAYNAME_SHUTTER) ) {
+            boolean isOn = (item.getType() == Material.IRON_DOOR);
+            if ( batteries.containsKey(player) ) {
+                if ( batteries.get(player).getPower() <= 0 ) {
+                    player.sendMessage(ChatColor.RED + "電力が無いので操作できない！");
+                    return false;
+                }
+                batteries.get(player).setUsingShutter(isOn);
+            }
+            if ( isOn ) {
+                player.setItemInHand(shutterOn.clone());
+                effectManager.applyEffect(player, new InvisibleEffect(player));
+            } else {
+                player.setItemInHand(shutterOff.clone());
+                effectManager.removeEffect(player, InvisibleEffect.TYPE);
+            }
+            return false;
+        }
+
+        // Foxyのアイテム処理
+        if ( name.equals(DISPLAYNAME_LEATHER) ) {
+
+            // 行動不可の状態になっていないなら、アイテムを使う必要は無い
+            if ( !effectManager.hasEffect(player, BindEffect.TYPE) ) {
+                player.sendMessage(ChatColor.AQUA + "今は使う必要はない。。。");
+                return false;
+            }
+
+            // 1つ消費する
+            int amount = item.getAmount() - 1;
+            if ( amount > 0 ) {
+                player.getItemInHand().setAmount(amount);
+            } else {
+                player.setItemInHand(new ItemStack(Material.AIR));
+            }
+
+            // 行動不可を解いて、30秒間の行動時間を与える
+            effectManager.removeEffect(player, BindEffect.TYPE);
+            effectManager.applyEffect(player, new SpeedEffect(player, 3));
+            player.sendMessage(ChatColor.AQUA + "30秒間行動できるようになった！");
+            final GameSession session = this;
+            new BukkitRunnable() {
+                public void run() {
+                    if ( session.getPhase() == GameSessionPhase.IN_GAME
+                            && player.isOnline() ) {
+                        player.sendMessage(ChatColor.AQUA + "行動時間が終了した。");
+                        Location respawn = FiveNightsAtFreddysInMinecraft
+                                .getInstance().getLocationManager().getFoxy();
+                        player.teleport(respawn, TeleportCause.PLUGIN);
+                        effectManager.applyEffect(player, new BindEffect(player));
+                    }
+                }
+            }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 20 * 30);
+
+            // TODO Foxyが、行動時間中にサーバーから切断してしまったときの対策を考えること。
+            //   再ログイン時に、行動不能を再設定して、リスポーン地点に送信するとか。
+            // TODO Foxyが、行動時間中のゲームが終了してしまったときの対策を考えること。
+            //   処理は保持しておいて、キャンセルできるようにすべきか。
+
+            return false;
+        }
 
         return true;
     }
 
     /**
-     * 人形側陣営プレイヤーがプレイヤーをクリックした時に呼び出される。
+     * 参加者プレイヤーが他の参加者プレイヤーをクリックした時に呼び出される。
      * @param player
      * @param target
-     * @return
      */
-    protected boolean onTouch(Player player, Player target) {
+    protected void onTouch(Player player, Player target) {
 
-        // TODO
+        // タッチした人がFreddy陣営でなければ無視
+        if ( getDollRole(player) == null ) {
+            return;
+        }
 
-        return true;
+        // タッチされた人がプレイヤーでなければ無視
+        if ( !players.contains(target) ) {
+            return;
+        }
+
+        // 捕まえた！
+        onCaughtPlayer(target, player);
+
+        return;
     }
 
     /**
@@ -400,22 +600,8 @@ public class GameSession {
      */
     private void sendPlayerInventory(Player player) {
 
-        ItemStack light = new ItemStack(Material.REDSTONE_TORCH_OFF);
-        ItemMeta meta = light.getItemMeta();
-        meta.setDisplayName("懐中電灯");
-        light.setItemMeta(meta);
-
-        ItemStack rader = new ItemStack(Material.REDSTONE);
-        meta = rader.getItemMeta();
-        meta.setDisplayName("レーダー");
-        rader.setItemMeta(meta);
-
-        ItemStack shutter = new ItemStack(Material.IRON_DOOR);
-        meta = shutter.getItemMeta();
-        meta.setDisplayName("シャッター");
-        shutter.setItemMeta(meta);
-
-        player.getInventory().addItem(light, rader, shutter);
+        player.getInventory().addItem(
+                flashlightOff.clone(), radar.clone(), shutterOff.clone());
         updateInventory(player);
     }
 
@@ -453,10 +639,8 @@ public class GameSession {
         } else if ( amount > 5 ) {
             amount = 5;
         }
-        ItemStack leather = new ItemStack(Material.LEATHER, amount);
-        ItemMeta meta = leather.getItemMeta();
-        meta.setDisplayName("高速移動");
-        leather.setItemMeta(meta);
+        ItemStack leather = this.leather.clone();
+        leather.setAmount(amount);
         player.getInventory().addItem(leather);
     }
 
@@ -496,11 +680,59 @@ public class GameSession {
     }
 
     /**
+     * アイテムの表示名を取得する
+     * @param item アイテム
+     * @return 表示名、なければnull
+     */
+    private String getDisplayName(ItemStack item) {
+        if ( item == null ) return null;
+        if ( !item.hasItemMeta() ) return null;
+        if ( !item.getItemMeta().hasDisplayName() ) return null;
+        return item.getItemMeta().getDisplayName();
+    }
+
+    /**
+     * アイテムの作成を行う
+     */
+    private void makeItems() {
+
+        flashlightOff = new ItemStack(Material.REDSTONE_TORCH_OFF);
+        ItemMeta meta = flashlightOff.getItemMeta();
+        meta.setDisplayName(DISPLAYNAME_FLASHLIGHT);
+        flashlightOff.setItemMeta(meta);
+
+        flashlightOn = new ItemStack(Material.REDSTONE_TORCH_ON);
+        meta = flashlightOn.getItemMeta();
+        meta.setDisplayName(DISPLAYNAME_FLASHLIGHT);
+        flashlightOn.setItemMeta(meta);
+
+        radar = new ItemStack(Material.REDSTONE);
+        meta = radar.getItemMeta();
+        meta.setDisplayName(DISPLAYNAME_RADER);
+        radar.setItemMeta(meta);
+
+        shutterOff = new ItemStack(Material.IRON_DOOR);
+        meta = shutterOff.getItemMeta();
+        meta.setDisplayName(DISPLAYNAME_SHUTTER);
+        shutterOff.setItemMeta(meta);
+
+        shutterOn = new ItemStack(Material.IRON_DOOR);
+        meta = shutterOn.getItemMeta();
+        meta.setDisplayName(DISPLAYNAME_SHUTTER);
+        shutterOn.setItemMeta(meta);
+
+        leather = new ItemStack(Material.LEATHER);
+        meta = leather.getItemMeta();
+        meta.setDisplayName(DISPLAYNAME_LEATHER);
+        leather.setItemMeta(meta);
+    }
+
+    /**
      * 役割を返す
      * @param player プレイヤー
      * @return 役割
      */
-    protected Doll getDollRoleString(Player player) {
+    private Doll getDollRole(Player player) {
 
         if ( player == null ) {
             return null;

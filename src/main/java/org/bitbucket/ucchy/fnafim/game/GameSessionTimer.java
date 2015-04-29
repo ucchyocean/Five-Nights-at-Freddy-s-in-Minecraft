@@ -30,6 +30,5 @@ public class GameSessionTimer extends BukkitRunnable {
 
     public void end() {
         cancel();
-        parent.onTimerCanceled();
     }
 }

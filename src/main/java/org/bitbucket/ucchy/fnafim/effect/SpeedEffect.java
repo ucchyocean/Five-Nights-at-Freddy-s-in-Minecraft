@@ -15,6 +15,8 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class SpeedEffect implements SpecialEffect {
 
+    public static final String TYPE = "Speed";
+
     private Player player;
     private int value;
 
@@ -39,4 +41,8 @@ public class SpeedEffect implements SpecialEffect {
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
     }
 
+    @Override
+    public String getTypeString() {
+        return TYPE;
+    }
 }

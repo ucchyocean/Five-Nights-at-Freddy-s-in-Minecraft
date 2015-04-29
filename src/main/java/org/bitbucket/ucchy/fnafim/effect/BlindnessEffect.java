@@ -15,6 +15,8 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class BlindnessEffect implements SpecialEffect {
 
+    public static final String TYPE = "Blindness";
+
     private Player player;
 
     public BlindnessEffect(Player player) {
@@ -30,5 +32,10 @@ public class BlindnessEffect implements SpecialEffect {
     @Override
     public void end() {
         player.removePotionEffect(PotionEffectType.BLINDNESS);
+    }
+
+    @Override
+    public String getTypeString() {
+        return TYPE;
     }
 }
