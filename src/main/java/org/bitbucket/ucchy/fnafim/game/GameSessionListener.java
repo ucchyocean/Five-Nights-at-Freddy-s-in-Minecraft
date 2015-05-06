@@ -18,6 +18,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  * リスナークラス
@@ -33,6 +34,12 @@ public class GameSessionListener implements Listener {
         // セッションが無いならイベントを無視
         GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
         if ( session == null ) {
+            return;
+        }
+
+        // 観客なら全てをキャンセル
+        if ( session.isSpectator(player) ) {
+            event.setCancelled(true);
             return;
         }
 
@@ -80,13 +87,11 @@ public class GameSessionListener implements Listener {
             return;
         }
 
-        // 参加者ではないならイベントを無視
-        if ( !session.isEntrant(player) ) {
+        // 参加者または観客なら、全てのダメージを無効化
+        if ( session.isEntrant(player) || session.isSpectator(player) ) {
+            event.setCancelled(true);
             return;
         }
-
-        // イベントを全てキャンセル
-        event.setCancelled(true);
     }
 
     @EventHandler
@@ -139,13 +144,11 @@ public class GameSessionListener implements Listener {
             return;
         }
 
-        // 参加者ではないならイベントを無視
-        if ( !session.isEntrant(player) ) {
+        // 参加者または観客なら、全てのイベントをキャンセル
+        if ( session.isEntrant(player) || session.isSpectator(player) ) {
+            event.setCancelled(true);
             return;
         }
-
-        // あとは全てイベントをキャンセル
-        event.setCancelled(true);
     }
 
     @EventHandler
@@ -171,5 +174,32 @@ public class GameSessionListener implements Listener {
 
         // リスポーン地点に飛ばして、バインドを設定する
         session.onFoxyMovementEnd();
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+
+        Player player = event.getPlayer();
+
+        // セッションが無いならイベントを無視
+        GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session == null ) {
+            return;
+        }
+
+        // ゲーム中でないならイベントを無視
+        if ( session.getPhase() != GameSessionPhase.IN_GAME ) {
+            return;
+        }
+
+        // プレイヤーではないならイベントを無視
+        if ( !session.isPlayer(player) ) {
+            return;
+        }
+
+        // 電力切れプレイヤーなら、即座に脱落させる
+        if ( session.getPowerLevel(player) == 0 ) {
+            session.onCaughtPlayer(player, null);
+        }
     }
 }

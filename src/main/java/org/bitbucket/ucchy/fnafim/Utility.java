@@ -31,8 +31,6 @@ import org.bukkit.entity.Player;
  */
 public class Utility {
 
-    private static Boolean isCB178orLaterCache;
-
     /**
      * jarファイルの中に格納されているファイルを、jarファイルの外にコピーするメソッド
      * @param jarFile jarファイル
@@ -208,12 +206,23 @@ public class Utility {
      * @return v1.7.8以上ならtrue、そうでないならfalse
      */
     public static boolean isCB178orLater() {
+        return versionCheck(new int[]{1, 7, 8});
+    }
 
-        if (isCB178orLaterCache != null) {
-            return isCB178orLaterCache;
-        }
+    /**
+     * 現在動作中のCraftBukkitが、v1.8 以上かどうかを確認する
+     * @return v1.8以上ならtrue、そうでないならfalse
+     */
+    public static boolean isCB180orLater() {
+        return versionCheck(new int[]{1, 8});
+    }
 
-        int[] borderNumbers = { 1, 7, 8 };
+    /**
+     * CraftBukkitのバージョン番号をチェックする
+     * @param border
+     * @return
+     */
+    private static boolean versionCheck(int[] border) {
 
         String version = Bukkit.getBukkitVersion();
         int hyphen = version.indexOf("-");
@@ -225,28 +234,23 @@ public class Utility {
         int[] versionNumbers = new int[versionArray.length];
         for (int i = 0; i < versionArray.length; i++) {
             if (!versionArray[i].matches("[0-9]+")) {
-                isCB178orLaterCache = false;
                 return false;
             }
             versionNumbers[i] = Integer.parseInt(versionArray[i]);
         }
 
         int index = 0;
-        while ((versionNumbers.length > index) && (borderNumbers.length > index)) {
-            if (versionNumbers[index] > borderNumbers[index]) {
-                isCB178orLaterCache = true;
+        while ((versionNumbers.length > index) && (border.length > index)) {
+            if (versionNumbers[index] > border[index]) {
                 return true;
-            } else if (versionNumbers[index] < borderNumbers[index]) {
-                isCB178orLaterCache = false;
+            } else if (versionNumbers[index] < border[index]) {
                 return false;
             }
             index++;
         }
-        if (borderNumbers.length == index) {
-            isCB178orLaterCache = true;
+        if (border.length == index) {
             return true;
         } else {
-            isCB178orLaterCache = false;
             return false;
         }
     }
@@ -300,5 +304,15 @@ public class Utility {
         if (player == null || (!player.hasPlayedBefore() && !player.isOnline()))
             return null;
         return player;
+    }
+
+    /**
+     * 指定された名前のプレイヤーを取得する
+     * @param name プレイヤー名
+     * @return プレイヤー
+     */
+    @SuppressWarnings("deprecation")
+    public static Player getPlayerExact(String name) {
+        return Bukkit.getPlayerExact(name);
     }
 }

@@ -5,6 +5,7 @@
  */
 package org.bitbucket.ucchy.fnafim.effect;
 
+import org.bitbucket.ucchy.fnafim.Utility;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -25,8 +26,13 @@ public class BlindnessEffect implements SpecialEffect {
 
     @Override
     public void start() {
-        player.addPotionEffect(new PotionEffect(
-                PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 3, true));
+        if ( Utility.isCB180orLater() ) {
+            player.addPotionEffect(new PotionEffect(
+                    PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 3, true, false));
+        } else {
+            player.addPotionEffect(new PotionEffect(
+                    PotionEffectType.BLINDNESS, Integer.MAX_VALUE, 3, true));
+        }
     }
 
     @Override

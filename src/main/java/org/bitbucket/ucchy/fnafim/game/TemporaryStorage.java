@@ -127,6 +127,15 @@ public class TemporaryStorage {
     }
 
     /**
+     * 指定したプレイヤーのインベントリを預かっているかどうか
+     * @param player プレイヤー
+     * @return 預かっているかどうか
+     */
+    public boolean isInventoryExists(Player player) {
+        return invs.containsKey(player);
+    }
+
+    /**
      * インベントリのアップデートを行う
      * @param player 更新対象のプレイヤー
      */

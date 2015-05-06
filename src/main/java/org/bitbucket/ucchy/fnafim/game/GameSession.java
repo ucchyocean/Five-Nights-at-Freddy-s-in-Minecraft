@@ -14,6 +14,7 @@ import org.bitbucket.ucchy.fnafim.DelayedTeleportTask;
 import org.bitbucket.ucchy.fnafim.FNAFIMConfig;
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bitbucket.ucchy.fnafim.LocationManager;
+import org.bitbucket.ucchy.fnafim.Utility;
 import org.bitbucket.ucchy.fnafim.effect.BindEffect;
 import org.bitbucket.ucchy.fnafim.effect.BlindnessEffect;
 import org.bitbucket.ucchy.fnafim.effect.ChangeDisplayNameEffect;
@@ -73,6 +74,8 @@ public class GameSession {
     private ItemStack leather;
 
     private FoxyMovementTask foxyMovementTask;
+    private ArrayList<FreddyItemWaitTask> freddyItemWaitTask;
+    private FreddyTeleportWaitTask freddyTeleportWaitTask;
 
     /**
      * コンストラクタ
@@ -131,6 +134,7 @@ public class GameSession {
 
         phase = GameSessionPhase.PREPARING;
         this.night = night;
+        this.freddyItemWaitTask = new ArrayList<FreddyItemWaitTask>();
 
         // 役割を設定する。
         players.clear();
@@ -324,7 +328,14 @@ public class GameSession {
         // タスクをクリア
         if ( foxyMovementTask != null && !foxyMovementTask.isEnded() ) {
             foxyMovementTask.end();
-            foxyMovementTask = null;
+        }
+        for ( FreddyItemWaitTask task : freddyItemWaitTask ) {
+            if ( !task.isEnded() ) {
+                task.end();
+            }
+        }
+        if ( freddyTeleportWaitTask != null && !freddyTeleportWaitTask.isEnded() ) {
+            freddyTeleportWaitTask.end();
         }
 
         // プレイヤーに持ち物を返す
@@ -354,8 +365,12 @@ public class GameSession {
      */
     protected void onCaughtPlayer(Player player, Player caught) {
 
-        Doll doll = getDollRole(caught);
-        sendInGameAnnounce(player.getName() + " が " + caught.getName() + "(" + doll + ") に捕まった！");
+        if ( caught != null ) {
+            Doll doll = getDollRole(caught);
+            sendInGameAnnounce(player.getName() + " が " + caught.getName() + "(" + doll + ") に捕まった。。。");
+        } else {
+            sendInGameAnnounce(player.getName() + " は、謎の力に飲み込まれて脱落した。。。");
+        }
 
         // エフェクトをクリア
         effectManager.removeAllEffect(player);
@@ -367,21 +382,24 @@ public class GameSession {
         // スコアボードを更新
         scoreboardDisplay.setRemainPlayer(players.size());
 
-        // スコアボードを非表示にする
-        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-
-        // 預かっていた持ち物を返す
-        storage.restoreFromTemp(player);
-
-        // ロビーに送る
-        Location lobby = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getLobby();
-        player.teleport(lobby, TeleportCause.PLUGIN);
-
-        // TODO アイテムを預かったままにして、ロビーに送らず、そのまま観客として参加するようにしたい。
-
-        // 全滅したら、onGameover() を呼びだす。
         if ( players.size() <= 0 ) {
+            // 全滅したら、onGameover() を呼びだす。
             onGameover();
+
+            // スコアボードを非表示にする
+            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+
+            // 預かっていた持ち物を返す
+            storage.restoreFromTemp(player);
+
+            // ロビーに送る
+            Location lobby = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getLobby();
+            player.teleport(lobby, TeleportCause.PLUGIN);
+
+        } else {
+            // 観客として再参加させる
+            joinSpectator(player);
+
         }
     }
 
@@ -540,6 +558,28 @@ public class GameSession {
             return false;
         }
 
+        // Freddyのアイテム処理
+        if ( item.getType() == Material.SKULL_ITEM ) {
+
+            // ターゲットプレイヤーの取得
+            SkullMeta meta = (SkullMeta)item.getItemMeta();
+            String owner = meta.getOwner();
+            if ( owner != null ) {
+                Player target = Utility.getPlayerExact(owner);
+                if ( target != null && target.isOnline() ) {
+                    freddy.teleport(target, TeleportCause.PLUGIN);
+                    freddyTeleportWaitTask = new FreddyTeleportWaitTask(this);
+                    freddyTeleportWaitTask.start();
+                    freddy.sendMessage(ChatColor.GOLD + "" + freddyTeleportWaitTask.getWait()
+                            + "秒後に行動できるようになる。。。");
+                    effectManager.applyEffect(freddy, new BindEffect(freddy));
+                }
+            }
+
+            // アイテム消費
+            player.setItemInHand(new ItemStack(Material.AIR));
+        }
+
         return true;
     }
 
@@ -562,12 +602,9 @@ public class GameSession {
         effectManager.applyEffect(player, new BindEffect(player));
 
         // フレディにテレポート用アイテムを渡す
-        ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
-        SkullMeta meta = (SkullMeta)skull.getItemMeta();
-        meta.setOwner(player.getName());
-        meta.setDisplayName("テレポートして" + player.getName() + "を襲う");
-        skull.setItemMeta(meta);
-        freddy.getInventory().addItem(skull);
+        FreddyItemWaitTask task = new FreddyItemWaitTask(this, player);
+        task.start();
+        freddyItemWaitTask.add(task);
     }
 
     /**
@@ -579,6 +616,11 @@ public class GameSession {
 
         // タッチした人がFreddy陣営でなければ無視
         if ( getDollRole(player) == null ) {
+            return;
+        }
+
+        // タッチした人がバインド中なら無視
+        if ( player.hasMetadata(BindEffect.TYPE) ) {
             return;
         }
 
@@ -633,6 +675,52 @@ public class GameSession {
         }
     }
 
+    public void joinSpectator(Player player) {
+
+        if ( !spectators.contains(player) ) {
+            spectators.add(player);
+        }
+
+        // サイドバーを表示する
+        scoreboardDisplay.setShowPlayer(player);
+
+        // 透明化する
+        effectManager.applyEffect(player, new InvisibleEffect(player));
+
+        // 持ち物を預かる
+        if ( !storage.isInventoryExists(player) ) {
+            storage.sendToTemp(player);
+        }
+
+        // 観客リスポーン地点に移動する
+        Location spectate = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getSpectate();
+        player.teleport(spectate, TeleportCause.PLUGIN);
+
+        player.sendMessage(ChatColor.GOLD + "観客として参加しました。");
+    }
+
+    public void leaveSpectator(Player player) {
+
+        if ( spectators.contains(player) ) {
+            spectators.remove(player);
+
+            // サイドバーを消去する
+            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+
+            // エフェクトを除去する
+            effectManager.removeAllEffect(player);
+
+            // 預かっていた持ち物を返す
+            storage.restoreFromTemp(player);
+
+            // ロビーに移動する
+            Location lobby = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getLobby();
+            player.teleport(lobby, TeleportCause.PLUGIN);
+
+            player.sendMessage(ChatColor.GOLD + "観客から離脱しました。");
+        }
+    }
+
     /**
      * 現在のフェーズを返す
      * @return フェーズ
@@ -668,6 +756,36 @@ public class GameSession {
     }
 
     /**
+     * 指定されたプレイヤーが、ゲームのプレイヤーとして参加しているかどうかを判定する
+     * @param player プレイヤー
+     * @return playerかどうか
+     */
+    public boolean isPlayer(Player player) {
+        return players.contains(player);
+    }
+
+    /**
+     * 指定されたプレイヤーのバッテリー残量を返す
+     * @param player プレイヤー
+     * @return バッテリー残量
+     */
+    public double getPowerLevel(Player player) {
+        if ( !batteries.containsKey(player) ) {
+            return -1;
+        }
+        return batteries.get(player).getPower();
+    }
+
+    /**
+     * 指定されたプレイヤーが観客かどうかを返す
+     * @param player プレイヤー
+     * @return 観客かどうか
+     */
+    public boolean isSpectator(Player player) {
+        return spectators.contains(player);
+    }
+
+    /**
      * Foxyが行動時間を終了した時に呼び出されるメソッド
      */
     protected void onFoxyMovementEnd() {
@@ -677,6 +795,29 @@ public class GameSession {
         foxy.teleport(respawn, TeleportCause.PLUGIN);
         effectManager.removeEffect(foxy, SpeedEffect.TYPE);
         effectManager.applyEffect(foxy, new BindEffect(foxy));
+    }
+
+    /**
+     * Freddyがテレポート用アイテムを取得する時に呼び出されるメソッド
+     * @param target ターゲットプレイヤー
+     */
+    protected void onFreddyItemGet(Player target) {
+        freddy.sendMessage(ChatColor.GOLD + target.getName() + "のバッテリーがダウンした。"
+                + "テレポートして襲うことができるぞ！");
+        ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
+        SkullMeta meta = (SkullMeta)skull.getItemMeta();
+        meta.setOwner(target.getName());
+        meta.setDisplayName("テレポートして" + target.getName() + "を襲う");
+        skull.setItemMeta(meta);
+        freddy.getInventory().addItem(skull);
+    }
+
+    /**
+     * Freddyがテレポート後に行動可能になる時に呼び出されるメソッド
+     */
+    protected void onFreddyTPWaitEnd() {
+        freddy.sendMessage(ChatColor.GOLD + "行動可能になった！");
+        effectManager.removeEffect(freddy, BindEffect.TYPE);
     }
 
     /**
