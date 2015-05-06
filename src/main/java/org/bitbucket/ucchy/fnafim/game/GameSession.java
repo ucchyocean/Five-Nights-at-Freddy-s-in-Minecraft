@@ -14,6 +14,7 @@ import org.bitbucket.ucchy.fnafim.DelayedTeleportTask;
 import org.bitbucket.ucchy.fnafim.FNAFIMConfig;
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bitbucket.ucchy.fnafim.LocationManager;
+import org.bitbucket.ucchy.fnafim.SoundComponent;
 import org.bitbucket.ucchy.fnafim.Utility;
 import org.bitbucket.ucchy.fnafim.effect.BindEffect;
 import org.bitbucket.ucchy.fnafim.effect.BlindnessEffect;
@@ -45,6 +46,7 @@ public class GameSession {
     private static final String DISPLAYNAME_LEATHER = "行動を開始 30秒の間だけ行動できます。";
 
     private GameSessionPhase phase;
+    private FNAFIMConfig config;
 
     private CommandSender owner;
     private List<Player> entrants;
@@ -93,6 +95,8 @@ public class GameSession {
 
         File logFolder = new File(FiveNightsAtFreddysInMinecraft.getInstance().getDataFolder(), "logs");
         logger = new GameSessionLogger(logFolder);
+        config = FiveNightsAtFreddysInMinecraft.getInstance().getFNAFIMConfig();
+
 
         makeItems();
 
@@ -107,7 +111,8 @@ public class GameSession {
 
         phase = GameSessionPhase.INVITATION;
         sendBroadcastAnnounce(owner.getName()
-                + "が Five Nights at Freddy's in Minecraft の参加者募集を開始しました。");
+                + "が Five Nights at Freddy's in Minecraft の参加者募集を開始しました。 "
+                + "\"/fn join\"コマンドで参加することができます。");
     }
 
     /**
@@ -190,7 +195,6 @@ public class GameSession {
         }
 
         // Freddyのエフェクトの設定
-        FNAFIMConfig config = FiveNightsAtFreddysInMinecraft.getInstance().getFNAFIMConfig();
         int nightnum = night.getNum();
         if ( nightnum <= 2 ) {
             // night2までは動けない
@@ -269,8 +273,16 @@ public class GameSession {
             scoreboardDisplay.setShowPlayer(player);
         }
         scoreboardDisplay.setTitle(ChatColor.RED + night.toString());
-        scoreboardDisplay.setRemainTime(config.getSecondsOfOneHour() * 6);
+        scoreboardDisplay.setRemainTime(night, 12);
         scoreboardDisplay.setRemainPlayer(players.size());
+
+        for ( Player player : players ) {
+            scoreboardDisplay.setPlayersTeam(player);
+        }
+        scoreboardDisplay.setFreddysTeam(freddy);
+        scoreboardDisplay.setFreddysTeam(chica);
+        scoreboardDisplay.setFreddysTeam(bonnie);
+        scoreboardDisplay.setFreddysTeam(foxy);
 
         // そのままゲームを開始する。
         startGame();
@@ -283,6 +295,9 @@ public class GameSession {
 
         phase = GameSessionPhase.IN_GAME;
         sendInGameAnnounce(night.toString());
+        sendInGameAnnounce("12:00 AM");
+        sendInGameSound(SoundComponent.getComponentFromString(
+                "LEVEL_UP-0.8-0.5,ZOMBIE_UNFECT-1.0-0.8,BLAZE_BREATH-1.0-0.5"));
 
         // タイマーの生成と開始
         FNAFIMConfig config = FiveNightsAtFreddysInMinecraft.getInstance().getFNAFIMConfig();
@@ -372,8 +387,15 @@ public class GameSession {
             sendInGameAnnounce(player.getName() + " は、謎の力に飲み込まれて脱落した。。。");
         }
 
+        // SEを再生
+        SoundComponent.getComponentFromString(
+                "GHAST_SCREAM-1.0-0.5,FIREWORK_LARGE_BLAST-1.0-0.5").playSoundToPlayer(player);
+
         // エフェクトをクリア
         effectManager.removeAllEffect(player);
+
+        // 持ち物をクリア
+        player.getInventory().clear();
 
         // プレイヤーおよび参加者から削除する
         entrants.remove(player);
@@ -381,6 +403,7 @@ public class GameSession {
 
         // スコアボードを更新
         scoreboardDisplay.setRemainPlayer(players.size());
+        scoreboardDisplay.leavePlayersTeam(player);
 
         if ( players.size() <= 0 ) {
             // 全滅したら、onGameover() を呼びだす。
@@ -426,7 +449,12 @@ public class GameSession {
         }
 
         // サイドバーの更新
-        scoreboardDisplay.setRemainTime(remain);
+        double reverse = config.getSecondsOfOneHour() * 6 - remain;
+        int hour = (int)(reverse / config.getSecondsOfOneHour());
+        if ( hour == 0 ) {
+            hour = 12;
+        }
+        scoreboardDisplay.setRemainTime(night, hour);
     }
 
     /**
@@ -435,8 +463,12 @@ public class GameSession {
     protected void onTimerZero() {
 
         phase = GameSessionPhase.END;
-        sendInGameAnnounce("6 AM");
+        sendInGameAnnounce("6:00 AM");
         sendInGameAnnounce(players.size() + "人のプレイヤーが生き延びた。");
+
+        // SEを流す
+        sendInGameSound(SoundComponent.getComponentFromString(""));
+
         onEnd();
     }
 
@@ -476,6 +508,7 @@ public class GameSession {
                 player.setItemInHand(flashlightOff.clone());
                 effectManager.applyEffect(player, new BlindnessEffect(player));
             }
+            SoundComponent.getComponentFromString("CLICK").playSoundToPlayer(player);
             return false;
         }
 
@@ -508,6 +541,7 @@ public class GameSession {
             if ( !found ) {
                 player.sendMessage(ChatColor.GOLD + "誰も近くにいないようだ。。。");
             }
+            SoundComponent.getComponentFromString("IRONGOLEM_HIT-1.0-0.7").playSoundToPlayer(player);
             return false;
         }
 
@@ -528,6 +562,7 @@ public class GameSession {
                 player.setItemInHand(shutterOff.clone());
                 effectManager.removeEffect(player, InvisibleEffect.TYPE);
             }
+            SoundComponent.getComponentFromString("WITHER_SHOOT-1.0-1.0").playSoundToPlayer(player);
             return false;
         }
 
@@ -555,6 +590,9 @@ public class GameSession {
             foxyMovementTask = new FoxyMovementTask(this);
             foxyMovementTask.start();
 
+            // SEを流す
+            SoundComponent.getComponentFromString("ZOMBIE_REMEDY-1.0-1.0").playSoundToPlayer(player);
+
             return false;
         }
 
@@ -573,6 +611,10 @@ public class GameSession {
                     freddy.sendMessage(ChatColor.GOLD + "" + freddyTeleportWaitTask.getWait()
                             + "秒後に行動できるようになる。。。");
                     effectManager.applyEffect(freddy, new BindEffect(freddy));
+
+                    // SEを流す
+                    SoundComponent.getComponentFromString("ENDERMAN_TELEPORT-1.0-0.8")
+                            .playSoundToWorld(target.getLocation());
                 }
             }
 
@@ -903,6 +945,19 @@ public class GameSession {
         message = ChatColor.RED + "[FNAF]" + ChatColor.GOLD + message;
         Bukkit.broadcastMessage(message);
         logger.log(message);
+    }
+
+    /**
+     * 全てのプレイヤーにSEを流す
+     * @param sound
+     */
+    private void sendInGameSound(SoundComponent sound) {
+        for ( Player player : players ) {
+            sound.playSoundToPlayer(player);
+        }
+        for ( Player player : spectators ) {
+            sound.playSoundToPlayer(player);
+        }
     }
 
     /**

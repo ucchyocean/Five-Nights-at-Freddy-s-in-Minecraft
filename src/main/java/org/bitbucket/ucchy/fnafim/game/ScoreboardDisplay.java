@@ -7,12 +7,14 @@ package org.bitbucket.ucchy.fnafim.game;
 
 import org.bitbucket.ucchy.fnafim.Utility;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 /**
  * スコアボード表示クラス
@@ -53,11 +55,22 @@ public class ScoreboardDisplay {
     }
 
     /**
+     * サイドバーのタイトルを取得する。
+     * @return サイドバーのタイトル
+     */
+    public String getTitle() {
+        return sidebar.getDisplayName();
+    }
+
+    /**
      * スコア項目を設定する。項目名は16文字以下にすること。
      * @param name 項目名
      * @param point 項目のスコア
      */
     public void setScore(String name, int point) {
+        if ( sidebar == null ) {
+            return;
+        }
         if ( name.length() > 16 ) {
             name = name.substring(0, 16);
         }
@@ -73,6 +86,9 @@ public class ScoreboardDisplay {
      * @param amount 加算する値
      */
     public void addScore(String name, int amount) {
+        if ( sidebar == null ) {
+            return;
+        }
         if ( name.length() > 16 ) {
             name = name.substring(0, 16);
         }
@@ -90,11 +106,30 @@ public class ScoreboardDisplay {
     }
 
     /**
+     * チームを取得する
+     * @param name チーム名
+     * @param color チームカラー
+     * @return チーム
+     */
+    public Team getTeam(String name, String color) {
+        Team team = scoreboard.getTeam(name);
+        if ( team == null ) {
+            team = scoreboard.registerNewTeam(name);
+            team.setPrefix(color);
+            team.setSuffix(ChatColor.RESET.toString());
+        }
+        return team;
+    }
+
+    /**
      * スコア項目を削除する
      * @param name
      */
     @SuppressWarnings("deprecation")
     public void removeScores(String name) {
+        if ( sidebar == null ) {
+            return;
+        }
         getScoreItem(name).setScore(0);
         if ( Utility.isCB178orLater() ) {
             scoreboard.resetScores(name);
@@ -111,6 +146,9 @@ public class ScoreboardDisplay {
      */
     @SuppressWarnings("deprecation")
     private Score getScoreItem(String name) {
+        if ( sidebar == null ) {
+            return null;
+        }
         if ( Utility.isCB178orLater() ) {
             return sidebar.getScore(name);
         } else {
@@ -118,12 +156,43 @@ public class ScoreboardDisplay {
         }
     }
 
+    // 以下、FNAFIM用のメソッド
+
+    /**
+     * プレイヤーをフレディチームに所属させる
+     * @param player
+     */
+    public void setFreddysTeam(Player player) {
+        getTeam("Freddys", ChatColor.RED.toString()).addPlayer(player);
+    }
+
+    /**
+     * プレイヤーをプレイヤーズチームに所属させる
+     * @param player
+     */
+    public void setPlayersTeam(Player player) {
+        getTeam("Players", ChatColor.BLUE.toString()).addPlayer(player);
+    }
+
+    /**
+     * プレイヤーをプレイヤーズチームから脱退させる
+     * @param player
+     */
+    public void leavePlayersTeam(Player player) {
+        getTeam("Players", ChatColor.BLUE.toString()).removePlayer(player);
+    }
+
     /**
      * 残り時間を設定する
      * @param remain
      */
-    public void setRemainTime(int remain) {
-        setScore("残り時間", remain);
+    public void setRemainTime(Night night, int hour) {
+        String title = String.format(
+                "%s  " + ChatColor.RED + "%2d" + ChatColor.WHITE + "AM",
+                night.toString(), hour);
+        if ( !title.equals(getTitle()) ) {
+            setTitle(title);
+        }
     }
 
     /**

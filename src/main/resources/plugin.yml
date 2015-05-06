@@ -12,6 +12,7 @@ commands:
     usage: |
            /<command> join - Join the game.
            /<command> leave - Leave the game.
+           /<command> spectate [join|leave]
            /<command> open - Open player invitation.
            /<command> close - Close player invitation.
            /<command> start night<1-7> - Start new game.
