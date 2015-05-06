@@ -33,6 +33,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * ゲームセッション
@@ -97,11 +98,7 @@ public class GameSession {
         logger = new GameSessionLogger(logFolder);
         config = FiveNightsAtFreddysInMinecraft.getInstance().getFNAFIMConfig();
 
-
         makeItems();
-
-        // そのまま募集を開始する
-        openInvitation();
     }
 
     /**
@@ -243,6 +240,12 @@ public class GameSession {
 //        effectManager.applyEffect(foxy, new HideNametagEffect(foxy));
         effectManager.applyEffect(foxy, new ChangeDisplayNameEffect(foxy,
                 ChatColor.GOLD + foxy.getName() + ChatColor.RED + "(Foxy)" + ChatColor.RESET));
+
+        // 観客のエフェクト設定
+        for ( Player player : spectators ) {
+            effectManager.applyEffect(player, new InvisibleEffect(player));
+            effectManager.applyEffect(player, new SpeedEffect(player, 3));
+        }
 
         // プレイヤーのバッテリー
         batteries = new HashMap<Player, PlayerBattery>();
@@ -467,9 +470,21 @@ public class GameSession {
         sendInGameAnnounce(players.size() + "人のプレイヤーが生き延びた。");
 
         // SEを流す
-        sendInGameSound(SoundComponent.getComponentFromString(""));
+        sendInGameSound(SoundComponent.getComponentFromString("ENDERDRAGON_DEATH-0.4-2.0"));
 
-        onEnd();
+        // Night1-4は、次の夜の準備。その他は終了.
+        final Night next = night.getNext();
+        if ( next != null ) {
+            // 15秒後に、startPreparingを呼び出す
+            new BukkitRunnable() {
+                public void run() {
+                    startPreparing(next);
+                }
+            }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 15 * 20);
+
+        } else {
+            onEnd();
+        }
     }
 
     /**
@@ -726,8 +741,9 @@ public class GameSession {
         // サイドバーを表示する
         scoreboardDisplay.setShowPlayer(player);
 
-        // 透明化する
+        // 透明化する、高速化する
         effectManager.applyEffect(player, new InvisibleEffect(player));
+        effectManager.applyEffect(player, new SpeedEffect(player, 3));
 
         // 持ち物を預かる
         if ( !storage.isInventoryExists(player) ) {
@@ -795,6 +811,22 @@ public class GameSession {
      */
     public boolean isFoxy(Player player) {
         return foxy.equals(player);
+    }
+
+    public void setFreddy(Player freddy) {
+        this.freddy = freddy;
+    }
+
+    public void setChica(Player chica) {
+        this.chica = chica;
+    }
+
+    public void setBonnie(Player bonnie) {
+        this.bonnie = bonnie;
+    }
+
+    public void setFoxy(Player foxy) {
+        this.foxy = foxy;
     }
 
     /**

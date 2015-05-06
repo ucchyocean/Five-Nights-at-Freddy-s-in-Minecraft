@@ -37,4 +37,19 @@ public enum Night {
         }
         return null;
     }
+
+    public Night getNext() {
+        switch (this) {
+        case NIGHT1:
+            return NIGHT2;
+        case NIGHT2:
+            return NIGHT3;
+        case NIGHT3:
+            return NIGHT4;
+        case NIGHT4:
+            return NIGHT5;
+        default:
+            return null;
+        }
+    }
 }

@@ -105,6 +105,7 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
      */
     public GameSession createNewGameSession(CommandSender owner) {
         session = new GameSession(owner);
+        session.openInvitation();
         return session;
     }
 
