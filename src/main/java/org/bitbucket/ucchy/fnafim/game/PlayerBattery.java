@@ -15,19 +15,23 @@ import org.bukkit.entity.Player;
 public class PlayerBattery {
 
     private Player player;
+    private GameSession session;
     private double power;
     private boolean isUsingFlashlight;
     private boolean isUsingShutter;
+    private boolean isDown;
 
     /**
      * コンストラクタ
      * @param player
      */
-    public PlayerBattery(Player player) {
+    public PlayerBattery(Player player, GameSession session) {
         this.player = player;
+        this.session = session;
         power = 100;
         isUsingFlashlight = false;
         isUsingShutter = false;
+        isDown = false;
 
         player.setLevel(100);
         player.setExp(1.0f);
@@ -59,10 +63,15 @@ public class PlayerBattery {
 
         refreshExpBar();
 
-        if ( power == 0 ) {
-            // TODO 全ての道具の利用をやめる
-            // TODO プレイヤーを停止させる
-            // TODO フレディにテレポート用アイテムを渡す
+        if ( !isDown && power <= 0 ) {
+            isDown = true;
+
+            // 全ての道具の利用をやめる
+            isUsingFlashlight = false;
+            isUsingShutter = false;
+
+            // 電力切れイベントを呼びだす
+            session.onBatteryDown(player);
         }
     }
 

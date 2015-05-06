@@ -29,8 +29,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * ゲームセッション
@@ -71,6 +71,8 @@ public class GameSession {
     private ItemStack shutterOn;
     private ItemStack shutterOff;
     private ItemStack leather;
+
+    private FoxyMovementTask foxyMovementTask;
 
     /**
      * コンストラクタ
@@ -237,7 +239,7 @@ public class GameSession {
         // プレイヤーのバッテリー
         batteries = new HashMap<Player, PlayerBattery>();
         for ( Player player : players ) {
-            batteries.put(player, new PlayerBattery(player));
+            batteries.put(player, new PlayerBattery(player, this));
         }
 
         // それぞれのスタート地点にTPする
@@ -319,6 +321,12 @@ public class GameSession {
             effectManager.removeAllEffect(player);
         }
 
+        // タスクをクリア
+        if ( foxyMovementTask != null && !foxyMovementTask.isEnded() ) {
+            foxyMovementTask.end();
+            foxyMovementTask = null;
+        }
+
         // プレイヤーに持ち物を返す
         for ( Player player : entrants ) {
             storage.restoreFromTemp(player);
@@ -383,7 +391,7 @@ public class GameSession {
     protected void onGameover() {
 
         phase = GameSessionPhase.END;
-        sendInGameAnnounce("Gameover ");
+        sendInGameAnnounce("Gameover");
         sendInGameAnnounce("プレイヤーが全員捕まってしまった。。。");
         onEnd();
     }
@@ -438,7 +446,7 @@ public class GameSession {
             boolean isOn = (item.getType() == flashlightOff.getType());
             if ( batteries.containsKey(player) ) {
                 if ( batteries.get(player).getPower() <= 0 ) {
-                    player.sendMessage(ChatColor.RED + "電力が無いので操作できない！");
+                    player.sendMessage(ChatColor.GOLD + "電力が無いので操作できない！");
                     return false;
                 }
                 batteries.get(player).setUsingFlashlight(isOn);
@@ -457,7 +465,7 @@ public class GameSession {
         if ( name.equals(DISPLAYNAME_RADER) ) {
             if ( batteries.containsKey(player) ) {
                 if ( !batteries.get(player).hasPowerToUserRadar() ) {
-                    player.sendMessage(ChatColor.RED + "電力が足りないので使用できない！");
+                    player.sendMessage(ChatColor.GOLD + "電力が足りないので使用できない！");
                     return false;
                 }
                 batteries.get(player).decreaseToUseRadar();
@@ -471,7 +479,7 @@ public class GameSession {
                         double distance = player.getLocation().distance(target.getLocation());
                         if ( distance <= 10 ) {
                             String msg = String.format(
-                                    ChatColor.RED + "%s(%s) が、%.1fｍ先にいる！！",
+                                    ChatColor.GOLD + "%s(%s) が、%.1fｍ先にいる！！",
                                     target.getName(), doll.toString(), distance);
                             player.sendMessage(msg);
                             found = true;
@@ -480,7 +488,7 @@ public class GameSession {
                 }
             }
             if ( !found ) {
-                player.sendMessage(ChatColor.AQUA + "誰も近くにいないようだ。。。");
+                player.sendMessage(ChatColor.GOLD + "誰も近くにいないようだ。。。");
             }
             return false;
         }
@@ -490,7 +498,7 @@ public class GameSession {
             boolean isOn = (item.getType() == shutterOff.getType());
             if ( batteries.containsKey(player) ) {
                 if ( batteries.get(player).getPower() <= 0 ) {
-                    player.sendMessage(ChatColor.RED + "電力が無いので操作できない！");
+                    player.sendMessage(ChatColor.GOLD + "電力が無いので操作できない！");
                     return false;
                 }
                 batteries.get(player).setUsingShutter(isOn);
@@ -509,8 +517,8 @@ public class GameSession {
         if ( name.equals(DISPLAYNAME_LEATHER) ) {
 
             // 行動不可の状態になっていないなら、アイテムを使う必要は無い
-            if ( !effectManager.hasEffect(player, BindEffect.TYPE) ) {
-                player.sendMessage(ChatColor.AQUA + "今は使う必要はない。。。");
+            if ( foxyMovementTask != null && !foxyMovementTask.isEnded() ) {
+                player.sendMessage(ChatColor.GOLD + "今は使う必要はない。。。");
                 return false;
             }
 
@@ -525,28 +533,41 @@ public class GameSession {
             // 行動不可を解いて、30秒間の行動時間を与える
             effectManager.removeEffect(player, BindEffect.TYPE);
             effectManager.applyEffect(player, new SpeedEffect(player, 3));
-            player.sendMessage(ChatColor.AQUA + "30秒間行動できるようになった！");
-            new BukkitRunnable() {
-                public void run() {
-                    if ( phase == GameSessionPhase.IN_GAME && player.isOnline() ) {
-                        player.sendMessage(ChatColor.AQUA + "行動時間が終了した。");
-                        Location respawn = FiveNightsAtFreddysInMinecraft
-                                .getInstance().getLocationManager().getFoxy();
-                        player.teleport(respawn, TeleportCause.PLUGIN);
-                        effectManager.applyEffect(player, new BindEffect(player));
-                    }
-                }
-            }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 20 * 30);
-
-            // TODO Foxyが、行動時間中にサーバーから切断してしまったときの対策を考えること。
-            //   再ログイン時に、行動不能を再設定して、リスポーン地点に送信するとか。
-            // TODO Foxyが、行動時間中のゲームが終了してしまったときの対策を考えること。
-            //   処理は保持しておいて、キャンセルできるようにすべきか。
+            player.sendMessage(ChatColor.GOLD + "30秒間行動できるようになった！");
+            foxyMovementTask = new FoxyMovementTask(this);
+            foxyMovementTask.start();
 
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * 参加者プレイヤーのバッテリーがダウンした時に呼び出される。
+     * @param player
+     */
+    protected void onBatteryDown(Player player) {
+
+        // 手持ちのアイテムを全て無くす
+        player.getInventory().clear();
+
+        // 懐中電灯オフ
+        effectManager.applyEffect(player, new BlindnessEffect(player));
+
+        // シャッターオフ
+        effectManager.removeEffect(player, InvisibleEffect.TYPE);
+
+        // プレイヤーを停止する
+        effectManager.applyEffect(player, new BindEffect(player));
+
+        // フレディにテレポート用アイテムを渡す
+        ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
+        SkullMeta meta = (SkullMeta)skull.getItemMeta();
+        meta.setOwner(player.getName());
+        meta.setDisplayName("テレポートして" + player.getName() + "を襲う");
+        skull.setItemMeta(meta);
+        freddy.getInventory().addItem(skull);
     }
 
     /**
@@ -635,6 +656,27 @@ public class GameSession {
      */
     public List<Player> getEntrants() {
         return entrants;
+    }
+
+    /**
+     * 指定されたプレイヤーがFoxyかどうかを判定する
+     * @param player プレイヤー
+     * @return Foxyかどうか
+     */
+    public boolean isFoxy(Player player) {
+        return foxy.equals(player);
+    }
+
+    /**
+     * Foxyが行動時間を終了した時に呼び出されるメソッド
+     */
+    protected void onFoxyMovementEnd() {
+        foxy.sendMessage(ChatColor.GOLD + "行動時間が終了した。");
+        Location respawn = FiveNightsAtFreddysInMinecraft
+                .getInstance().getLocationManager().getFoxy();
+        foxy.teleport(respawn, TeleportCause.PLUGIN);
+        effectManager.removeEffect(foxy, SpeedEffect.TYPE);
+        effectManager.applyEffect(foxy, new BindEffect(foxy));
     }
 
     /**

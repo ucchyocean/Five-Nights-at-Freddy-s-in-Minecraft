@@ -17,6 +17,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 
 /**
  * リスナークラス
@@ -145,5 +146,30 @@ public class GameSessionListener implements Listener {
 
         // あとは全てイベントをキャンセル
         event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+
+        Player player = event.getPlayer();
+
+        // セッションが無いならイベントを無視
+        GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session == null ) {
+            return;
+        }
+
+        // ゲーム中でないならイベントを無視
+        if ( session.getPhase() != GameSessionPhase.IN_GAME ) {
+            return;
+        }
+
+        // Foxyではないならイベントを無視
+        if ( !session.isFoxy(player) ) {
+            return;
+        }
+
+        // リスポーン地点に飛ばして、バインドを設定する
+        session.onFoxyMovementEnd();
     }
 }
