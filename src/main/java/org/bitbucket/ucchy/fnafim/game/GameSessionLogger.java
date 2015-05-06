@@ -47,31 +47,39 @@ public class GameSessionLogger {
     public synchronized void log(final String message) {
 
         // 以降の処理を、発言処理の負荷軽減のため、非同期実行にする。
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-
-                String msg = ChatColor.stripColor(message).replace(",", "，");
-                FileWriter writer = null;
-                try {
-                    writer = new FileWriter(file, true);
-                    String str = lformat.format(new Date()) + ", " + msg;
-                    writer.write(str + "\r\n");
-                    writer.flush();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if ( writer != null ) {
-                        try {
-                            writer.close();
-                        } catch (Exception e) {
-                            // do nothing.
-                        }
-                    }
+        FiveNightsAtFreddysInMinecraft plugin =
+                FiveNightsAtFreddysInMinecraft.getInstance();
+        if ( plugin.isEnabled() ) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    writeLogInternal(message);
                 }
-
-            }
-        }.runTaskAsynchronously(FiveNightsAtFreddysInMinecraft.getInstance());
+            }.runTaskAsynchronously(plugin);
+        } else {
+            writeLogInternal(message);
+        }
     }
 
+    private void writeLogInternal(String message) {
+
+        String msg = ChatColor.stripColor(message).replace(",", "，");
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file, true);
+            String str = lformat.format(new Date()) + ", " + msg;
+            writer.write(str + "\r\n");
+            writer.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if ( writer != null ) {
+                try {
+                    writer.close();
+                } catch (Exception e) {
+                    // do nothing.
+                }
+            }
+        }
+    }
 }

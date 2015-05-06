@@ -7,13 +7,15 @@ package org.bitbucket.ucchy.fnafim.game;
 
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bitbucket.ucchy.fnafim.effect.HideNametagEffect;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 /**
@@ -38,7 +40,15 @@ public class GameSessionListener implements Listener {
             return;
         }
 
-        // セッションの方に送って処理する。falseが返されたらイベントをキャンセルする。
+        // 感圧板イベント、左クリックイベントなら、イベントを無視
+        if ( event.getAction() == Action.PHYSICAL
+                || event.getAction() == Action.LEFT_CLICK_AIR
+                || event.getAction() == Action.LEFT_CLICK_BLOCK ) {
+            return;
+        }
+
+        // アイテムの使用判定は、セッションの方に送って処理する。
+        // falseが返されたらイベントをキャンセルする。
         if ( !session.onEntrantInteract(player) ) {
             event.setCancelled(true);
         }
@@ -79,9 +89,7 @@ public class GameSessionListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-
-        Player player = event.getPlayer();
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 
         // セッションが無いならイベントを無視
         GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
@@ -89,8 +97,19 @@ public class GameSessionListener implements Listener {
             return;
         }
 
+        // ダメージを受けたのがプレイヤーでないならイベントを無視
+        Entity damagent = event.getEntity();
+        if ( damagent instanceof Slime
+                && damagent.hasMetadata(HideNametagEffect.TYPE) ) {
+            damagent = damagent.getVehicle();
+        }
+        if ( !(damagent instanceof Player) ) {
+            return;
+        }
+        Player target = (Player)damagent;
+
         // 参加者ではないならイベントを無視
-        if ( !session.isEntrant(player) ) {
+        if ( !session.isEntrant(target) ) {
             return;
         }
 
@@ -98,12 +117,12 @@ public class GameSessionListener implements Listener {
         event.setCancelled(true);
 
         // タッチしたプレイヤーも参加者プレイヤーである場合は、セッションで処理
-        if ( event.getRightClicked() instanceof Player ) {
-            Player target = (Player)event.getRightClicked();
-            if ( !session.isEntrant(target) ) {
+        if ( event.getDamager() instanceof Player ) {
+            Player damager = (Player)event.getDamager();
+            if ( !session.isEntrant(damager) ) {
                 return;
             }
-            session.onTouch(player, target);
+            session.onTouch(damager, target);
             return;
         }
     }

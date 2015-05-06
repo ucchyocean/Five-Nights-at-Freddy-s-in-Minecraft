@@ -17,7 +17,6 @@ import org.bitbucket.ucchy.fnafim.LocationManager;
 import org.bitbucket.ucchy.fnafim.effect.BindEffect;
 import org.bitbucket.ucchy.fnafim.effect.BlindnessEffect;
 import org.bitbucket.ucchy.fnafim.effect.ChangeDisplayNameEffect;
-import org.bitbucket.ucchy.fnafim.effect.HideNametagEffect;
 import org.bitbucket.ucchy.fnafim.effect.InvisibleEffect;
 import org.bitbucket.ucchy.fnafim.effect.SpeedEffect;
 import org.bukkit.Bukkit;
@@ -201,7 +200,7 @@ public class GameSession {
             effectManager.applyEffect(freddy, new SpeedEffect(
                     freddy, config.getCustomNightMoveSpeed_freddy()));
         }
-        effectManager.applyEffect(freddy, new HideNametagEffect(freddy));
+//        effectManager.applyEffect(freddy, new HideNametagEffect(freddy));
         effectManager.applyEffect(freddy, new ChangeDisplayNameEffect(freddy,
                 ChatColor.GOLD + freddy.getName() + ChatColor.RED + "(Freddy)" + ChatColor.RESET));
 
@@ -221,8 +220,8 @@ public class GameSession {
             effectManager.applyEffect(bonnie, new SpeedEffect(
                     bonnie, config.getCustomNightMoveSpeed_bonnie()));
         }
-        effectManager.applyEffect(chica, new HideNametagEffect(chica));
-        effectManager.applyEffect(bonnie, new HideNametagEffect(bonnie));
+//        effectManager.applyEffect(chica, new HideNametagEffect(chica));
+//        effectManager.applyEffect(bonnie, new HideNametagEffect(bonnie));
 
         effectManager.applyEffect(chica, new ChangeDisplayNameEffect(chica,
                 ChatColor.GOLD + chica.getName() + ChatColor.RED + "(Chica)" + ChatColor.RESET));
@@ -231,7 +230,7 @@ public class GameSession {
 
         // Foxyのエフェクト設定、常に移動不可にしておく
         effectManager.applyEffect(foxy, new BindEffect(foxy));
-        effectManager.applyEffect(foxy, new HideNametagEffect(foxy));
+//        effectManager.applyEffect(foxy, new HideNametagEffect(foxy));
         effectManager.applyEffect(foxy, new ChangeDisplayNameEffect(foxy,
                 ChatColor.GOLD + foxy.getName() + ChatColor.RED + "(Foxy)" + ChatColor.RESET));
 

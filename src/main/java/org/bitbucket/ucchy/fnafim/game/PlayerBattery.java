@@ -38,24 +38,32 @@ public class PlayerBattery {
      */
     protected void onSeconds() {
 
-        System.out.println("onSeconds start : " + power);
-
         // 基本使用量
-        power -= 1/7;
+        power -= 0.15;
 
         // 懐中電灯使用量
         if ( isUsingFlashlight ) {
-            power -= 1/5;
+            power -= 0.2;
         }
 
         // シャッター使用量
         if ( isUsingShutter ) {
-            power -= 1/2;
+            power -= 0.5;
+        }
+
+        if ( power > 100 ) {
+            power = 100;
+        } else if ( power < 0 ) {
+            power = 0;
         }
 
         refreshExpBar();
 
-        System.out.println("onSeconds end : " + power);
+        if ( power == 0 ) {
+            // TODO 全ての道具の利用をやめる
+            // TODO プレイヤーを停止させる
+            // TODO フレディにテレポート用アイテムを渡す
+        }
     }
 
     /**
@@ -93,13 +101,6 @@ public class PlayerBattery {
      */
     private void refreshExpBar() {
 
-        if ( power > 100 ) {
-            power = 100;
-        } else if ( power < 0 ) {
-            power = 0;
-            // TODO 全ての道具の利用をやめる
-            // TODO プレイヤーを停止させる
-        }
         player.setLevel((int)power);
         float progress = (float)(power / 100);
         player.setExp(progress);

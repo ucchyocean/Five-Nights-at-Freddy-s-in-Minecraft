@@ -38,7 +38,8 @@ public class SpeedEffect implements SpecialEffect {
 
     @Override
     public void end() {
-        player.removePotionEffect(PotionEffectType.INVISIBILITY);
+        player.removePotionEffect(PotionEffectType.SLOW);
+        player.removePotionEffect(PotionEffectType.SPEED);
     }
 
     @Override
