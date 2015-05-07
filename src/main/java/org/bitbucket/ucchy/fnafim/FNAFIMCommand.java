@@ -44,6 +44,12 @@ public class FNAFIMCommand implements TabExecutor {
         } else if ( args[0].equalsIgnoreCase("leave") ) {
             leaveCommand(sender, command, label, args);
             return true;
+        } else if ( args[0].equalsIgnoreCase("spectate") ) {
+            spectateCommand(sender, command, label, args);
+            return true;
+        } else if ( args[0].equalsIgnoreCase("info") ) {
+            infoCommand(sender, command, label, args);
+            return true;
         } else if ( args[0].equalsIgnoreCase("open") ) {
             openCommand(sender, command, label, args);
             return true;
@@ -198,6 +204,75 @@ public class FNAFIMCommand implements TabExecutor {
         // 離脱する。
         session.leaveEntrant(player);
         sendInformationMessage(sender, "ゲームから離脱しました。");
+    }
+
+    private void spectateCommand(CommandSender sender, Command command, String label, String[] args) {
+
+        // パーミッションチェック
+        if ( !sender.hasPermission(PERMISSION_PREFIX + "spectate") ) {
+            sendErrorMessage(sender, "パーミッションが無いため実行できません。");
+            return;
+        }
+
+        // プレイヤーでないならエラー
+        if ( !(sender instanceof Player) ) {
+            sendErrorMessage(sender, "このコマンドはゲーム内から実行してください。");
+            return;
+        }
+
+        Player player = (Player)sender;
+
+        // ゲームセッションが無いならエラー
+        GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session == null ) {
+            sendErrorMessage(sender, "ゲームセッションがありません。");
+            return;
+        }
+
+        // セッションがゲーム中でないならエラー
+        if ( session.getPhase() != GameSessionPhase.IN_GAME ) {
+            sendErrorMessage(sender, "ゲームセッションがゲーム中ではありません。");
+            return;
+        }
+
+        // 参加者ならエラー
+        if ( session.isEntrant(player) ) {
+            sendErrorMessage(sender, "あなたは参加者なので、観客コマンドは利用できません。");
+            return;
+        }
+
+        // 観客でないなら、観客として参加。観客なら、観客から離脱。
+        if ( !session.isSpectator(player) ) {
+            session.joinSpectator(player);
+        } else {
+            session.leaveSpectator(player);
+        }
+    }
+
+    private void infoCommand(CommandSender sender, Command command, String label, String[] args) {
+
+        // パーミッションチェック
+        if ( !sender.hasPermission(PERMISSION_PREFIX + "info") ) {
+            sendErrorMessage(sender, "パーミッションが無いため実行できません。");
+            return;
+        }
+
+        // ゲームセッションを取得
+        GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session == null ) {
+            sendInformationMessage(sender, "ゲームセッションがありません。");
+            return;
+        }
+
+        sendInformationMessage(sender, "現在のゲームフェーズ：" + session.getPhase()
+                + ", " + session.getNight());
+
+        StringBuilder buffer = new StringBuilder();
+        buffer.append("現在の参加者：");
+        for ( Player player : session.getEntrants() ) {
+            buffer.append(player.getDisplayName() + ", ");
+        }
+        sendInformationMessage(sender, buffer.toString());
     }
 
     private void openCommand(
@@ -404,12 +479,12 @@ public class FNAFIMCommand implements TabExecutor {
     }
 
     private void sendInformationMessage(CommandSender sender, String message) {
-        String msg = ChatColor.RED + "[FNAF]" + ChatColor.AQUA + message;
+        String msg = ChatColor.RED + "[FNAF]" + ChatColor.GOLD + message;
         sender.sendMessage(msg);
     }
 
     private void sendErrorMessage(CommandSender sender, String message) {
-        String msg = ChatColor.RED + "[FNAF]" + message;
+        String msg = ChatColor.RED + "[FNAF]" + ChatColor.RED + message;
         sender.sendMessage(msg);
     }
 }

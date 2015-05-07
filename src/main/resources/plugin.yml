@@ -12,7 +12,8 @@ commands:
     usage: |
            /<command> join - Join the game.
            /<command> leave - Leave the game.
-           /<command> spectate [join|leave]
+           /<command> spectate - join/leave the game as spactator.
+           /<command> info - Show game session status.
            /<command> open - Open player invitation.
            /<command> close - Close player invitation.
            /<command> start night<1-7> - Start new game.
@@ -31,6 +32,12 @@ permissions:
     default: true
   fnafim.leave:
     description: Permission of leave command.
+    default: true
+  fnafim.spectate:
+    description: Permission of spectate command.
+    default: true
+  fnafim.info:
+    description: Permission of info command.
     default: true
   fnafim.open:
     description: Permission of open command.
@@ -56,6 +63,8 @@ permissions:
       fnafim.command: true
       fnafim.join: true
       fnafim.leave: true
+      fnafim.spectate: true
+      fnafim.info: true
       fnafim.open: true
       fnafim.close: true
       fnafim.start: true

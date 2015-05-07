@@ -61,7 +61,7 @@ public class DelayedTeleportTask extends BukkitRunnable {
         Player player = players.poll();
         Location location = locationMap.get(player);
         if ( player != null && location != null ) {
-            location = location.add(0.5, 0, 0.5);
+            location = location.clone().add(0.5, 0, 0.5);
             player.teleport(location, TeleportCause.PLUGIN);
         }
     }

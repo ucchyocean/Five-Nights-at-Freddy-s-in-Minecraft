@@ -15,6 +15,7 @@ import org.bitbucket.ucchy.fnafim.FNAFIMConfig;
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bitbucket.ucchy.fnafim.LocationManager;
 import org.bitbucket.ucchy.fnafim.SoundComponent;
+import org.bitbucket.ucchy.fnafim.TitleDisplayComponent;
 import org.bitbucket.ucchy.fnafim.Utility;
 import org.bitbucket.ucchy.fnafim.effect.BindEffect;
 import org.bitbucket.ucchy.fnafim.effect.BlindnessEffect;
@@ -184,6 +185,11 @@ public class GameSession {
         sendFoxyInventory(foxy);
 
         // エフェクトの設定
+        for ( Player player : entrants ) {
+            effectManager.removeAllEffect(player);
+        }
+
+        // プレイヤーのエフェクト設定
         for ( Player player : players ) {
             effectManager.applyEffect(player, new BlindnessEffect(player));
             effectManager.applyEffect(player, new ChangeDisplayNameEffect(player,
@@ -297,8 +303,13 @@ public class GameSession {
     private void startGame() {
 
         phase = GameSessionPhase.IN_GAME;
-        sendInGameAnnounce(night.toString());
-        sendInGameAnnounce("12:00 AM");
+        String msg = ChatColor.WHITE + night.toString() + "  12:00 AM";
+        for ( Player player : entrants ) {
+            TitleDisplayComponent.display(player, msg, 0, 30, 20);
+        }
+        for ( Player player : spectators ) {
+            TitleDisplayComponent.display(player, msg, 0, 30, 20);
+        }
         sendInGameSound(SoundComponent.getComponentFromString(
                 "LEVEL_UP-0.8-0.5,ZOMBIE_UNFECT-1.0-0.8,BLAZE_BREATH-1.0-0.5"));
 
@@ -374,6 +385,9 @@ public class GameSession {
             locationMap.put(player, lmanager.getLobby());
         }
         new DelayedTeleportTask(locationMap, 3).startTask();
+
+        // セッションを消去する
+        FiveNightsAtFreddysInMinecraft.getInstance().removeGameSession();
     }
 
     /**
@@ -435,7 +449,12 @@ public class GameSession {
     protected void onGameover() {
 
         phase = GameSessionPhase.END;
-        sendInGameAnnounce("Gameover");
+        for ( Player player : entrants ) {
+            TitleDisplayComponent.display(player, ChatColor.WHITE + "Game Over", 0, 30, 20);
+        }
+        for ( Player player : spectators ) {
+            TitleDisplayComponent.display(player, ChatColor.WHITE + "Game Over", 0, 30, 20);
+        }
         sendInGameAnnounce("プレイヤーが全員捕まってしまった。。。");
         onEnd();
     }
@@ -466,24 +485,38 @@ public class GameSession {
     protected void onTimerZero() {
 
         phase = GameSessionPhase.END;
-        sendInGameAnnounce("6:00 AM");
+        for ( Player player : entrants ) {
+            TitleDisplayComponent.display(player, ChatColor.WHITE + "6:00 AM", 0, 30, 20);
+        }
+        for ( Player player : spectators ) {
+            TitleDisplayComponent.display(player, ChatColor.WHITE + "6:00 AM", 0, 30, 20);
+        }
         sendInGameAnnounce(players.size() + "人のプレイヤーが生き延びた。");
 
         // SEを流す
         sendInGameSound(SoundComponent.getComponentFromString("ENDERDRAGON_DEATH-0.4-2.0"));
 
+        // 持ち物を消去する、エフェクトを消去する
+        for ( Player player : entrants ) {
+            removeInventoryAll(player);
+            effectManager.removeAllEffect(player);
+        }
+
         // Night1-4は、次の夜の準備。その他は終了.
         final Night next = night.getNext();
         if ( next != null ) {
             // 15秒後に、startPreparingを呼び出す
+            int wait = 15;
             new BukkitRunnable() {
                 public void run() {
                     startPreparing(next);
                 }
-            }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 15 * 20);
+            }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), wait * 20);
+            sendInGameAnnounce(wait + "秒後に、次の" + next + "が始まります。");
 
         } else {
             onEnd();
+            sendInGameAnnounce("ゲーム終了。プレイヤー側の勝利！");
         }
     }
 
@@ -671,6 +704,11 @@ public class GameSession {
      */
     protected void onTouch(Player player, Player target) {
 
+        // ゲームフェーズ中でなければ無視
+        if ( phase != GameSessionPhase.IN_GAME ) {
+            return;
+        }
+
         // タッチした人がFreddy陣営でなければ無視
         if ( getDollRole(player) == null ) {
             return;
@@ -754,7 +792,8 @@ public class GameSession {
         Location spectate = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getSpectate();
         player.teleport(spectate, TeleportCause.PLUGIN);
 
-        player.sendMessage(ChatColor.GOLD + "観客として参加しました。");
+        player.sendMessage(ChatColor.GOLD + "観客として参加しました。 "
+                + "\"/fn spectate\"コマンドで、ゲームから離脱できます。");
     }
 
     public void leaveSpectator(Player player) {
@@ -857,6 +896,14 @@ public class GameSession {
      */
     public boolean isSpectator(Player player) {
         return spectators.contains(player);
+    }
+
+    /**
+     * 現在のNightを返す
+     * @return 現在のNight
+     */
+    public Night getNight() {
+        return night;
     }
 
     /**
@@ -1059,5 +1106,13 @@ public class GameSession {
             return Doll.FOXY;
         }
         return null;
+    }
+
+    private void removeInventoryAll(Player player) {
+        player.getInventory().clear();
+        player.getInventory().setHelmet(new ItemStack(Material.AIR));
+        player.getInventory().setChestplate(new ItemStack(Material.AIR));
+        player.getInventory().setLeggings(new ItemStack(Material.AIR));
+        player.getInventory().setBoots(new ItemStack(Material.AIR));
     }
 }

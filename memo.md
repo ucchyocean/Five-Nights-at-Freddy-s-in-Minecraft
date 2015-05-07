@@ -1,7 +1,5 @@
 残っていること
 
-- 5夜通しでのプレイ
-
 -----
 
 Plugin名: Five Night at Freddy's in minecraft(もしくはFNAFIM)
