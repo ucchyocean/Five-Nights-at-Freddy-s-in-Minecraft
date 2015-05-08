@@ -43,7 +43,7 @@ public class PlayerBattery {
     protected void onSeconds() {
 
         // 基本使用量
-        power -= 0.15;
+        power -= 0.14;
 
         // 懐中電灯使用量
         if ( isUsingFlashlight ) {
@@ -52,7 +52,7 @@ public class PlayerBattery {
 
         // シャッター使用量
         if ( isUsingShutter ) {
-            power -= 0.5;
+            power -= 0.67;
         }
 
         if ( power > 100 ) {

@@ -47,6 +47,8 @@ public class GameSession {
     private static final String DISPLAYNAME_SHUTTER = "シャッター";
     private static final String DISPLAYNAME_LEATHER = "行動を開始 30秒の間だけ行動できます。";
 
+    private static final int TELEPORT_WAIT_TICKS = 3;
+
     private GameSessionPhase phase;
     private FNAFIMConfig config;
 
@@ -271,7 +273,7 @@ public class GameSession {
         locationMap.put(bonnie, lmanager.getBonnie());
         locationMap.put(foxy, lmanager.getFoxy());
 
-        new DelayedTeleportTask(locationMap, 3).startTask();
+        new DelayedTeleportTask(locationMap, TELEPORT_WAIT_TICKS).startTask();
 
         // サイドバーを用意する
         scoreboardDisplay = new ScoreboardDisplay("fnafim");
@@ -293,8 +295,13 @@ public class GameSession {
         scoreboardDisplay.setFreddysTeam(bonnie);
         scoreboardDisplay.setFreddysTeam(foxy);
 
-        // そのままゲームを開始する。
-        startGame();
+        // プレイヤー人数✕TELEPORT_WAIT＋α 分だけ待ってから、ゲームを開始する。
+        int delay = entrants.size() * TELEPORT_WAIT_TICKS + 10;
+        new BukkitRunnable() {
+            public void run() {
+                startGame();
+            }
+        }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), delay);
     }
 
     /**
@@ -384,7 +391,7 @@ public class GameSession {
         for ( Player player : spectators ) {
             locationMap.put(player, lmanager.getLobby());
         }
-        new DelayedTeleportTask(locationMap, 3).startTask();
+        new DelayedTeleportTask(locationMap, TELEPORT_WAIT_TICKS).startTask();
 
         // セッションを消去する
         FiveNightsAtFreddysInMinecraft.getInstance().removeGameSession();
@@ -721,6 +728,11 @@ public class GameSession {
 
         // タッチされた人がプレイヤーでなければ無視
         if ( !players.contains(target) ) {
+            return;
+        }
+
+        // タッチされた人が透明化していたら無視
+        if ( effectManager.hasEffect(target, InvisibleEffect.TYPE) ) {
             return;
         }
 
