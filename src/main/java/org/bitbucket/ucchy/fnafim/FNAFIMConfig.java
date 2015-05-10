@@ -7,6 +7,7 @@ package org.bitbucket.ucchy.fnafim;
 
 import java.io.File;
 
+import org.bitbucket.ucchy.fnafim.game.Night;
 import org.bukkit.configuration.file.FileConfiguration;
 
 /**
@@ -27,17 +28,44 @@ public class FNAFIMConfig {
     /** Foxyが一晩あたりに行動できる回数 */
     private int foxyMovementPerNight;
 
-    /** カスタムナイトのFreddyの移動速度 */
-    private int customNightMoveSpeed_freddy;
+    /** Foxyが一回の行動で移動可能な時間（秒） */
+    private int foxyMovementSeconds;
 
-    /** カスタムナイトのChicaの移動速度 */
-    private int customNightMoveSpeed_chica;
+    /** 1秒あたりのバッテリー基本消費量 */
+    private double batteryDecreasePerSecond;
 
-    /** カスタムナイトのBonnyの移動速度 */
-    private int customNightMoveSpeed_bonnie;
+    /** 懐中電灯を使用しているときの1秒あたりのバッテリー消費量 */
+    private double batteryFlashLightPerSecond;
 
-    /** カスタムナイトのFoxyの移動速度 */
-    private int customNightMoveSpeed_foxy;
+    /** レーダーを使用したときの1回あたりのバッテリー消費量 */
+    private double batteryRaderPerUse;
+
+    /** シャッターを使用しているときの1秒あたりのバッテリー消費量 */
+    private double batteryShutterPerSecond;
+
+    /** レーダーの索敵範囲（マス） */
+    private int raderSearchingRange;
+
+    /** Night1の移動速度 */
+    private FNAFIMConfigMoveSetting night1MoveSpeed;
+
+    /** Night2の移動速度 */
+    private FNAFIMConfigMoveSetting night2MoveSpeed;
+
+    /** Night3の移動速度 */
+    private FNAFIMConfigMoveSetting night3MoveSpeed;
+
+    /** Night4の移動速度 */
+    private FNAFIMConfigMoveSetting night4MoveSpeed;
+
+    /** Night5の移動速度 */
+    private FNAFIMConfigMoveSetting night5MoveSpeed;
+
+    /** Night6の移動速度 */
+    private FNAFIMConfigMoveSetting night6MoveSpeed;
+
+    /** CustomNightの移動速度 */
+    private FNAFIMConfigMoveSetting customNightMoveSpeed;
 
     /**
      * コンストラクタ
@@ -67,10 +95,27 @@ public class FNAFIMConfig {
         maxPlayers = config.getInt("maxPlayers", 64);
         secondsOfOneHour = config.getInt("secondsOfOneHour", 90);
         foxyMovementPerNight = config.getInt("foxyMovementPerNight", 3);
-        customNightMoveSpeed_freddy = config.getInt("customNightMoveSpeed.freddy", 4);
-        customNightMoveSpeed_chica = config.getInt("customNightMoveSpeed.chica", 4);
-        customNightMoveSpeed_bonnie = config.getInt("customNightMoveSpeed.bonnie", 4);
-        customNightMoveSpeed_foxy = config.getInt("customNightMoveSpeed.foxy", 3);
+        foxyMovementSeconds = config.getInt("foxyMovementSeconds", 15);
+        batteryDecreasePerSecond = config.getDouble("batteryDecreasePerSecond", 0.14);
+        batteryFlashLightPerSecond = config.getDouble("batteryFlashLightPerSecond", 0.2);
+        batteryRaderPerUse = config.getDouble("batteryRaderPerUse", 1.0);
+        batteryShutterPerSecond = config.getDouble("batteryShutterPerSecond", 0.67);
+        raderSearchingRange = config.getInt("raderSearchingRange", 15);
+
+        night1MoveSpeed = FNAFIMConfigMoveSetting.load(
+                config, "night1MoveSpeed", -99, -3, -3, 3);
+        night2MoveSpeed = FNAFIMConfigMoveSetting.load(
+                config, "night2MoveSpeed", -99, -2, -2, 3);
+        night3MoveSpeed = FNAFIMConfigMoveSetting.load(
+                config, "night3MoveSpeed", -1, -1, -1, 3);
+        night4MoveSpeed = FNAFIMConfigMoveSetting.load(
+                config, "night4MoveSpeed", 0, 0, 0, 3);
+        night5MoveSpeed = FNAFIMConfigMoveSetting.load(
+                config, "night5MoveSpeed", 1, 1, 1, 3);
+        night6MoveSpeed = FNAFIMConfigMoveSetting.load(
+                config, "night6MoveSpeed", 2, 2, 2, 4);
+        customNightMoveSpeed = FNAFIMConfigMoveSetting.load(
+                config, "customNightMoveSpeed", 4, 4, 4, 5);
     }
 
     /**
@@ -102,31 +147,114 @@ public class FNAFIMConfig {
     }
 
     /**
-     * @return customNightMoveSpeed_freddy
+     * @return foxyMovementSeconds
      */
-    public int getCustomNightMoveSpeed_freddy() {
-        return customNightMoveSpeed_freddy;
+    public int getFoxyMovementSeconds() {
+        return foxyMovementSeconds;
     }
 
     /**
-     * @return customNightMoveSpeed_chica
+     * @return batteryDecreasePerSecond
      */
-    public int getCustomNightMoveSpeed_chica() {
-        return customNightMoveSpeed_chica;
+    public double getBatteryDecreasePerSecond() {
+        return batteryDecreasePerSecond;
     }
 
     /**
-     * @return customNightMoveSpeed_bonny
+     * @return batteryFlashLightPerSecond
      */
-    public int getCustomNightMoveSpeed_bonnie() {
-        return customNightMoveSpeed_bonnie;
+    public double getBatteryFlashLightPerSecond() {
+        return batteryFlashLightPerSecond;
     }
 
     /**
-     * @return customNightMoveSpeed_foxy
+     * @return batteryRaderPerUse
      */
-    public int getCustomNightMoveSpeed_foxy() {
-        return customNightMoveSpeed_foxy;
+    public double getBatteryRaderPerUse() {
+        return batteryRaderPerUse;
     }
 
+    /**
+     * @return batteryShutterPerSecond
+     */
+    public double getBatteryShutterPerSecond() {
+        return batteryShutterPerSecond;
+    }
+
+    /**
+     * @return raderSearchingRange
+     */
+    public int getRaderSearchingRange() {
+        return raderSearchingRange;
+    }
+
+    /**
+     * @return night1MoveSpeed
+     */
+    public FNAFIMConfigMoveSetting getNight1MoveSpeed() {
+        return night1MoveSpeed;
+    }
+
+    /**
+     * @return night2MoveSpeed
+     */
+    public FNAFIMConfigMoveSetting getNight2MoveSpeed() {
+        return night2MoveSpeed;
+    }
+
+    /**
+     * @return night3MoveSpeed
+     */
+    public FNAFIMConfigMoveSetting getNight3MoveSpeed() {
+        return night3MoveSpeed;
+    }
+
+    /**
+     * @return night4MoveSpeed
+     */
+    public FNAFIMConfigMoveSetting getNight4MoveSpeed() {
+        return night4MoveSpeed;
+    }
+
+    /**
+     * @return night5MoveSpeed
+     */
+    public FNAFIMConfigMoveSetting getNight5MoveSpeed() {
+        return night5MoveSpeed;
+    }
+
+    /**
+     * @return night6MoveSpeed
+     */
+    public FNAFIMConfigMoveSetting getNight6MoveSpeed() {
+        return night6MoveSpeed;
+    }
+
+    /**
+     * @return customNightMoveSpeed
+     */
+    public FNAFIMConfigMoveSetting getCustomNightMoveSpeed() {
+        return customNightMoveSpeed;
+    }
+
+    public FNAFIMConfigMoveSetting getMoveSpeed(Night night) {
+        switch (night) {
+        case NIGHT1:
+            return night1MoveSpeed;
+        case NIGHT2:
+            return night2MoveSpeed;
+        case NIGHT3:
+            return night3MoveSpeed;
+        case NIGHT4:
+            return night4MoveSpeed;
+        case NIGHT5:
+            return night5MoveSpeed;
+        case NIGHT6:
+            return night6MoveSpeed;
+        case NIGHT7:
+            return customNightMoveSpeed;
+        default:
+            return night1MoveSpeed;
+        }
+    }
 }

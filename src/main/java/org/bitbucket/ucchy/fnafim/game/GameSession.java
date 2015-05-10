@@ -74,7 +74,6 @@ public class GameSession {
     private ItemStack radar;
     private ItemStack shutterOn;
     private ItemStack shutterOff;
-    private ItemStack leather;
 
     private FoxyMovementTask foxyMovementTask;
     private ArrayList<FreddyItemWaitTask> freddyItemWaitTask;
@@ -198,42 +197,17 @@ public class GameSession {
         }
 
         // Freddyのエフェクトの設定
-        int nightnum = night.getNum();
-        if ( nightnum <= 2 ) {
-            // night2までは動けない
-            effectManager.applyEffect(freddy, new BindEffect(freddy));
-        } else if ( nightnum <= 5 ) {
-            // night3 - 5 は移動速度エフェクト
-            effectManager.applyEffect(freddy, new SpeedEffect(freddy, (nightnum - 4)));
-        } else if ( nightnum == 6 ) {
-            // night6 は移動速度エフェクトlv1
-            effectManager.applyEffect(freddy, new SpeedEffect(freddy, 1));
-        } else if ( nightnum == 7 ) {
-            // night7 はカスタム
-            effectManager.applyEffect(freddy, new SpeedEffect(
-                    freddy, config.getCustomNightMoveSpeed_freddy()));
-        }
+        applyMoveSpeedSetting(freddy, config.getMoveSpeed(night).getFreddy());
         effectManager.applyEffect(freddy, new ChangeDisplayNameEffect(freddy,
                 ChatColor.GOLD + freddy.getName() + ChatColor.RED + "(Freddy)" + ChatColor.RESET));
 
-        // ChicaとBonnieのエフェクト設定
-        if ( nightnum <= 5 ) {
-            // night1 - 5 は移動速度エフェクト
-            effectManager.applyEffect(chica, new SpeedEffect(chica, (nightnum - 4)));
-            effectManager.applyEffect(bonnie, new SpeedEffect(bonnie, (nightnum - 4)));
-        } else if ( nightnum <= 6 ) {
-            // night6 は移動速度エフェクトlv1
-            effectManager.applyEffect(chica, new SpeedEffect(chica, 1));
-            effectManager.applyEffect(bonnie, new SpeedEffect(bonnie, 1));
-        } else if ( nightnum == 7 ) {
-            // night7 はカスタム
-            effectManager.applyEffect(chica, new SpeedEffect(
-                    chica, config.getCustomNightMoveSpeed_chica()));
-            effectManager.applyEffect(bonnie, new SpeedEffect(
-                    bonnie, config.getCustomNightMoveSpeed_bonnie()));
-        }
+        // Chicaのエフェクト設定
+        applyMoveSpeedSetting(chica, config.getMoveSpeed(night).getChica());
         effectManager.applyEffect(chica, new ChangeDisplayNameEffect(chica,
                 ChatColor.GOLD + chica.getName() + ChatColor.RED + "(Chica)" + ChatColor.RESET));
+
+        // Bonnieのエフェクト設定
+        applyMoveSpeedSetting(bonnie, config.getMoveSpeed(night).getBonnie());
         effectManager.applyEffect(bonnie, new ChangeDisplayNameEffect(bonnie,
                 ChatColor.GOLD + bonnie.getName() + ChatColor.RED + "(Bonnie)" + ChatColor.RESET));
 
@@ -395,7 +369,7 @@ public class GameSession {
      * @param player 捕まったプレイヤー
      * @param caught 捕まえたプレイヤー
      */
-    protected void onCaughtPlayer(Player player, Player caught) {
+    protected void onCaughtPlayer(final Player player, Player caught) {
 
         if ( caught != null ) {
             Doll doll = getDollRole(caught);
@@ -408,10 +382,17 @@ public class GameSession {
                     "%player", player.getName()));
         }
 
-        // SEを再生
-        SoundComponent.getComponentFromString(
-                "GHAST_SCREAM-1.0-0.5,FIREWORK_LARGE_BLAST-1.0-0.5").playSoundToPlayer(player);
-        player.getWorld().playEffect(player.getLocation(), Effect.STEP_SOUND, 8);
+        // SEを再生（プレイヤーは捕まると観客のリスポーン地点に飛ばされるので、
+        // 飛んだ先でSEが流れるように、2ticks遅らせて再生する）
+        player.getWorld().playEffect(player.getLocation(), Effect.STEP_SOUND, 10);
+        new BukkitRunnable() {
+            public void run() {
+                SoundComponent.getComponentFromString(
+                        "GHAST_SCREAM-1.0-0.5,FIREWORK_LARGE_BLAST-1.0-0.5")
+                        .playSoundToPlayer(player);
+                player.getWorld().playEffect(player.getLocation(), Effect.STEP_SOUND, 10);
+            }
+        }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 2);
 
         // エフェクトをクリア
         effectManager.removeAllEffect(player);
@@ -580,13 +561,14 @@ public class GameSession {
                 batteries.get(player).decreaseToUseRadar();
             }
             boolean found = false;
-            for ( Entity entity : player.getNearbyEntities(10, 10, 10) ) {
+            int range = config.getRaderSearchingRange();
+            for ( Entity entity : player.getNearbyEntities(range, range, range) ) {
                 if ( entity instanceof Player ) {
                     Player target = (Player)entity;
                     Doll doll = getDollRole(target);
                     if ( doll != null ) {
                         double distance = player.getLocation().distance(target.getLocation());
-                        if ( distance <= 10 ) {
+                        if ( distance <= range ) {
                             String msg = Messages.get("Info_ItemRader",
                                     new String[]{"%target", "%doll", "%distance"},
                                     new String[]{target.getName(), doll.toString(),
@@ -643,9 +625,10 @@ public class GameSession {
             }
 
             // 行動不可を解いて、30秒間の行動時間を与える
-            int seconds = 30;
+            int seconds = config.getFoxyMovementSeconds();
+            int speed = config.getMoveSpeed(night).getFoxy();
             effectManager.removeEffect(player, BindEffect.TYPE);
-            effectManager.applyEffect(player, new SpeedEffect(player, 3));
+            effectManager.applyEffect(player, new SpeedEffect(player, speed));
             sendInfoToPlayer(player, Messages.get("Info_FoxyMovementStart", "%seconds", seconds));
             foxyMovementTask = new FoxyMovementTask(this, seconds);
             foxyMovementTask.start();
@@ -788,6 +771,10 @@ public class GameSession {
         }
     }
 
+    /**
+     * 観客としてゲーム参加する
+     * @param player
+     */
     public void joinSpectator(Player player) {
 
         if ( !spectators.contains(player) ) {
@@ -813,6 +800,10 @@ public class GameSession {
         sendInfoToPlayer(player, Messages.get("Info_JoinSpectator"));
     }
 
+    /**
+     * ゲームの観客から退出する
+     * @param player
+     */
     public void leaveSpectator(Player player) {
 
         if ( spectators.contains(player) ) {
@@ -1003,7 +994,12 @@ public class GameSession {
         } else if ( amount > 5 ) {
             amount = 5;
         }
-        ItemStack leather = this.leather.clone();
+
+        ItemStack leather = new ItemStack(Material.LEATHER);
+        ItemMeta meta = leather.getItemMeta();
+        int seconds = config.getFoxyMovementSeconds();
+        meta.setDisplayName(Messages.get("ItemName_FoxyMovement", "%seconds", seconds));
+        leather.setItemMeta(meta);
         leather.setAmount(amount);
         player.getInventory().addItem(leather);
     }
@@ -1107,11 +1103,6 @@ public class GameSession {
         meta = shutterOn.getItemMeta();
         meta.setDisplayName(Messages.get("ItemName_Shutter"));
         shutterOn.setItemMeta(meta);
-
-        leather = new ItemStack(Material.LEATHER);
-        meta = leather.getItemMeta();
-        meta.setDisplayName(Messages.get("ItemName_FoxyMovement"));
-        leather.setItemMeta(meta);
     }
 
     /**
@@ -1141,5 +1132,13 @@ public class GameSession {
         player.getInventory().setChestplate(new ItemStack(Material.AIR));
         player.getInventory().setLeggings(new ItemStack(Material.AIR));
         player.getInventory().setBoots(new ItemStack(Material.AIR));
+    }
+
+    private void applyMoveSpeedSetting(Player player, int setting) {
+        if ( setting == -99 ) {
+            effectManager.applyEffect(player, new BindEffect(player));
+        } else {
+            effectManager.applyEffect(player, new SpeedEffect(player, setting));
+        }
     }
 }

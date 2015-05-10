@@ -5,6 +5,8 @@
  */
 package org.bitbucket.ucchy.fnafim.game;
 
+import org.bitbucket.ucchy.fnafim.FNAFIMConfig;
+import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bukkit.entity.Player;
 
 
@@ -21,6 +23,11 @@ public class PlayerBattery {
     private boolean isUsingShutter;
     private boolean isDown;
 
+    private double batteryDecreasePerSecond;
+    private double batteryFlashLightPerSecond;
+    private double batteryRaderPerUse;
+    private double batteryShutterPerSecond;
+
     /**
      * コンストラクタ
      * @param player
@@ -35,6 +42,12 @@ public class PlayerBattery {
 
         player.setLevel(100);
         player.setExp(1.0f);
+
+        FNAFIMConfig config = FiveNightsAtFreddysInMinecraft.getInstance().getFNAFIMConfig();
+        batteryDecreasePerSecond = config.getBatteryDecreasePerSecond();
+        batteryFlashLightPerSecond = config.getBatteryFlashLightPerSecond();
+        batteryRaderPerUse = config.getBatteryRaderPerUse();
+        batteryShutterPerSecond = config.getBatteryShutterPerSecond();
     }
 
     /**
@@ -43,16 +56,16 @@ public class PlayerBattery {
     protected void onSeconds() {
 
         // 基本使用量
-        power -= 0.14;
+        power -= batteryDecreasePerSecond;
 
         // 懐中電灯使用量
         if ( isUsingFlashlight ) {
-            power -= 0.2;
+            power -= batteryFlashLightPerSecond;
         }
 
         // シャッター使用量
         if ( isUsingShutter ) {
-            power -= 0.67;
+            power -= batteryShutterPerSecond;
         }
 
         if ( power > 100 ) {
@@ -79,7 +92,7 @@ public class PlayerBattery {
      * レーダーを使用した時に呼び出されるメソッド
      */
     protected void decreaseToUseRadar() {
-        power -= 1.0;
+        power -= batteryRaderPerUse;
         refreshExpBar();
     }
 
