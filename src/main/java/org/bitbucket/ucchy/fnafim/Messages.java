@@ -183,6 +183,11 @@ public class Messages {
         }
     }
 
+    /**
+     * UTF8エンコードのYamlファイルから、内容をロードする。
+     * @param file ファイル
+     * @return ロードされたYamlデータ
+     */
     private static YamlConfiguration loadUTF8YamlFile(File file) {
 
         YamlConfiguration config = new YamlConfiguration();
@@ -207,7 +212,11 @@ public class Messages {
                     }
                     buffer.append(temp[i]);
                 }
-                String value = buffer.toString().trim().replace("''", "’").replace("'", "").replace("’", "'");
+                String value = buffer.toString().trim();
+                if ( value.startsWith("'") && value.endsWith("'") ) {
+                    value = value.substring(1, value.length() - 1);
+                }
+                value = value.replace("''", "'");
                 config.set(key, value);
             }
         } catch (UnsupportedEncodingException e) {

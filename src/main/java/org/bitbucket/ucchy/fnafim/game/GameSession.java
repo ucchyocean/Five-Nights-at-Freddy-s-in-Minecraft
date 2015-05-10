@@ -998,20 +998,22 @@ public class GameSession {
         player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS));
 
         int amount = FiveNightsAtFreddysInMinecraft.getInstance()
-                .getFNAFIMConfig().getFoxyMovementPerNight();
-        if ( amount <= 0 ) {
-            amount = (int)(Math.random() * 5) + 1;
-        } else if ( amount > 5 ) {
-            amount = 5;
-        }
+                .getFNAFIMConfig().getMoveSpeed(night).getFoxyMovement();
+        if ( amount >= 0 ) {
+            if ( amount == 0 ) {
+                amount = (int)(Math.random() * 5) + 1;
+            } else if ( amount > 5 ) {
+                amount = 5;
+            }
 
-        ItemStack leather = new ItemStack(Material.LEATHER);
-        ItemMeta meta = leather.getItemMeta();
-        int seconds = config.getFoxyMovementSeconds();
-        meta.setDisplayName(Messages.get("ItemName_FoxyMovement", "%seconds", seconds));
-        leather.setItemMeta(meta);
-        leather.setAmount(amount);
-        player.getInventory().addItem(leather);
+            ItemStack leather = new ItemStack(Material.LEATHER);
+            ItemMeta meta = leather.getItemMeta();
+            int seconds = config.getFoxyMovementSeconds();
+            meta.setDisplayName(Messages.get("ItemName_FoxyMovement", "%seconds", seconds));
+            leather.setItemMeta(meta);
+            leather.setAmount(amount);
+            player.getInventory().addItem(leather);
+        }
     }
 
 

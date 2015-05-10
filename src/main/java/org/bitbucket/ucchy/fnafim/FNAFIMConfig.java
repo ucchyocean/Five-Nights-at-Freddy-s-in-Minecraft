@@ -28,9 +28,6 @@ public class FNAFIMConfig {
     /** Night間のインターバル秒数 */
     private int secondsOfNightInterval;
 
-    /** Foxyが一晩あたりに行動できる回数 */
-    private int foxyMovementPerNight;
-
     /** Foxyが一回の行動で移動可能な時間（秒） */
     private int foxyMovementSeconds;
 
@@ -123,7 +120,6 @@ public class FNAFIMConfig {
         maxPlayers = config.getInt("maxPlayers", 64);
         secondsOfOneHour = config.getInt("secondsOfOneHour", 90);
         secondsOfNightInterval = config.getInt("secondsOfNightInterval", 15);
-        foxyMovementPerNight = config.getInt("foxyMovementPerNight", 3);
         foxyMovementSeconds = config.getInt("foxyMovementSeconds", 15);
         batteryDecreasePerSecond = config.getDouble("batteryDecreasePerSecond", 0.14);
         batteryFlashLightPerSecond = config.getDouble("batteryFlashLightPerSecond", 0.2);
@@ -132,19 +128,19 @@ public class FNAFIMConfig {
         raderSearchingRange = config.getInt("raderSearchingRange", 15);
 
         night1MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night1MoveSpeed", -99, -3, -3, 3);
+                config, "night1MoveSpeed", -99, -3, -3, -99, -1);
         night2MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night2MoveSpeed", -99, -2, -2, 3);
+                config, "night2MoveSpeed", -99, -2, -2, -99, -1);
         night3MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night3MoveSpeed", -1, -1, -1, 3);
+                config, "night3MoveSpeed", -1, -1, -1, -99, -1);
         night4MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night4MoveSpeed", 0, 0, 0, 3);
+                config, "night4MoveSpeed", 0, 0, 0, 3, 3);
         night5MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night5MoveSpeed", 1, 1, 1, 3);
+                config, "night5MoveSpeed", 1, 1, 1, 3, 3);
         night6MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night6MoveSpeed", 2, 2, 2, 4);
+                config, "night6MoveSpeed", 2, 2, 2, 4, 4);
         customNightMoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "customNightMoveSpeed", 4, 4, 4, 5);
+                config, "customNightMoveSpeed", 4, 4, 4, 5, 5);
 
         soundUseFlashLight = SoundComponent.getComponentFromString(
                 config.getString("soundUseFlashLight"));
@@ -190,13 +186,6 @@ public class FNAFIMConfig {
      */
     public int getSecondsOfNightInterval() {
         return secondsOfNightInterval;
-    }
-
-    /**
-     * @return foxyMovementPerNight
-     */
-    public int getFoxyMovementPerNight() {
-        return foxyMovementPerNight;
     }
 
     /**

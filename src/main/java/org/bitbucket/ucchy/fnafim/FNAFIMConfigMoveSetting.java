@@ -17,18 +17,22 @@ public class FNAFIMConfigMoveSetting {
     private int chica;
     private int bonnie;
     private int foxy;
+    private int foxyMovement;
 
     private FNAFIMConfigMoveSetting() {
     }
 
-    public static FNAFIMConfigMoveSetting load(ConfigurationSection config, String sectionName,
-            int freddyDefault, int chicaDefault, int bonnieDefault, int foxyDefault) {
+    public static FNAFIMConfigMoveSetting load(
+            ConfigurationSection config, String sectionName,
+            int freddyDefault, int chicaDefault, int bonnieDefault, int foxyDefault,
+            int foxyMovementDefault) {
 
         FNAFIMConfigMoveSetting setting = new FNAFIMConfigMoveSetting();
         setting.freddy = config.getInt(sectionName + ".freddy", freddyDefault);
         setting.chica = config.getInt(sectionName + ".chica", chicaDefault);
         setting.bonnie = config.getInt(sectionName + ".bonnie", bonnieDefault);
         setting.foxy = config.getInt(sectionName + ".foxy", foxyDefault);
+        setting.foxyMovement = config.getInt(sectionName + ".foxyMovement", foxyMovementDefault);
         return setting;
     }
 
@@ -58,5 +62,12 @@ public class FNAFIMConfigMoveSetting {
      */
     public int getFoxy() {
         return foxy;
+    }
+
+    /**
+     * @return foxyMovement
+     */
+    public int getFoxyMovement() {
+        return foxyMovement;
     }
 }

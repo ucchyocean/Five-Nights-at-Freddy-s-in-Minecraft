@@ -17,10 +17,6 @@ secondsOfOneHour: 90
 # Nightが終わって、次のNightが始まるまでの、インターバル。秒数で指定します。
 secondsOfNightInterval: 15
 
-# Foxyが、一晩で行動できる回数。0か、1から5が設定できます。
-# 0を設定すると、1から5がランダムで選択されます。
-foxyMovementPerNight: 3
-
 # Foxyが、一回の行動で移動可能な時間（秒）を指定します。
 foxyMovementSeconds: 15
 
@@ -42,25 +38,30 @@ raderSearchingRange: 15
 # Night1 の各キャラの移動速度。
 # 各キャラの移動速度レベルを、-99(移動不可)か、-5から5で設定します。
 # Foxyは普段は移動不可で、行動時間の時のみ、ここに設定した移動速度で移動できます。
+# foxyMovementは、Foxyが一晩で行動できる回数です。-1か、0か、1から5が設定できます。
+# -1を設定すると、そのNightは行動できません。0を設定すると、1から5がランダムで選択されます。
 night1MoveSpeed:
   freddy: -99
   chica: -3
   bonnie: -3
-  foxy: 3
+  foxy: -99
+  foxyMovement: -1
 
 # Night2 の各キャラの移動速度。
 night2MoveSpeed:
   freddy: -99
   chica: -2
   bonnie: -2
-  foxy: 3
+  foxy: -99
+  foxyMovement: -1
 
 # Night3 の各キャラの移動速度。
 night3MoveSpeed:
   freddy: -1
   chica: -1
   bonnie: -1
-  foxy: 3
+  foxy: -99
+  foxyMovement: -1
 
 # Night4 の各キャラの移動速度。
 night4MoveSpeed:
@@ -68,6 +69,7 @@ night4MoveSpeed:
   chica: 0
   bonnie: 0
   foxy: 3
+  foxyMovement: 3
 
 # Night5 の各キャラの移動速度。
 night5MoveSpeed:
@@ -75,6 +77,7 @@ night5MoveSpeed:
   chica: 1
   bonnie: 1
   foxy: 3
+  foxyMovement: 3
 
 # Night6 の各キャラの移動速度。
 night6MoveSpeed:
@@ -82,7 +85,7 @@ night6MoveSpeed:
   chica: 2
   bonnie: 2
   foxy: 4
-
+  foxyMovement: 4
 
 # カスタムナイト(Night7)の各キャラの移動速度。
 customNightMoveSpeed:
@@ -90,7 +93,7 @@ customNightMoveSpeed:
   chica: 4
   bonnie: 4
   foxy: 5
-
+  foxyMovement: 5
 
 # =============== 効果音の設定 ===============
 
