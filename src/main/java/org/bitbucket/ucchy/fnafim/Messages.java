@@ -200,7 +200,14 @@ public class Messages {
                     continue;
                 }
                 String key = temp[0].trim();
-                String value = temp[1].trim().replace("''", "’").replace("'", "").replace("’", "'");
+                StringBuffer buffer = new StringBuffer();
+                for ( int i=1; i<temp.length; i++ ) {
+                    if ( buffer.length() > 0 ) {
+                        buffer.append(":");
+                    }
+                    buffer.append(temp[i]);
+                }
+                String value = buffer.toString().trim().replace("''", "’").replace("'", "").replace("’", "'");
                 config.set(key, value);
             }
         } catch (UnsupportedEncodingException e) {

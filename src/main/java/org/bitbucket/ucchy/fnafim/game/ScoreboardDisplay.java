@@ -116,8 +116,10 @@ public class ScoreboardDisplay {
         Team team = scoreboard.getTeam(name);
         if ( team == null ) {
             team = scoreboard.registerNewTeam(name);
-            team.setPrefix(color);
-            team.setSuffix(ChatColor.RESET.toString());
+            if ( color != null ) {
+                team.setPrefix(color);
+                team.setSuffix(ChatColor.RESET.toString());
+            }
         }
         return team;
     }
@@ -164,7 +166,7 @@ public class ScoreboardDisplay {
      * @param player
      */
     public void setFreddysTeam(Player player) {
-        getTeam("Freddys", ChatColor.RED.toString()).addPlayer(player);
+//        getTeam("Freddys", ChatColor.RED.toString()).addPlayer(player);
     }
 
     /**
@@ -172,7 +174,7 @@ public class ScoreboardDisplay {
      * @param player
      */
     public void setPlayersTeam(Player player) {
-        getTeam("Players", ChatColor.BLUE.toString()).addPlayer(player);
+//        getTeam("Players", ChatColor.BLUE.toString()).addPlayer(player);
     }
 
     /**
@@ -180,7 +182,7 @@ public class ScoreboardDisplay {
      * @param player
      */
     public void leavePlayersTeam(Player player) {
-        getTeam("Players", ChatColor.BLUE.toString()).removePlayer(player);
+//        getTeam("Players", ChatColor.BLUE.toString()).removePlayer(player);
     }
 
     /**
