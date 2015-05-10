@@ -10,9 +10,7 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bukkit.ChatColor;
-import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * ゲームセッションロガー
@@ -46,19 +44,22 @@ public class GameSessionLogger {
      */
     public synchronized void log(final String message) {
 
-        // 以降の処理を、発言処理の負荷軽減のため、非同期実行にする。
-        FiveNightsAtFreddysInMinecraft plugin =
-                FiveNightsAtFreddysInMinecraft.getInstance();
-        if ( plugin.isEnabled() ) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    writeLogInternal(message);
-                }
-            }.runTaskAsynchronously(plugin);
-        } else {
-            writeLogInternal(message);
-        }
+//        // 以降の処理を、発言処理の負荷軽減のため、非同期実行にする。
+//        FiveNightsAtFreddysInMinecraft plugin =
+//                FiveNightsAtFreddysInMinecraft.getInstance();
+//        if ( plugin.isEnabled() ) {
+//            new BukkitRunnable() {
+//                @Override
+//                public void run() {
+//                    writeLogInternal(message);
+//                }
+//            }.runTaskAsynchronously(plugin);
+//        } else {
+//            writeLogInternal(message);
+//        }
+
+        // 順序が狂うので、普通に同期処理でログを書く。
+        writeLogInternal(message);
     }
 
     private void writeLogInternal(String message) {

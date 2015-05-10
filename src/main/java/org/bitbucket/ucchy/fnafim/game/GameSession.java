@@ -320,18 +320,24 @@ public class GameSession {
         for ( Player player : entrants ) {
             effectManager.removeAllEffect(player);
         }
+        for ( Player player : spectators ) {
+            effectManager.removeAllEffect(player);
+        }
 
         // タスクをクリア
         if ( foxyMovementTask != null && !foxyMovementTask.isEnded() ) {
             foxyMovementTask.end();
+            foxyMovementTask = null;
         }
         for ( FreddyItemWaitTask task : freddyItemWaitTask ) {
             if ( !task.isEnded() ) {
                 task.end();
             }
         }
+        freddyItemWaitTask.clear();
         if ( freddyTeleportWaitTask != null && !freddyTeleportWaitTask.isEnded() ) {
             freddyTeleportWaitTask.end();
+            freddyTeleportWaitTask = null;
         }
 
         // プレイヤーに持ち物を返す
@@ -366,7 +372,7 @@ public class GameSession {
 
         if ( caught != null ) {
             Doll doll = getDollRole(caught);
-            sendInGameAnnounce(Messages.get("Announce_PlayerRunMidway",
+            sendInGameAnnounce(Messages.get("Announce_PlayerCaught",
                     new String[]{"%player", "%caught", "%doll"},
                     new String[]{player.getName(), caught.getName(), doll.toString()}
             ));
@@ -472,8 +478,33 @@ public class GameSession {
         // Night1-4は、次の夜の準備。その他は終了.
         final Night next = night.getNext();
         if ( next != null ) {
+
+            // タスクをクリア
+            if ( foxyMovementTask != null && !foxyMovementTask.isEnded() ) {
+                foxyMovementTask.end();
+                foxyMovementTask = null;
+            }
+            for ( FreddyItemWaitTask task : freddyItemWaitTask ) {
+                if ( !task.isEnded() ) {
+                    task.end();
+                }
+            }
+            freddyItemWaitTask.clear();
+            if ( freddyTeleportWaitTask != null && !freddyTeleportWaitTask.isEnded() ) {
+                freddyTeleportWaitTask.end();
+                freddyTeleportWaitTask = null;
+            }
+
+            // エフェクトをクリア
+            for ( Player player : entrants ) {
+                effectManager.removeAllEffect(player);
+            }
+            for ( Player player : spectators ) {
+                effectManager.removeAllEffect(player);
+            }
+
             // 15秒後に、startPreparingを呼び出す
-            int wait = 15;
+            int wait = config.getSecondsOfNightInterval();
             new BukkitRunnable() {
                 public void run() {
                     startPreparing(next);
@@ -587,7 +618,8 @@ public class GameSession {
         }
 
         // Foxyのアイテム処理
-        if ( name.equals(Messages.get("ItemName_FoxyMovement")) ) {
+        if ( name.equals(Messages.get(
+                "ItemName_FoxyMovement", "%seconds", config.getFoxyMovementSeconds())) ) {
 
             // 行動不可の状態になっていないなら、アイテムを使う必要は無い
             if ( foxyMovementTask != null && !foxyMovementTask.isEnded() ) {
@@ -999,7 +1031,7 @@ public class GameSession {
      */
     private void sendInfoToPlayer(Player player, String message) {
         message = Messages.get("Prefix_Info") + message;
-        sendInfoToPlayer(player, message);
+        player.sendMessage(message);
     }
 
     /**
@@ -1009,10 +1041,10 @@ public class GameSession {
     private void sendInGameAnnounce(String message) {
         message = Messages.get("Prefix_InGame") + message;
         for ( Player player : entrants ) {
-            sendInfoToPlayer(player, message);
+            player.sendMessage(message);
         }
         for ( Player player : spectators ) {
-            sendInfoToPlayer(player, message);
+            player.sendMessage(message);
         }
         logger.log(message);
     }

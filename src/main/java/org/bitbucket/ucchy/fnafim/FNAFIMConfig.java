@@ -25,6 +25,9 @@ public class FNAFIMConfig {
     /** 1時間あたりの実秒数 */
     private int secondsOfOneHour;
 
+    /** Night間のインターバル秒数 */
+    private int secondsOfNightInterval;
+
     /** Foxyが一晩あたりに行動できる回数 */
     private int foxyMovementPerNight;
 
@@ -119,6 +122,7 @@ public class FNAFIMConfig {
         lang = config.getString("lang", "ja");
         maxPlayers = config.getInt("maxPlayers", 64);
         secondsOfOneHour = config.getInt("secondsOfOneHour", 90);
+        secondsOfNightInterval = config.getInt("secondsOfNightInterval", 15);
         foxyMovementPerNight = config.getInt("foxyMovementPerNight", 3);
         foxyMovementSeconds = config.getInt("foxyMovementSeconds", 15);
         batteryDecreasePerSecond = config.getDouble("batteryDecreasePerSecond", 0.14);
@@ -179,6 +183,13 @@ public class FNAFIMConfig {
      */
     public int getSecondsOfOneHour() {
         return secondsOfOneHour;
+    }
+
+    /**
+     * @return secondsOfNightInterval
+     */
+    public int getSecondsOfNightInterval() {
+        return secondsOfNightInterval;
     }
 
     /**

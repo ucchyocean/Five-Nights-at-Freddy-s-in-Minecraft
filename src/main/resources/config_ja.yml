@@ -14,6 +14,9 @@ maxPlayers: 64
 # 例えば90にすると、1時間進むのに90秒かかり、1つのNightに9分（540秒）かかります。
 secondsOfOneHour: 90
 
+# Nightが終わって、次のNightが始まるまでの、インターバル。秒数で指定します。
+secondsOfNightInterval: 15
+
 # Foxyが、一晩で行動できる回数。0か、1から5が設定できます。
 # 0を設定すると、1から5がランダムで選択されます。
 foxyMovementPerNight: 3
