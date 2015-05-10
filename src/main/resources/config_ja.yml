@@ -87,3 +87,33 @@ customNightMoveSpeed:
   chica: 4
   bonnie: 4
   foxy: 5
+
+
+# =============== 効果音の設定 ===============
+
+# 懐中電灯のオンオフ
+soundUseFlashLight: 'CLICK'
+
+# レーダーの使用
+soundUseRader: 'IRONGOLEM_HIT-1.0-0.7'
+
+# シャッターの使用
+soundUseShutter: 'WITHER_SHOOT-1.0-1.0'
+
+# Foxyの行動開始
+soundFoxyMovement: 'ZOMBIE_REMEDY-1.0-1.0'
+
+# Freddyの電力切れプレイヤーへのテレポート
+# この効果音はテレポート先の近隣プレイヤーに流れます。
+# リソースパックで、Freddyのオルゴール音に変えるといいかも。
+soundFreddyTeleport: 'ENDERMAN_TELEPORT-1.0-0.8,BLAZE_BREATH-1.0-0.5,ENDERMAN_DEATH'
+
+# Night開始
+soundNightStart: 'LEVEL_UP-0.8-0.5,ZOMBIE_UNFECT-1.0-0.8,BLAZE_BREATH-1.0-0.5'
+
+# Night終了
+# リソースパックで、拍手＋イエエエェェェーーイ！ 音に変えるといいかも。
+soundNightEnd: 'ENDERDRAGON_DEATH-0.4-2.0'
+
+# プレイヤーが捕まったときの効果音
+soundPlayerCaught: 'GHAST_SCREAM-1.0-0.5,FIREWORK_LARGE_BLAST-1.0-0.5'

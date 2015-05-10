@@ -67,6 +67,31 @@ public class FNAFIMConfig {
     /** CustomNightの移動速度 */
     private FNAFIMConfigMoveSetting customNightMoveSpeed;
 
+    /** 効果音 - 懐中電灯のオンオフ */
+    private SoundComponent soundUseFlashLight;
+
+    /** 効果音 - レーダーの使用 */
+    private SoundComponent soundUseRader;
+
+    /** 効果音 - シャッターの使用 */
+    private SoundComponent soundUseShutter;
+
+    /** 効果音 - Foxyの行動開始 */
+    private SoundComponent soundFoxyMovement;
+
+    /** 効果音 - Freddyの電力切れプレイヤーへのテレポート */
+    private SoundComponent soundFreddyTeleport;
+
+    /** 効果音 - Night開始 */
+    private SoundComponent soundNightStart;
+
+    /** 効果音 - Night終了 */
+    private SoundComponent soundNightEnd;
+
+    /** 効果音 - プレイヤーが捕まったときの効果音 */
+    private SoundComponent soundPlayerCaught;
+
+
     /**
      * コンストラクタ
      */
@@ -116,6 +141,23 @@ public class FNAFIMConfig {
                 config, "night6MoveSpeed", 2, 2, 2, 4);
         customNightMoveSpeed = FNAFIMConfigMoveSetting.load(
                 config, "customNightMoveSpeed", 4, 4, 4, 5);
+
+        soundUseFlashLight = SoundComponent.getComponentFromString(
+                config.getString("soundUseFlashLight"));
+        soundUseRader = SoundComponent.getComponentFromString(
+                config.getString("soundUseRader"));
+        soundUseShutter = SoundComponent.getComponentFromString(
+                config.getString("soundUseShutter"));
+        soundFoxyMovement = SoundComponent.getComponentFromString(
+                config.getString("soundFoxyMovement"));
+        soundFreddyTeleport = SoundComponent.getComponentFromString(
+                config.getString("soundFreddyTeleport"));
+        soundNightStart = SoundComponent.getComponentFromString(
+                config.getString("soundNightStart"));
+        soundNightEnd = SoundComponent.getComponentFromString(
+                config.getString("soundNightEnd"));
+        soundPlayerCaught = SoundComponent.getComponentFromString(
+                config.getString("soundPlayerCaught"));
     }
 
     /**
@@ -237,6 +279,11 @@ public class FNAFIMConfig {
         return customNightMoveSpeed;
     }
 
+    /**
+     *
+     * @param night
+     * @return
+     */
     public FNAFIMConfigMoveSetting getMoveSpeed(Night night) {
         switch (night) {
         case NIGHT1:
@@ -257,4 +304,61 @@ public class FNAFIMConfig {
             return night1MoveSpeed;
         }
     }
+
+    /**
+     * @return soundUseFlashLight
+     */
+    public SoundComponent getSoundUseFlashLight() {
+        return soundUseFlashLight;
+    }
+
+    /**
+     * @return soundUseRader
+     */
+    public SoundComponent getSoundUseRader() {
+        return soundUseRader;
+    }
+
+    /**
+     * @return soundUseShutter
+     */
+    public SoundComponent getSoundUseShutter() {
+        return soundUseShutter;
+    }
+
+    /**
+     * @return soundFoxyMovement
+     */
+    public SoundComponent getSoundFoxyMovement() {
+        return soundFoxyMovement;
+    }
+
+    /**
+     * @return soundFreddyTeleport
+     */
+    public SoundComponent getSoundFreddyTeleport() {
+        return soundFreddyTeleport;
+    }
+
+    /**
+     * @return soundNightStart
+     */
+    public SoundComponent getSoundNightStart() {
+        return soundNightStart;
+    }
+
+    /**
+     * @return soundNightEnd
+     */
+    public SoundComponent getSoundNightEnd() {
+        return soundNightEnd;
+    }
+
+    /**
+     * @return soundPlayerCaught
+     */
+    public SoundComponent getSoundPlayerCaught() {
+        return soundPlayerCaught;
+    }
+
 }

@@ -277,15 +277,8 @@ public class GameSession {
     private void startGame() {
 
         phase = GameSessionPhase.IN_GAME;
-        String msg = Messages.get("Announce_GameStart", "%night", night.toString());
-        for ( Player player : entrants ) {
-            TitleDisplayComponent.display(player, msg, 0, 30, 20);
-        }
-        for ( Player player : spectators ) {
-            TitleDisplayComponent.display(player, msg, 0, 30, 20);
-        }
-        sendInGameSound(SoundComponent.getComponentFromString(
-                "LEVEL_UP-0.8-0.5,ZOMBIE_UNFECT-1.0-0.8,BLAZE_BREATH-1.0-0.5"));
+        sendInGameTitle(Messages.get("Announce_GameStart", "%night", night.toString()));
+        sendInGameSound(config.getSoundNightStart());
 
         // タイマーの生成と開始
         FNAFIMConfig config = FiveNightsAtFreddysInMinecraft.getInstance().getFNAFIMConfig();
@@ -387,9 +380,7 @@ public class GameSession {
         player.getWorld().playEffect(player.getLocation(), Effect.STEP_SOUND, 10);
         new BukkitRunnable() {
             public void run() {
-                SoundComponent.getComponentFromString(
-                        "GHAST_SCREAM-1.0-0.5,FIREWORK_LARGE_BLAST-1.0-0.5")
-                        .playSoundToPlayer(player);
+                config.getSoundPlayerCaught().playSoundToPlayer(player);
                 player.getWorld().playEffect(player.getLocation(), Effect.STEP_SOUND, 10);
             }
         }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 2);
@@ -435,13 +426,7 @@ public class GameSession {
     protected void onGameover() {
 
         phase = GameSessionPhase.END;
-        String msg = Messages.get("Announce_GameOver1");
-        for ( Player player : entrants ) {
-            TitleDisplayComponent.display(player, msg, 0, 30, 20);
-        }
-        for ( Player player : spectators ) {
-            TitleDisplayComponent.display(player, msg, 0, 30, 20);
-        }
+        sendInGameTitle(Messages.get("Announce_GameOver1"));
         sendInGameAnnounce(Messages.get("Announce_GameOver2"));
         onEnd();
     }
@@ -472,17 +457,11 @@ public class GameSession {
     protected void onTimerZero() {
 
         phase = GameSessionPhase.END;
-        String msg = Messages.get("Announce_NightClear1");
-        for ( Player player : entrants ) {
-            TitleDisplayComponent.display(player, msg, 0, 30, 20);
-        }
-        for ( Player player : spectators ) {
-            TitleDisplayComponent.display(player, msg, 0, 30, 20);
-        }
+        sendInGameTitle(Messages.get("Announce_NightClear1"));
         sendInGameAnnounce(Messages.get("Announce_NightClear2", "%num", players.size()));
 
         // SEを流す
-        sendInGameSound(SoundComponent.getComponentFromString("ENDERDRAGON_DEATH-0.4-2.0"));
+        sendInGameSound(config.getSoundNightEnd());
 
         // 持ち物を消去する、エフェクトを消去する
         for ( Player player : entrants ) {
@@ -547,7 +526,7 @@ public class GameSession {
                 player.setItemInHand(flashlightOff.clone());
                 effectManager.applyEffect(player, new BlindnessEffect(player));
             }
-            SoundComponent.getComponentFromString("CLICK").playSoundToPlayer(player);
+            config.getSoundUseFlashLight().playSoundToPlayer(player);
             return false;
         }
 
@@ -582,7 +561,7 @@ public class GameSession {
             if ( !found ) {
                 sendInfoToPlayer(player, Messages.get("Info_ItemRaderNone"));
             }
-            SoundComponent.getComponentFromString("IRONGOLEM_HIT-1.0-0.7").playSoundToPlayer(player);
+            config.getSoundUseRader().playSoundToPlayer(player);
             return false;
         }
 
@@ -603,7 +582,7 @@ public class GameSession {
                 player.setItemInHand(shutterOff.clone());
                 effectManager.removeEffect(player, InvisibleEffect.TYPE);
             }
-            SoundComponent.getComponentFromString("WITHER_SHOOT-1.0-1.0").playSoundToPlayer(player);
+            config.getSoundUseShutter().playSoundToPlayer(player);
             return false;
         }
 
@@ -634,7 +613,7 @@ public class GameSession {
             foxyMovementTask.start();
 
             // SEを流す
-            SoundComponent.getComponentFromString("ZOMBIE_REMEDY-1.0-1.0").playSoundToPlayer(player);
+            config.getSoundFoxyMovement().playSoundToPlayer(player);
 
             return false;
         }
@@ -656,8 +635,7 @@ public class GameSession {
                     effectManager.applyEffect(freddy, new BindEffect(freddy));
 
                     // SEを流す
-                    SoundComponent.getComponentFromString("ENDERMAN_TELEPORT-1.0-0.8")
-                            .playSoundToWorld(target.getLocation());
+                    config.getSoundFreddyTeleport().playSoundToWorld(target.getLocation());
                 }
             }
 
@@ -1060,6 +1038,20 @@ public class GameSession {
         for ( Player player : spectators ) {
             sound.playSoundToPlayer(player);
         }
+    }
+
+    /**
+     * 全てのプレイヤーにタイトルコマンドを流す
+     * @param message
+     */
+    private void sendInGameTitle(String message) {
+        for ( Player player : entrants ) {
+            TitleDisplayComponent.display(player, message, 0, 40, 40);
+        }
+        for ( Player player : spectators ) {
+            TitleDisplayComponent.display(player, message, 0, 40, 40);
+        }
+        logger.log(message);
     }
 
     /**
