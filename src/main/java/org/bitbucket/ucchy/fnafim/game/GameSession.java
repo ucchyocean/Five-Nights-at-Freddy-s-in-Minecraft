@@ -14,6 +14,7 @@ import org.bitbucket.ucchy.fnafim.DelayedTeleportTask;
 import org.bitbucket.ucchy.fnafim.FNAFIMConfig;
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bitbucket.ucchy.fnafim.LocationManager;
+import org.bitbucket.ucchy.fnafim.Messages;
 import org.bitbucket.ucchy.fnafim.SoundComponent;
 import org.bitbucket.ucchy.fnafim.TitleDisplayComponent;
 import org.bitbucket.ucchy.fnafim.Utility;
@@ -24,6 +25,7 @@ import org.bitbucket.ucchy.fnafim.effect.InvisibleEffect;
 import org.bitbucket.ucchy.fnafim.effect.SpeedEffect;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -41,11 +43,6 @@ import org.bukkit.scheduler.BukkitRunnable;
  * @author ucchy
  */
 public class GameSession {
-
-    private static final String DISPLAYNAME_FLASHLIGHT = "懐中電灯";
-    private static final String DISPLAYNAME_RADER = "レーダー";
-    private static final String DISPLAYNAME_SHUTTER = "シャッター";
-    private static final String DISPLAYNAME_LEATHER = "行動を開始 30秒の間だけ行動できます。";
 
     private static final int TELEPORT_WAIT_TICKS = 3;
 
@@ -110,9 +107,7 @@ public class GameSession {
     public void openInvitation() {
 
         phase = GameSessionPhase.INVITATION;
-        sendBroadcastAnnounce(owner.getName()
-                + "が Five Nights at Freddy's in Minecraft の参加者募集を開始しました。 "
-                + "\"/fn join\"コマンドで参加することができます。");
+        sendBroadcastAnnounce(Messages.get("Announce_OpenInvitation", "%owner", owner.getName()));
     }
 
     /**
@@ -127,8 +122,7 @@ public class GameSession {
         }
 
         phase = GameSessionPhase.CANCELED;
-        sendBroadcastAnnounce(owner.getName()
-                + "が Five Nights at Freddy's in Minecraft の参加者募集を中断しました。");
+        sendBroadcastAnnounce(Messages.get("Announce_CloseInvitation", "%owner", owner.getName()));
     }
 
     /**
@@ -154,6 +148,7 @@ public class GameSession {
             freddy = players.get(random);
             players.remove(random);
             sendInGameAnnounce("Freddy : " + freddy.getName());
+            sendInfoToPlayer(freddy, Messages.get("Description_Freddy"));
         }
 
         if ( chica == null ) {
@@ -161,6 +156,7 @@ public class GameSession {
             chica = players.get(random);
             players.remove(random);
             sendInGameAnnounce("Chica : " + chica.getName());
+            sendInfoToPlayer(chica, Messages.get("Description_Chica"));
         }
 
         if ( bonnie == null ) {
@@ -168,6 +164,7 @@ public class GameSession {
             bonnie = players.get(random);
             players.remove(random);
             sendInGameAnnounce("Bonnie : " + bonnie.getName());
+            sendInfoToPlayer(bonnie, Messages.get("Description_Bonnie"));
         }
 
         if ( foxy == null ) {
@@ -175,6 +172,7 @@ public class GameSession {
             foxy = players.get(random);
             players.remove(random);
             sendInGameAnnounce("Foxy : " + foxy.getName());
+            sendInfoToPlayer(foxy, Messages.get("Description_Foxy"));
         }
 
         // 装備を配布する
@@ -215,7 +213,6 @@ public class GameSession {
             effectManager.applyEffect(freddy, new SpeedEffect(
                     freddy, config.getCustomNightMoveSpeed_freddy()));
         }
-//        effectManager.applyEffect(freddy, new HideNametagEffect(freddy));
         effectManager.applyEffect(freddy, new ChangeDisplayNameEffect(freddy,
                 ChatColor.GOLD + freddy.getName() + ChatColor.RED + "(Freddy)" + ChatColor.RESET));
 
@@ -235,9 +232,6 @@ public class GameSession {
             effectManager.applyEffect(bonnie, new SpeedEffect(
                     bonnie, config.getCustomNightMoveSpeed_bonnie()));
         }
-//        effectManager.applyEffect(chica, new HideNametagEffect(chica));
-//        effectManager.applyEffect(bonnie, new HideNametagEffect(bonnie));
-
         effectManager.applyEffect(chica, new ChangeDisplayNameEffect(chica,
                 ChatColor.GOLD + chica.getName() + ChatColor.RED + "(Chica)" + ChatColor.RESET));
         effectManager.applyEffect(bonnie, new ChangeDisplayNameEffect(bonnie,
@@ -245,7 +239,6 @@ public class GameSession {
 
         // Foxyのエフェクト設定、常に移動不可にしておく
         effectManager.applyEffect(foxy, new BindEffect(foxy));
-//        effectManager.applyEffect(foxy, new HideNametagEffect(foxy));
         effectManager.applyEffect(foxy, new ChangeDisplayNameEffect(foxy,
                 ChatColor.GOLD + foxy.getName() + ChatColor.RED + "(Foxy)" + ChatColor.RESET));
 
@@ -310,7 +303,7 @@ public class GameSession {
     private void startGame() {
 
         phase = GameSessionPhase.IN_GAME;
-        String msg = ChatColor.WHITE + night.toString() + "  12:00 AM";
+        String msg = Messages.get("Announce_GameStart", "%night", night.toString());
         for ( Player player : entrants ) {
             TitleDisplayComponent.display(player, msg, 0, 30, 20);
         }
@@ -332,7 +325,7 @@ public class GameSession {
     public void cancelGame() {
 
         phase = GameSessionPhase.CANCELED;
-        sendInGameAnnounce("ゲームを強制中断しました。");
+        sendInGameAnnounce(Messages.get("Announce_GameCanceled"));
         onEnd();
     }
 
@@ -406,14 +399,19 @@ public class GameSession {
 
         if ( caught != null ) {
             Doll doll = getDollRole(caught);
-            sendInGameAnnounce(player.getName() + " が " + caught.getName() + "(" + doll + ") に捕まった。。。");
+            sendInGameAnnounce(Messages.get("Announce_PlayerRunMidway",
+                    new String[]{"%player", "%caught", "%doll"},
+                    new String[]{player.getName(), caught.getName(), doll.toString()}
+            ));
         } else {
-            sendInGameAnnounce(player.getName() + " は、謎の力に飲み込まれて脱落した。。。");
+            sendInGameAnnounce(Messages.get("Announce_PlayerRunMidway",
+                    "%player", player.getName()));
         }
 
         // SEを再生
         SoundComponent.getComponentFromString(
                 "GHAST_SCREAM-1.0-0.5,FIREWORK_LARGE_BLAST-1.0-0.5").playSoundToPlayer(player);
+        player.getWorld().playEffect(player.getLocation(), Effect.STEP_SOUND, 8);
 
         // エフェクトをクリア
         effectManager.removeAllEffect(player);
@@ -456,13 +454,14 @@ public class GameSession {
     protected void onGameover() {
 
         phase = GameSessionPhase.END;
+        String msg = Messages.get("Announce_GameOver1");
         for ( Player player : entrants ) {
-            TitleDisplayComponent.display(player, ChatColor.WHITE + "Game Over", 0, 30, 20);
+            TitleDisplayComponent.display(player, msg, 0, 30, 20);
         }
         for ( Player player : spectators ) {
-            TitleDisplayComponent.display(player, ChatColor.WHITE + "Game Over", 0, 30, 20);
+            TitleDisplayComponent.display(player, msg, 0, 30, 20);
         }
-        sendInGameAnnounce("プレイヤーが全員捕まってしまった。。。");
+        sendInGameAnnounce(Messages.get("Announce_GameOver2"));
         onEnd();
     }
 
@@ -492,13 +491,14 @@ public class GameSession {
     protected void onTimerZero() {
 
         phase = GameSessionPhase.END;
+        String msg = Messages.get("Announce_NightClear1");
         for ( Player player : entrants ) {
-            TitleDisplayComponent.display(player, ChatColor.WHITE + "6:00 AM", 0, 30, 20);
+            TitleDisplayComponent.display(player, msg, 0, 30, 20);
         }
         for ( Player player : spectators ) {
-            TitleDisplayComponent.display(player, ChatColor.WHITE + "6:00 AM", 0, 30, 20);
+            TitleDisplayComponent.display(player, msg, 0, 30, 20);
         }
-        sendInGameAnnounce(players.size() + "人のプレイヤーが生き延びた。");
+        sendInGameAnnounce(Messages.get("Announce_NightClear2", "%num", players.size()));
 
         // SEを流す
         sendInGameSound(SoundComponent.getComponentFromString("ENDERDRAGON_DEATH-0.4-2.0"));
@@ -519,11 +519,14 @@ public class GameSession {
                     startPreparing(next);
                 }
             }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), wait * 20);
-            sendInGameAnnounce(wait + "秒後に、次の" + next + "が始まります。");
+            sendInGameAnnounce(Messages.get("Announce_NextNight",
+                    new String[]{"%seconds", "%night"},
+                    new Object[]{wait, night}
+            ));
 
         } else {
             onEnd();
-            sendInGameAnnounce("ゲーム終了。プレイヤー側の勝利！");
+            sendInGameAnnounce(Messages.get("Announce_GameClear"));
         }
     }
 
@@ -547,11 +550,11 @@ public class GameSession {
         }
 
         // 懐中電灯のアイテム処理
-        if ( name.equals(DISPLAYNAME_FLASHLIGHT) ) {
+        if ( name.equals(Messages.get("ItemName_FlashLight")) ) {
             boolean isOn = (item.getType() == flashlightOff.getType());
             if ( batteries.containsKey(player) ) {
                 if ( batteries.get(player).getPower() <= 0 ) {
-                    player.sendMessage(ChatColor.GOLD + "電力が無いので操作できない！");
+                    sendInfoToPlayer(player, Messages.get("Info_BatteryNotEnough"));
                     return false;
                 }
                 batteries.get(player).setUsingFlashlight(isOn);
@@ -568,10 +571,10 @@ public class GameSession {
         }
 
         // レーダーのアイテム処理
-        if ( name.equals(DISPLAYNAME_RADER) ) {
+        if ( name.equals(Messages.get("ItemName_Rader")) ) {
             if ( batteries.containsKey(player) ) {
                 if ( !batteries.get(player).hasPowerToUserRadar() ) {
-                    player.sendMessage(ChatColor.GOLD + "電力が足りないので使用できない！");
+                    sendInfoToPlayer(player, Messages.get("Info_BatteryNotEnough"));
                     return false;
                 }
                 batteries.get(player).decreaseToUseRadar();
@@ -584,28 +587,29 @@ public class GameSession {
                     if ( doll != null ) {
                         double distance = player.getLocation().distance(target.getLocation());
                         if ( distance <= 10 ) {
-                            String msg = String.format(
-                                    ChatColor.GOLD + "%s(%s) が、%.1fｍ先にいる！！",
-                                    target.getName(), doll.toString(), distance);
-                            player.sendMessage(msg);
+                            String msg = Messages.get("Info_ItemRader",
+                                    new String[]{"%target", "%doll", "%distance"},
+                                    new String[]{target.getName(), doll.toString(),
+                                        String.format("%.1f", distance)});
+                            sendInfoToPlayer(player, msg);
                             found = true;
                         }
                     }
                 }
             }
             if ( !found ) {
-                player.sendMessage(ChatColor.GOLD + "誰も近くにいないようだ。。。");
+                sendInfoToPlayer(player, Messages.get("Info_ItemRaderNone"));
             }
             SoundComponent.getComponentFromString("IRONGOLEM_HIT-1.0-0.7").playSoundToPlayer(player);
             return false;
         }
 
         // シャッターのアイテム処理
-        if ( name.equals(DISPLAYNAME_SHUTTER) ) {
+        if ( name.equals(Messages.get("ItemName_Shutter")) ) {
             boolean isOn = (item.getType() == shutterOff.getType());
             if ( batteries.containsKey(player) ) {
                 if ( batteries.get(player).getPower() <= 0 ) {
-                    player.sendMessage(ChatColor.GOLD + "電力が無いので操作できない！");
+                    sendInfoToPlayer(player, Messages.get("Info_BatteryNotEnough"));
                     return false;
                 }
                 batteries.get(player).setUsingShutter(isOn);
@@ -622,11 +626,11 @@ public class GameSession {
         }
 
         // Foxyのアイテム処理
-        if ( name.equals(DISPLAYNAME_LEATHER) ) {
+        if ( name.equals(Messages.get("ItemName_FoxyMovement")) ) {
 
             // 行動不可の状態になっていないなら、アイテムを使う必要は無い
             if ( foxyMovementTask != null && !foxyMovementTask.isEnded() ) {
-                player.sendMessage(ChatColor.GOLD + "今は使う必要はない。。。");
+                sendInfoToPlayer(player, Messages.get("Info_FoxyMovementAlready"));
                 return false;
             }
 
@@ -639,10 +643,11 @@ public class GameSession {
             }
 
             // 行動不可を解いて、30秒間の行動時間を与える
+            int seconds = 30;
             effectManager.removeEffect(player, BindEffect.TYPE);
             effectManager.applyEffect(player, new SpeedEffect(player, 3));
-            player.sendMessage(ChatColor.GOLD + "30秒間行動できるようになった！");
-            foxyMovementTask = new FoxyMovementTask(this);
+            sendInfoToPlayer(player, Messages.get("Info_FoxyMovementStart", "%seconds", seconds));
+            foxyMovementTask = new FoxyMovementTask(this, seconds);
             foxyMovementTask.start();
 
             // SEを流す
@@ -660,11 +665,11 @@ public class GameSession {
             if ( owner != null ) {
                 Player target = Utility.getPlayerExact(owner);
                 if ( target != null && target.isOnline() ) {
+                    int wait = (int)(Math.random() * 8) + 1;
                     freddy.teleport(target, TeleportCause.PLUGIN);
-                    freddyTeleportWaitTask = new FreddyTeleportWaitTask(this);
+                    freddyTeleportWaitTask = new FreddyTeleportWaitTask(this, wait);
                     freddyTeleportWaitTask.start();
-                    freddy.sendMessage(ChatColor.GOLD + "" + freddyTeleportWaitTask.getWait()
-                            + "秒後に行動できるようになる。。。");
+                    sendInfoToPlayer(freddy, Messages.get("Info_FreddyTeleportWait", "%seconds", wait));
                     effectManager.applyEffect(freddy, new BindEffect(freddy));
 
                     // SEを流す
@@ -699,7 +704,8 @@ public class GameSession {
         effectManager.applyEffect(player, new BindEffect(player));
 
         // フレディにテレポート用アイテムを渡す
-        FreddyItemWaitTask task = new FreddyItemWaitTask(this, player);
+        int wait = (int)(Math.random() * 8) + 1;
+        FreddyItemWaitTask task = new FreddyItemWaitTask(this, player, wait);
         task.start();
         freddyItemWaitTask.add(task);
     }
@@ -761,7 +767,7 @@ public class GameSession {
             player.setFoodLevel(20);
             player.setHealth(player.getMaxHealth());
 
-            sendInGameAnnounce(player.getName() + "がゲームに参加しました。");
+            sendInGameAnnounce(Messages.get("Announce_EntrantJoin", "%player", player.getName()));
         }
     }
 
@@ -778,7 +784,7 @@ public class GameSession {
             // 預かっていた持ち物を返す
             storage.restoreFromTemp(player);
 
-            sendInGameAnnounce(player.getName() + "がゲームから離脱しました。");
+            sendInGameAnnounce(Messages.get("Announce_EntrantLeave", "%player", player.getName()));
         }
     }
 
@@ -804,8 +810,7 @@ public class GameSession {
         Location spectate = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getSpectate();
         player.teleport(spectate, TeleportCause.PLUGIN);
 
-        player.sendMessage(ChatColor.GOLD + "観客として参加しました。 "
-                + "\"/fn spectate\"コマンドで、ゲームから離脱できます。");
+        sendInfoToPlayer(player, Messages.get("Info_JoinSpectator"));
     }
 
     public void leaveSpectator(Player player) {
@@ -826,7 +831,7 @@ public class GameSession {
             Location lobby = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getLobby();
             player.teleport(lobby, TeleportCause.PLUGIN);
 
-            player.sendMessage(ChatColor.GOLD + "観客から離脱しました。");
+            sendInfoToPlayer(player, Messages.get("Info_LeaveSpectator"));
         }
     }
 
@@ -922,7 +927,7 @@ public class GameSession {
      * Foxyが行動時間を終了した時に呼び出されるメソッド
      */
     protected void onFoxyMovementEnd() {
-        foxy.sendMessage(ChatColor.GOLD + "行動時間が終了した。");
+        sendInfoToPlayer(foxy, Messages.get("Info_FoxyMovementEnd"));
         Location respawn = FiveNightsAtFreddysInMinecraft
                 .getInstance().getLocationManager().getFoxy();
         foxy.teleport(respawn, TeleportCause.PLUGIN);
@@ -935,12 +940,12 @@ public class GameSession {
      * @param target ターゲットプレイヤー
      */
     protected void onFreddyItemGet(Player target) {
-        freddy.sendMessage(ChatColor.GOLD + target.getName() + "のバッテリーがダウンした。"
-                + "テレポートして襲うことができるぞ！");
+        sendInfoToPlayer(freddy, Messages.get("Info_FreddyTeleportItem",
+                "%player", target.getName()));
         ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
         SkullMeta meta = (SkullMeta)skull.getItemMeta();
         meta.setOwner(target.getName());
-        meta.setDisplayName("テレポートして" + target.getName() + "を襲う");
+        meta.setDisplayName(Messages.get("ItemName_FreddyTeleport", "%target", target.getName()));
         skull.setItemMeta(meta);
         freddy.getInventory().addItem(skull);
     }
@@ -949,7 +954,7 @@ public class GameSession {
      * Freddyがテレポート後に行動可能になる時に呼び出されるメソッド
      */
     protected void onFreddyTPWaitEnd() {
-        freddy.sendMessage(ChatColor.GOLD + "行動可能になった！");
+        sendInfoToPlayer(freddy, Messages.get("Info_FreddyTeleportWaitEnd"));
         effectManager.removeEffect(freddy, BindEffect.TYPE);
     }
 
@@ -1014,16 +1019,26 @@ public class GameSession {
     }
 
     /**
+     * プレイヤーに情報を流す
+     * @param player プレイヤー
+     * @param message 情報
+     */
+    private void sendInfoToPlayer(Player player, String message) {
+        message = Messages.get("Prefix_Info") + message;
+        sendInfoToPlayer(player, message);
+    }
+
+    /**
      * ゲーム内にアナウンスを流す
      * @param message メッセージ
      */
     private void sendInGameAnnounce(String message) {
-        message = ChatColor.RED + "[FNAF]" + ChatColor.AQUA + message;
+        message = Messages.get("Prefix_InGame") + message;
         for ( Player player : entrants ) {
-            player.sendMessage(message);
+            sendInfoToPlayer(player, message);
         }
         for ( Player player : spectators ) {
-            player.sendMessage(message);
+            sendInfoToPlayer(player, message);
         }
         logger.log(message);
     }
@@ -1033,7 +1048,7 @@ public class GameSession {
      * @param message メッセージ
      */
     private void sendBroadcastAnnounce(String message) {
-        message = ChatColor.RED + "[FNAF]" + ChatColor.GOLD + message;
+        message = Messages.get("Prefix_Broadcast") + message;
         Bukkit.broadcastMessage(message);
         logger.log(message);
     }
@@ -1070,32 +1085,32 @@ public class GameSession {
 
         flashlightOff = new ItemStack(Material.IRON_INGOT);
         ItemMeta meta = flashlightOff.getItemMeta();
-        meta.setDisplayName(DISPLAYNAME_FLASHLIGHT);
+        meta.setDisplayName(Messages.get("ItemName_FlashLight"));
         flashlightOff.setItemMeta(meta);
 
         flashlightOn = new ItemStack(Material.GOLD_INGOT);
         meta = flashlightOn.getItemMeta();
-        meta.setDisplayName(DISPLAYNAME_FLASHLIGHT);
+        meta.setDisplayName(Messages.get("ItemName_FlashLight"));
         flashlightOn.setItemMeta(meta);
 
         radar = new ItemStack(Material.REDSTONE);
         meta = radar.getItemMeta();
-        meta.setDisplayName(DISPLAYNAME_RADER);
+        meta.setDisplayName(Messages.get("ItemName_Rader"));
         radar.setItemMeta(meta);
 
         shutterOff = new ItemStack(Material.IRON_DOOR);
         meta = shutterOff.getItemMeta();
-        meta.setDisplayName(DISPLAYNAME_SHUTTER);
+        meta.setDisplayName(Messages.get("ItemName_Shutter"));
         shutterOff.setItemMeta(meta);
 
         shutterOn = new ItemStack(Material.WOOD_DOOR);
         meta = shutterOn.getItemMeta();
-        meta.setDisplayName(DISPLAYNAME_SHUTTER);
+        meta.setDisplayName(Messages.get("ItemName_Shutter"));
         shutterOn.setItemMeta(meta);
 
         leather = new ItemStack(Material.LEATHER);
         meta = leather.getItemMeta();
-        meta.setDisplayName(DISPLAYNAME_LEATHER);
+        meta.setDisplayName(Messages.get("ItemName_FoxyMovement"));
         leather.setItemMeta(meta);
     }
 

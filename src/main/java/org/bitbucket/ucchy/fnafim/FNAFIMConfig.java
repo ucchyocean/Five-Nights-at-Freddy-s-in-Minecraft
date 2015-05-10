@@ -15,6 +15,9 @@ import org.bukkit.configuration.file.FileConfiguration;
  */
 public class FNAFIMConfig {
 
+    /** メッセージ言語 */
+    private String lang;
+
     /** 最大参加可能人数 */
     private int maxPlayers;
 
@@ -60,13 +63,21 @@ public class FNAFIMConfig {
         FiveNightsAtFreddysInMinecraft.getInstance().reloadConfig();
         FileConfiguration config = plugin.getConfig();
 
-        maxPlayers = config.getInt("maxPlayers", 15);
+        lang = config.getString("lang", "ja");
+        maxPlayers = config.getInt("maxPlayers", 64);
         secondsOfOneHour = config.getInt("secondsOfOneHour", 90);
         foxyMovementPerNight = config.getInt("foxyMovementPerNight", 3);
         customNightMoveSpeed_freddy = config.getInt("customNightMoveSpeed.freddy", 4);
         customNightMoveSpeed_chica = config.getInt("customNightMoveSpeed.chica", 4);
         customNightMoveSpeed_bonnie = config.getInt("customNightMoveSpeed.bonnie", 4);
         customNightMoveSpeed_foxy = config.getInt("customNightMoveSpeed.foxy", 3);
+    }
+
+    /**
+     * @return lang
+     */
+    public String getLang() {
+        return lang;
     }
 
     /**

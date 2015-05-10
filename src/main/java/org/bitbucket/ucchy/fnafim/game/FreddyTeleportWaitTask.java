@@ -18,8 +18,9 @@ public class FreddyTeleportWaitTask extends BukkitRunnable {
     private boolean isEnd;
     private int wait;
 
-    protected FreddyTeleportWaitTask(GameSession session) {
+    protected FreddyTeleportWaitTask(GameSession session, int wait) {
         this.session = session;
+        this.wait = wait;
         isEnd = false;
     }
 
@@ -30,7 +31,6 @@ public class FreddyTeleportWaitTask extends BukkitRunnable {
     }
 
     public void start() {
-        wait = (int)(Math.random() * 8) + 1;
         runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 20 * wait);
     }
 

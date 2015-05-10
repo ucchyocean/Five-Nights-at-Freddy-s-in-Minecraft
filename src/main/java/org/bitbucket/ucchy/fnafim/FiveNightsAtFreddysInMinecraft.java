@@ -7,6 +7,7 @@ package org.bitbucket.ucchy.fnafim;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
 import org.bitbucket.ucchy.fnafim.game.GameSession;
 import org.bitbucket.ucchy.fnafim.game.GameSessionListener;
@@ -40,6 +41,11 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
         // コンフィグのロード
         config = new FNAFIMConfig();
 
+        // メッセージをロードする
+        File langFolder = new File(getDataFolder(), "lang");
+        Messages.initialize(getFile(), langFolder, getDefaultLocaleLanguage());
+        Messages.reload(config.getLang());
+
         // 地点管理のロード
         locationManager = LocationManager.load(new File(getDataFolder(), "location.yml"));
 
@@ -67,6 +73,7 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
      */
     public void reloadAll() {
         config.reloadConfig();
+        Messages.reload(config.getLang());
         locationManager = LocationManager.load(new File(getDataFolder(), "location.yml"));
     }
 
@@ -147,5 +154,15 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
     public static FiveNightsAtFreddysInMinecraft getInstance() {
         return (FiveNightsAtFreddysInMinecraft)
                 Bukkit.getPluginManager().getPlugin("FiveNightAtFreddysInMinecraft");
+    }
+
+    /**
+     * 動作環境の言語設定を取得する。日本語環境なら ja、英語環境なら en が返される。
+     * @return 動作環境の言語
+     */
+    protected static String getDefaultLocaleLanguage() {
+        Locale locale = Locale.getDefault();
+        if ( locale == null ) return "en";
+        return locale.getLanguage();
     }
 }

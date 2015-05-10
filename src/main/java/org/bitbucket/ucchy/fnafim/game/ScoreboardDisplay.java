@@ -5,6 +5,7 @@
  */
 package org.bitbucket.ucchy.fnafim.game;
 
+import org.bitbucket.ucchy.fnafim.Messages;
 import org.bitbucket.ucchy.fnafim.Utility;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -187,9 +188,9 @@ public class ScoreboardDisplay {
      * @param remain
      */
     public void setRemainTime(Night night, int hour) {
-        String title = String.format(
-                "%s  " + ChatColor.RED + "%2d" + ChatColor.WHITE + "AM",
-                night.toString(), hour);
+        String title = Messages.get("Sidebar_Title",
+                new String[]{"%night", "%hour"},
+                new String[]{night.toString(), String.format("%2d", hour)});
         if ( !title.equals(getTitle()) ) {
             setTitle(title);
         }
@@ -200,6 +201,6 @@ public class ScoreboardDisplay {
      * @param remain
      */
     public void setRemainPlayer(int remain) {
-        setScore("残りプレイヤー", remain);
+        setScore(Messages.get("Sidebar_RemainingPlayers"), remain);
     }
 }

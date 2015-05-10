@@ -16,9 +16,11 @@ public class FoxyMovementTask extends BukkitRunnable {
 
     private GameSession session;
     private boolean isEnd;
+    private int seconds;
 
-    protected FoxyMovementTask(GameSession session) {
+    protected FoxyMovementTask(GameSession session, int seconds) {
         this.session = session;
+        this.seconds = seconds;
         isEnd = false;
     }
 
@@ -29,7 +31,7 @@ public class FoxyMovementTask extends BukkitRunnable {
     }
 
     public void start() {
-        runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 20 * 30);
+        runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 20 * seconds);
     }
 
     public void end() {

@@ -18,10 +18,12 @@ public class FreddyItemWaitTask extends BukkitRunnable {
     private GameSession session;
     private Player target;
     private boolean isEnd;
+    private int wait;
 
-    protected FreddyItemWaitTask(GameSession session, Player target) {
+    protected FreddyItemWaitTask(GameSession session, Player target, int wait) {
         this.session = session;
         this.target = target;
+        this.wait = wait;
         isEnd = false;
     }
 
@@ -32,7 +34,6 @@ public class FreddyItemWaitTask extends BukkitRunnable {
     }
 
     public void start() {
-        int wait = (int)(Math.random() * 8) + 1;
         runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 20 * wait);
     }
 
