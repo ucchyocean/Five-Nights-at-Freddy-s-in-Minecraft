@@ -20,12 +20,17 @@ public class InvisibleEffect implements SpecialEffect {
 
     private Player player;
 
+    public InvisibleEffect(String name) {
+        this.player = Utility.getPlayerExact(name);
+    }
+
     public InvisibleEffect(Player player) {
         this.player = player;
     }
 
     @Override
     public void start() {
+        if ( player == null ) return;
         if ( Utility.isCB180orLater() ) {
             player.addPotionEffect(new PotionEffect(
                     PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 3, true, false));
@@ -37,6 +42,7 @@ public class InvisibleEffect implements SpecialEffect {
 
     @Override
     public void end() {
+        if ( player == null ) return;
         player.removePotionEffect(PotionEffectType.INVISIBILITY);
     }
 

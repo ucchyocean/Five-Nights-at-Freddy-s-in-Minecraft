@@ -6,6 +6,7 @@
 package org.bitbucket.ucchy.fnafim.effect;
 
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
+import org.bitbucket.ucchy.fnafim.Utility;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
@@ -21,12 +22,17 @@ public class BindEffect implements SpecialEffect {
 
     private Player player;
 
+    public BindEffect(String name) {
+        this.player = Utility.getPlayerExact(name);
+    }
+
     public BindEffect(Player player) {
         this.player = player;
     }
 
     @Override
     public void start() {
+        if ( player == null ) return;
         player.addPotionEffect(new PotionEffect(
                 PotionEffectType.SLOW, Integer.MAX_VALUE, 10, true));
         player.addPotionEffect(new PotionEffect(
@@ -37,6 +43,7 @@ public class BindEffect implements SpecialEffect {
 
     @Override
     public void end() {
+        if ( player == null ) return;
         player.removePotionEffect(PotionEffectType.SLOW);
         player.removePotionEffect(PotionEffectType.JUMP);
         player.removeMetadata(TYPE, FiveNightsAtFreddysInMinecraft.getInstance());

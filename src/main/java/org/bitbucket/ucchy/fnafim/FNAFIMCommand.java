@@ -268,8 +268,13 @@ public class FNAFIMCommand implements TabExecutor {
 
         StringBuilder buffer = new StringBuilder();
         buffer.append(Messages.get("Info_GameEntrants"));
-        for ( Player player : session.getEntrants() ) {
-            buffer.append(player.getDisplayName() + ", ");
+        for ( String name : session.getEntrants() ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null ) {
+                buffer.append(player.getDisplayName() + ", ");
+            } else {
+                buffer.append(name + ", ");
+            }
         }
         sendInformationMessage(sender, buffer.toString());
     }

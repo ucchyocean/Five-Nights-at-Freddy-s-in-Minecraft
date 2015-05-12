@@ -6,10 +6,7 @@
 package org.bitbucket.ucchy.fnafim.game;
 
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
-import org.bitbucket.ucchy.fnafim.effect.HideNametagEffect;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Slime;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -26,6 +23,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
  */
 public class GameSessionListener implements Listener {
 
+    /**
+     * プレイヤーがクリックした時に呼び出されるイベントハンドラ
+     * @param event
+     */
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
 
@@ -62,19 +63,14 @@ public class GameSessionListener implements Listener {
         }
     }
 
+    /**
+     * エンティティがダメージを受けた時に呼び出されるイベントハンドラ
+     * @param event
+     */
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
 
-        // ネームタグ隠し用のスライムなら、ダメージを無効化
-        if ( event.getEntity() instanceof Slime ) {
-            Slime slime = (Slime)event.getEntity();
-            if ( slime.hasMetadata(HideNametagEffect.TYPE) ) {
-                event.setCancelled(true);
-                return;
-            }
-        }
-
-        // 以降はプレイヤーに対してのみ実行する
+        // Playerでないならイベントを無視
         if ( !(event.getEntity() instanceof Player) ) {
             return;
         }
@@ -94,6 +90,10 @@ public class GameSessionListener implements Listener {
         }
     }
 
+    /**
+     * エンティティがエンティティからダメージを受けた時に呼び出されるイベントハンドラ
+     * @param event
+     */
     @EventHandler
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 
@@ -104,15 +104,10 @@ public class GameSessionListener implements Listener {
         }
 
         // ダメージを受けたのがプレイヤーでないならイベントを無視
-        Entity damagent = event.getEntity();
-        if ( damagent instanceof Slime
-                && damagent.hasMetadata(HideNametagEffect.TYPE) ) {
-            damagent = damagent.getVehicle();
-        }
-        if ( !(damagent instanceof Player) ) {
+        if ( !(event.getEntity() instanceof Player) ) {
             return;
         }
-        Player target = (Player)damagent;
+        Player target = (Player)event.getEntity();
 
         // 参加者ではないならイベントを無視
         if ( !session.isEntrant(target) ) {
@@ -133,6 +128,10 @@ public class GameSessionListener implements Listener {
         }
     }
 
+    /**
+     * プレイヤーがアイテムを落とした時に呼び出されるイベントハンドラ
+     * @param event
+     */
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
 
@@ -151,6 +150,10 @@ public class GameSessionListener implements Listener {
         }
     }
 
+    /**
+     * プレイヤーがサーバーに参加した時に呼び出されるイベントハンドラ
+     * @param event
+     */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
 
@@ -176,6 +179,10 @@ public class GameSessionListener implements Listener {
         session.onFoxyMovementEnd();
     }
 
+    /**
+     * プレイヤーがサーバーを退出した時に呼び出されるイベントハンドラ
+     * @param event
+     */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
 

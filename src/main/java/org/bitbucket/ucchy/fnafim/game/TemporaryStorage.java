@@ -7,6 +7,7 @@ package org.bitbucket.ucchy.fnafim.game;
 
 import java.util.HashMap;
 
+import org.bitbucket.ucchy.fnafim.Utility;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -33,6 +34,17 @@ public class TemporaryStorage {
         armors = new HashMap<Player, Inventory>();
         levels = new HashMap<Player, Integer>();
         exps = new HashMap<Player, Float>();
+    }
+
+    /**
+     * プレイヤーのインベントリと経験値を、テンポラリ保存領域に保存する
+     * @param name プレイヤー名
+     */
+    public void sendToTemp(String name) {
+        Player player = Utility.getPlayerExact(name);
+        if ( player != null ) {
+            sendToTemp(player);
+        }
     }
 
     /**
@@ -75,6 +87,17 @@ public class TemporaryStorage {
         exps.put(player, player.getExp());
         player.setLevel(0);
         player.setExp(0);
+    }
+
+    /**
+     * テンポラリ領域に保存していたインベントリや経験値を復帰する
+     * @param name プレイヤー名
+     */
+    public void restoreFromTemp(String name) {
+        Player player = Utility.getPlayerExact(name);
+        if ( player != null ) {
+            restoreFromTemp(player);
+        }
     }
 
     /**

@@ -5,6 +5,7 @@
  */
 package org.bitbucket.ucchy.fnafim.effect;
 
+import org.bitbucket.ucchy.fnafim.Utility;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -20,6 +21,11 @@ public class SpeedEffect implements SpecialEffect {
     private Player player;
     private int value;
 
+    public SpeedEffect(String name, int value) {
+        this.player = Utility.getPlayerExact(name);
+        this.value = value;
+    }
+
     public SpeedEffect(Player player, int value) {
         this.player = player;
         this.value = value;
@@ -27,12 +33,14 @@ public class SpeedEffect implements SpecialEffect {
 
     @Override
     public void start() {
+        if ( player == null ) return;
         player.addPotionEffect(new PotionEffect(
                 PotionEffectType.SPEED, Integer.MAX_VALUE, value, true));
     }
 
     @Override
     public void end() {
+        if ( player == null ) return;
         player.removePotionEffect(PotionEffectType.SPEED);
     }
 

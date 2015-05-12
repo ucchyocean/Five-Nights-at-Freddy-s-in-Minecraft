@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.bitbucket.ucchy.fnafim.effect.SpecialEffect;
-import org.bukkit.entity.Player;
 
 /**
  * エフェクト管理クラス
@@ -17,53 +16,53 @@ import org.bukkit.entity.Player;
  */
 public class EffectManager {
 
-    private HashMap<Player, ArrayList<SpecialEffect>> effects;
+    private HashMap<String, ArrayList<SpecialEffect>> effects;
 
     public EffectManager() {
-        effects = new HashMap<Player, ArrayList<SpecialEffect>>();
+        effects = new HashMap<String, ArrayList<SpecialEffect>>();
     }
 
-    public void applyEffect(Player player, SpecialEffect effect) {
-        if ( !effects.containsKey(player) ) {
-            effects.put(player, new ArrayList<SpecialEffect>());
+    public void applyEffect(String name, SpecialEffect effect) {
+        if ( !effects.containsKey(name) ) {
+            effects.put(name, new ArrayList<SpecialEffect>());
         }
-        removeEffect(player, effect.getTypeString());
-        effects.get(player).add(effect);
+        removeEffect(name, effect.getTypeString());
+        effects.get(name).add(effect);
         effect.start();
     }
 
     public void removeAll() {
-        for ( Player player : effects.keySet() ) {
-            removeAllEffect(player);
+        for ( String name : effects.keySet() ) {
+            removeAllEffect(name);
         }
     }
 
-    public void removeAllEffect(Player player) {
-        if ( !effects.containsKey(player) ) {
+    public void removeAllEffect(String name) {
+        if ( !effects.containsKey(name) ) {
             return;
         }
-        for ( SpecialEffect effect : effects.get(player) ) {
+        for ( SpecialEffect effect : effects.get(name) ) {
             effect.end();
         }
-        effects.get(player).clear();
+        effects.get(name).clear();
     }
 
-    public void removeEffect(Player player, String type) {
-        if ( !effects.containsKey(player) ) {
+    public void removeEffect(String name, String type) {
+        if ( !effects.containsKey(name) ) {
             return;
         }
-        SpecialEffect founds = getSameTypeSpecialEffect(effects.get(player), type);
+        SpecialEffect founds = getSameTypeSpecialEffect(effects.get(name), type);
         if ( founds != null ) {
             founds.end();
-            effects.get(player).remove(founds);
+            effects.get(name).remove(founds);
         }
     }
 
-    public boolean hasEffect(Player player, String type) {
-        if ( !effects.containsKey(player) ) {
+    public boolean hasEffect(String name, String type) {
+        if ( !effects.containsKey(name) ) {
             return false;
         }
-        return (getSameTypeSpecialEffect(effects.get(player), type) != null);
+        return (getSameTypeSpecialEffect(effects.get(name), type) != null);
     }
 
     private SpecialEffect getSameTypeSpecialEffect(

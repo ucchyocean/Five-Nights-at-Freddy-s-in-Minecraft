@@ -7,6 +7,7 @@ package org.bitbucket.ucchy.fnafim.game;
 
 import org.bitbucket.ucchy.fnafim.FNAFIMConfig;
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
+import org.bitbucket.ucchy.fnafim.Utility;
 import org.bukkit.entity.Player;
 
 
@@ -30,7 +31,17 @@ public class PlayerBattery {
 
     /**
      * コンストラクタ
+     * @param name
+     * @param session
+     */
+    public PlayerBattery(String name, GameSession session) {
+        this(Utility.getPlayerExact(name), session);
+    }
+
+    /**
+     * コンストラクタ
      * @param player
+     * @param session
      */
     public PlayerBattery(Player player, GameSession session) {
         this.player = player;
@@ -40,8 +51,10 @@ public class PlayerBattery {
         isUsingShutter = false;
         isDown = false;
 
-        player.setLevel(100);
-        player.setExp(1.0f);
+        if ( player != null ) {
+            player.setLevel(100);
+            player.setExp(1.0f);
+        }
 
         FNAFIMConfig config = FiveNightsAtFreddysInMinecraft.getInstance().getFNAFIMConfig();
         batteryDecreasePerSecond = config.getBatteryDecreasePerSecond();
@@ -122,7 +135,7 @@ public class PlayerBattery {
      * 現在の電力を、Exp表示部分に反映する
      */
     private void refreshExpBar() {
-
+        if ( player == null ) return;
         player.setLevel((int)power);
         float progress = (float)(power / 100);
         player.setExp(progress);

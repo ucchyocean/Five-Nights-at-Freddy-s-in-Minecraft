@@ -50,15 +50,15 @@ public class GameSession {
     private FNAFIMConfig config;
 
     private CommandSender owner;
-    private List<Player> entrants;
-    private List<Player> players;
-    private List<Player> spectators;
-    private Player freddy;
-    private Player chica;
-    private Player bonnie;
-    private Player foxy;
+    private List<String> entrants;
+    private List<String> players;
+    private List<String> spectators;
+    private String freddy;
+    private String chica;
+    private String bonnie;
+    private String foxy;
 
-    private HashMap<Player, PlayerBattery> batteries;
+    private HashMap<String, PlayerBattery> batteries;
 
     private GameSessionTimer timer;
     private GameSessionLogger logger;
@@ -86,9 +86,9 @@ public class GameSession {
     public GameSession(CommandSender owner) {
 
         this.owner = owner;
-        entrants = new ArrayList<Player>();
-        players = new ArrayList<Player>();
-        spectators = new ArrayList<Player>();
+        entrants = new ArrayList<String>();
+        players = new ArrayList<String>();
+        spectators = new ArrayList<String>();
 
         storage = new TemporaryStorage();
         effectManager = new EffectManager();
@@ -136,9 +136,9 @@ public class GameSession {
 
         // 役割を設定する。
         players.clear();
-        for ( Player player : entrants ) {
-            if ( getDollRole(player) == null ) {
-                players.add(player);
+        for ( String name : entrants ) {
+            if ( getDollRole(name) == null ) {
+                players.add(name);
             }
         }
 
@@ -146,7 +146,7 @@ public class GameSession {
             int random = (int)(Math.random() * players.size());
             freddy = players.get(random);
             players.remove(random);
-            sendInGameAnnounce("Freddy : " + freddy.getName());
+            sendInGameAnnounce("Freddy : " + freddy);
             sendInfoToPlayer(freddy, Messages.get("Description_Freddy"));
         }
 
@@ -154,7 +154,7 @@ public class GameSession {
             int random = (int)(Math.random() * players.size());
             chica = players.get(random);
             players.remove(random);
-            sendInGameAnnounce("Chica : " + chica.getName());
+            sendInGameAnnounce("Chica : " + chica);
             sendInfoToPlayer(chica, Messages.get("Description_Chica"));
         }
 
@@ -162,7 +162,7 @@ public class GameSession {
             int random = (int)(Math.random() * players.size());
             bonnie = players.get(random);
             players.remove(random);
-            sendInGameAnnounce("Bonnie : " + bonnie.getName());
+            sendInGameAnnounce("Bonnie : " + bonnie);
             sendInfoToPlayer(bonnie, Messages.get("Description_Bonnie"));
         }
 
@@ -170,13 +170,13 @@ public class GameSession {
             int random = (int)(Math.random() * players.size());
             foxy = players.get(random);
             players.remove(random);
-            sendInGameAnnounce("Foxy : " + foxy.getName());
+            sendInGameAnnounce("Foxy : " + foxy);
             sendInfoToPlayer(foxy, Messages.get("Description_Foxy"));
         }
 
         // 装備を配布する
-        for ( Player player : players ) {
-            sendPlayerInventory(player);
+        for ( String name : players ) {
+            sendPlayerInventory(name);
         }
         sendFreddyInventory(freddy);
         sendChicaInventory(chica);
@@ -184,83 +184,104 @@ public class GameSession {
         sendFoxyInventory(foxy);
 
         // エフェクトの設定
-        for ( Player player : entrants ) {
-            effectManager.removeAllEffect(player);
+        for ( String name : entrants ) {
+            effectManager.removeAllEffect(name);
         }
 
         // プレイヤーのエフェクト設定
-        for ( Player player : players ) {
-            effectManager.applyEffect(player, new BlindnessEffect(player));
-            effectManager.applyEffect(player, new ChangeDisplayNameEffect(player,
-                    ChatColor.AQUA + player.getName() + ChatColor.WHITE + "(Player)"
+        for ( String name : players ) {
+            effectManager.applyEffect(name, new BlindnessEffect(name));
+            effectManager.applyEffect(name, new ChangeDisplayNameEffect(name,
+                    ChatColor.AQUA + name + ChatColor.WHITE + "(Player)"
                             + ChatColor.RESET));
         }
 
         // Freddyのエフェクトの設定
         applyMoveSpeedSetting(freddy, config.getMoveSpeed(night).getFreddy());
         effectManager.applyEffect(freddy, new ChangeDisplayNameEffect(freddy,
-                ChatColor.GOLD + freddy.getName() + ChatColor.RED + "(Freddy)" + ChatColor.RESET));
+                ChatColor.GOLD + freddy + ChatColor.RED + "(Freddy)" + ChatColor.RESET));
 
         // Chicaのエフェクト設定
         applyMoveSpeedSetting(chica, config.getMoveSpeed(night).getChica());
         effectManager.applyEffect(chica, new ChangeDisplayNameEffect(chica,
-                ChatColor.GOLD + chica.getName() + ChatColor.RED + "(Chica)" + ChatColor.RESET));
+                ChatColor.GOLD + chica + ChatColor.RED + "(Chica)" + ChatColor.RESET));
 
         // Bonnieのエフェクト設定
         applyMoveSpeedSetting(bonnie, config.getMoveSpeed(night).getBonnie());
         effectManager.applyEffect(bonnie, new ChangeDisplayNameEffect(bonnie,
-                ChatColor.GOLD + bonnie.getName() + ChatColor.RED + "(Bonnie)" + ChatColor.RESET));
+                ChatColor.GOLD + bonnie + ChatColor.RED + "(Bonnie)" + ChatColor.RESET));
 
         // Foxyのエフェクト設定、常に移動不可にしておく
         effectManager.applyEffect(foxy, new BindEffect(foxy));
         effectManager.applyEffect(foxy, new ChangeDisplayNameEffect(foxy,
-                ChatColor.GOLD + foxy.getName() + ChatColor.RED + "(Foxy)" + ChatColor.RESET));
+                ChatColor.GOLD + foxy + ChatColor.RED + "(Foxy)" + ChatColor.RESET));
 
         // 観客のエフェクト設定
-        for ( Player player : spectators ) {
-            effectManager.applyEffect(player, new InvisibleEffect(player));
-            effectManager.applyEffect(player, new SpeedEffect(player, 3));
+        for ( String name : spectators ) {
+            effectManager.applyEffect(name, new InvisibleEffect(name));
+            effectManager.applyEffect(name, new SpeedEffect(name, 3));
         }
 
         // プレイヤーのバッテリー
-        batteries = new HashMap<Player, PlayerBattery>();
-        for ( Player player : players ) {
-            batteries.put(player, new PlayerBattery(player, this));
+        batteries = new HashMap<String, PlayerBattery>();
+        for ( String name : players ) {
+            batteries.put(name, new PlayerBattery(name, this));
         }
 
         // それぞれのスタート地点にTPする
         LocationManager lmanager =
                 FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager();
         HashMap<Player, Location> locationMap = new HashMap<Player, Location>();
-        for ( Player player : players ) {
-            locationMap.put(player, lmanager.getPlayer());
+        for ( String name : players ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null ) {
+                locationMap.put(player, lmanager.getPlayer());
+            }
         }
-        locationMap.put(freddy, lmanager.getFreddy());
-        locationMap.put(chica, lmanager.getChica());
-        locationMap.put(bonnie, lmanager.getBonnie());
-        locationMap.put(foxy, lmanager.getFoxy());
+        Player player = Utility.getPlayerExact(freddy);
+        if ( player != null ) {
+            locationMap.put(player, lmanager.getFreddy());
+        }
+        player = Utility.getPlayerExact(chica);
+        if ( player != null ) {
+            locationMap.put(player, lmanager.getChica());
+        }
+        player = Utility.getPlayerExact(bonnie);
+        if ( player != null ) {
+            locationMap.put(player, lmanager.getBonnie());
+        }
+        player = Utility.getPlayerExact(foxy);
+        if ( player != null ) {
+            locationMap.put(player, lmanager.getFoxy());
+        }
 
         new DelayedTeleportTask(locationMap, TELEPORT_WAIT_TICKS).startTask();
 
         // サイドバーを用意する
         scoreboardDisplay = new ScoreboardDisplay("fnafim");
-        for ( Player player : entrants ) {
-            scoreboardDisplay.setShowPlayer(player);
+        for ( String name : entrants ) {
+            player = Utility.getPlayerExact(name);
+            if ( player != null ) {
+                scoreboardDisplay.setShowPlayer(player);
+            }
         }
-        for ( Player player : spectators ) {
-            scoreboardDisplay.setShowPlayer(player);
+        for ( String name : spectators ) {
+            player = Utility.getPlayerExact(name);
+            if ( player != null ) {
+                scoreboardDisplay.setShowPlayer(player);
+            }
         }
         scoreboardDisplay.setTitle(ChatColor.RED + night.toString());
         scoreboardDisplay.setRemainTime(night, 12);
         scoreboardDisplay.setRemainPlayer(players.size());
 
-        for ( Player player : players ) {
-            scoreboardDisplay.setPlayersTeam(player);
-        }
-        scoreboardDisplay.setFreddysTeam(freddy);
-        scoreboardDisplay.setFreddysTeam(chica);
-        scoreboardDisplay.setFreddysTeam(bonnie);
-        scoreboardDisplay.setFreddysTeam(foxy);
+//        for ( Player player : players ) {
+//            scoreboardDisplay.setPlayersTeam(player);
+//        }
+//        scoreboardDisplay.setFreddysTeam(freddy);
+//        scoreboardDisplay.setFreddysTeam(chica);
+//        scoreboardDisplay.setFreddysTeam(bonnie);
+//        scoreboardDisplay.setFreddysTeam(foxy);
 
         // プレイヤー人数✕TELEPORT_WAIT＋α 分だけ待ってから、ゲームを開始する。
         int delay = entrants.size() * TELEPORT_WAIT_TICKS + 10;
@@ -309,19 +330,25 @@ public class GameSession {
 
         // サイドバーの除去
         scoreboardDisplay.remove();
-        for ( Player player : entrants ) {
-            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        for ( String name : entrants ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null ) {
+                player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+            }
         }
-        for ( Player player : spectators ) {
-            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        for ( String name : spectators ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null ) {
+                player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+            }
         }
 
         // エフェクトをクリア
-        for ( Player player : entrants ) {
-            effectManager.removeAllEffect(player);
+        for ( String name : entrants ) {
+            effectManager.removeAllEffect(name);
         }
-        for ( Player player : spectators ) {
-            effectManager.removeAllEffect(player);
+        for ( String name : spectators ) {
+            effectManager.removeAllEffect(name);
         }
 
         // タスクをクリア
@@ -341,21 +368,27 @@ public class GameSession {
         }
 
         // プレイヤーに持ち物を返す
-        for ( Player player : entrants ) {
-            storage.restoreFromTemp(player);
+        for ( String name : entrants ) {
+            storage.restoreFromTemp(name);
         }
-        for ( Player player : spectators ) {
-            storage.restoreFromTemp(player);
+        for ( String name : spectators ) {
+            storage.restoreFromTemp(name);
         }
 
         // 全員をロビーに送る
         HashMap<Player, Location> locationMap = new HashMap<Player, Location>();
         LocationManager lmanager = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager();
-        for ( Player player : entrants ) {
-            locationMap.put(player, lmanager.getLobby());
+        for ( String name : entrants ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null ) {
+                locationMap.put(player, lmanager.getLobby());
+            }
         }
-        for ( Player player : spectators ) {
-            locationMap.put(player, lmanager.getLobby());
+        for ( String name : spectators ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null ) {
+                locationMap.put(player, lmanager.getLobby());
+            }
         }
         new DelayedTeleportTask(locationMap, TELEPORT_WAIT_TICKS).startTask();
 
@@ -371,7 +404,7 @@ public class GameSession {
     protected void onCaughtPlayer(final Player player, Player caught) {
 
         if ( caught != null ) {
-            Doll doll = getDollRole(caught);
+            Doll doll = getDollRole(caught.getName());
             sendInGameAnnounce(Messages.get("Announce_PlayerCaught",
                     new String[]{"%player", "%caught", "%doll"},
                     new String[]{player.getName(), caught.getName(), doll.toString()}
@@ -392,7 +425,7 @@ public class GameSession {
         }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), 2);
 
         // エフェクトをクリア
-        effectManager.removeAllEffect(player);
+        effectManager.removeAllEffect(player.getName());
 
         // 持ち物をクリア
         player.getInventory().clear();
@@ -470,9 +503,9 @@ public class GameSession {
         sendInGameSound(config.getSoundNightEnd());
 
         // 持ち物を消去する、エフェクトを消去する
-        for ( Player player : entrants ) {
-            removeInventoryAll(player);
-            effectManager.removeAllEffect(player);
+        for ( String name : entrants ) {
+            removeInventoryAll(name);
+            effectManager.removeAllEffect(name);
         }
 
         // Night1-4は、次の夜の準備。その他は終了.
@@ -496,11 +529,11 @@ public class GameSession {
             }
 
             // エフェクトをクリア
-            for ( Player player : entrants ) {
-                effectManager.removeAllEffect(player);
+            for ( String name : entrants ) {
+                effectManager.removeAllEffect(name);
             }
-            for ( Player player : spectators ) {
-                effectManager.removeAllEffect(player);
+            for ( String name : spectators ) {
+                effectManager.removeAllEffect(name);
             }
 
             // 15秒後に、startPreparingを呼び出す
@@ -552,10 +585,10 @@ public class GameSession {
             }
             if ( isOn ) {
                 player.setItemInHand(flashlightOn.clone());
-                effectManager.removeEffect(player, BlindnessEffect.TYPE);
+                effectManager.removeEffect(player.getName(), BlindnessEffect.TYPE);
             } else {
                 player.setItemInHand(flashlightOff.clone());
-                effectManager.applyEffect(player, new BlindnessEffect(player));
+                effectManager.applyEffect(player.getName(), new BlindnessEffect(player));
             }
             config.getSoundUseFlashLight().playSoundToPlayer(player);
             return false;
@@ -575,7 +608,7 @@ public class GameSession {
             for ( Entity entity : player.getNearbyEntities(range, range, range) ) {
                 if ( entity instanceof Player ) {
                     Player target = (Player)entity;
-                    Doll doll = getDollRole(target);
+                    Doll doll = getDollRole(target.getName());
                     if ( doll != null ) {
                         double distance = player.getLocation().distance(target.getLocation());
                         if ( distance <= range ) {
@@ -608,10 +641,10 @@ public class GameSession {
             }
             if ( isOn ) {
                 player.setItemInHand(shutterOn.clone());
-                effectManager.applyEffect(player, new InvisibleEffect(player));
+                effectManager.applyEffect(player.getName(), new InvisibleEffect(player));
             } else {
                 player.setItemInHand(shutterOff.clone());
-                effectManager.removeEffect(player, InvisibleEffect.TYPE);
+                effectManager.removeEffect(player.getName(), InvisibleEffect.TYPE);
             }
             config.getSoundUseShutter().playSoundToPlayer(player);
             return false;
@@ -638,8 +671,8 @@ public class GameSession {
             // 行動不可を解いて、30秒間の行動時間を与える
             int seconds = config.getFoxyMovementSeconds();
             int speed = config.getMoveSpeed(night).getFoxy();
-            effectManager.removeEffect(player, BindEffect.TYPE);
-            effectManager.applyEffect(player, new SpeedEffect(player, speed));
+            effectManager.removeEffect(player.getName(), BindEffect.TYPE);
+            effectManager.applyEffect(player.getName(), new SpeedEffect(player, speed));
             sendInfoToPlayer(player, Messages.get("Info_FoxyMovementStart", "%seconds", seconds));
             foxyMovementTask = new FoxyMovementTask(this, seconds);
             foxyMovementTask.start();
@@ -660,7 +693,7 @@ public class GameSession {
                 Player target = Utility.getPlayerExact(owner);
                 if ( target != null && target.isOnline() ) {
                     int wait = (int)(Math.random() * 8) + 1;
-                    freddy.teleport(target, TeleportCause.PLUGIN);
+                    player.teleport(target, TeleportCause.PLUGIN);
                     freddyTeleportWaitTask = new FreddyTeleportWaitTask(this, wait);
                     freddyTeleportWaitTask.start();
                     sendInfoToPlayer(freddy, Messages.get("Info_FreddyTeleportWait", "%seconds", wait));
@@ -684,17 +717,22 @@ public class GameSession {
      */
     protected void onBatteryDown(Player player) {
 
+        // ゲーム中でなければ何もしない
+        if ( phase != GameSessionPhase.IN_GAME ) {
+            return;
+        }
+
         // 手持ちのアイテムを全て無くす
         player.getInventory().clear();
 
         // 懐中電灯オフ
-        effectManager.applyEffect(player, new BlindnessEffect(player));
+        effectManager.applyEffect(player.getName(), new BlindnessEffect(player));
 
         // シャッターオフ
-        effectManager.removeEffect(player, InvisibleEffect.TYPE);
+        effectManager.removeEffect(player.getName(), InvisibleEffect.TYPE);
 
         // プレイヤーを停止する
-        effectManager.applyEffect(player, new BindEffect(player));
+        effectManager.applyEffect(player.getName(), new BindEffect(player));
 
         // フレディにテレポート用アイテムを渡す
         int wait = (int)(Math.random() * 8) + 1;
@@ -716,7 +754,7 @@ public class GameSession {
         }
 
         // タッチした人がFreddy陣営でなければ無視
-        if ( getDollRole(player) == null ) {
+        if ( getDollRole(player.getName()) == null ) {
             return;
         }
 
@@ -731,7 +769,7 @@ public class GameSession {
         }
 
         // タッチされた人が透明化していたら無視
-        if ( effectManager.hasEffect(target, InvisibleEffect.TYPE) ) {
+        if ( effectManager.hasEffect(target.getName(), InvisibleEffect.TYPE) ) {
             return;
         }
 
@@ -747,8 +785,8 @@ public class GameSession {
      */
     public void joinEntrant(Player player) {
 
-        if ( !entrants.contains(player) ) {
-            entrants.add(player);
+        if ( !entrants.contains(player.getName()) ) {
+            entrants.add(player.getName());
 
             // プレイヤーの持ち物を預かる
             storage.sendToTemp(player);
@@ -771,8 +809,8 @@ public class GameSession {
      */
     public void leaveEntrant(Player player) {
 
-        if ( entrants.contains(player) ) {
-            entrants.remove(player);
+        if ( entrants.contains(player.getName()) ) {
+            entrants.remove(player.getName());
 
             // 預かっていた持ち物を返す
             storage.restoreFromTemp(player);
@@ -787,16 +825,16 @@ public class GameSession {
      */
     public void joinSpectator(Player player) {
 
-        if ( !spectators.contains(player) ) {
-            spectators.add(player);
+        if ( !spectators.contains(player.getName()) ) {
+            spectators.add(player.getName());
         }
 
         // サイドバーを表示する
         scoreboardDisplay.setShowPlayer(player);
 
         // 透明化する、高速化する
-        effectManager.applyEffect(player, new InvisibleEffect(player));
-        effectManager.applyEffect(player, new SpeedEffect(player, 3));
+        effectManager.applyEffect(player.getName(), new InvisibleEffect(player));
+        effectManager.applyEffect(player.getName(), new SpeedEffect(player, 3));
 
         // 持ち物を預かる
         if ( !storage.isInventoryExists(player) ) {
@@ -816,14 +854,14 @@ public class GameSession {
      */
     public void leaveSpectator(Player player) {
 
-        if ( spectators.contains(player) ) {
-            spectators.remove(player);
+        if ( spectators.contains(player.getName()) ) {
+            spectators.remove(player.getName());
 
             // サイドバーを消去する
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 
             // エフェクトを除去する
-            effectManager.removeAllEffect(player);
+            effectManager.removeAllEffect(player.getName());
 
             // 預かっていた持ち物を返す
             storage.restoreFromTemp(player);
@@ -857,7 +895,7 @@ public class GameSession {
      * 参加者を全て取得する
      * @return 参加者
      */
-    public List<Player> getEntrants() {
+    public List<String> getEntrants() {
         return entrants;
     }
 
@@ -871,19 +909,19 @@ public class GameSession {
     }
 
     public void setFreddy(Player freddy) {
-        this.freddy = freddy;
+        this.freddy = freddy.getName();
     }
 
     public void setChica(Player chica) {
-        this.chica = chica;
+        this.chica = chica.getName();
     }
 
     public void setBonnie(Player bonnie) {
-        this.bonnie = bonnie;
+        this.bonnie = bonnie.getName();
     }
 
     public void setFoxy(Player foxy) {
-        this.foxy = foxy;
+        this.foxy = foxy.getName();
     }
 
     /**
@@ -928,10 +966,12 @@ public class GameSession {
      * Foxyが行動時間を終了した時に呼び出されるメソッド
      */
     protected void onFoxyMovementEnd() {
+        Player player = Utility.getPlayerExact(foxy);
+        if ( player == null ) return;
         sendInfoToPlayer(foxy, Messages.get("Info_FoxyMovementEnd"));
         Location respawn = FiveNightsAtFreddysInMinecraft
                 .getInstance().getLocationManager().getFoxy();
-        foxy.teleport(respawn, TeleportCause.PLUGIN);
+        player.teleport(respawn, TeleportCause.PLUGIN);
         effectManager.removeEffect(foxy, SpeedEffect.TYPE);
         effectManager.applyEffect(foxy, new BindEffect(foxy));
     }
@@ -941,6 +981,8 @@ public class GameSession {
      * @param target ターゲットプレイヤー
      */
     protected void onFreddyItemGet(Player target) {
+        Player player = Utility.getPlayerExact(freddy);
+        if ( player == null ) return;
         sendInfoToPlayer(freddy, Messages.get("Info_FreddyTeleportItem",
                 "%player", target.getName()));
         ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
@@ -948,7 +990,7 @@ public class GameSession {
         meta.setOwner(target.getName());
         meta.setDisplayName(Messages.get("ItemName_FreddyTeleport", "%target", target.getName()));
         skull.setItemMeta(meta);
-        freddy.getInventory().addItem(skull);
+        player.getInventory().addItem(skull);
     }
 
     /**
@@ -963,35 +1005,54 @@ public class GameSession {
      * プレイヤー用アイテムを配布する
      * @param player
      */
-    private void sendPlayerInventory(Player player) {
-
+    private void sendPlayerInventory(String name) {
+        Player player = Utility.getPlayerExact(name);
+        if ( player == null || !player.isOnline() ) {
+            return;
+        }
         player.getInventory().addItem(
                 flashlightOff.clone(), radar.clone(), shutterOff.clone());
         updateInventory(player);
     }
 
-    private void sendFreddyInventory(Player player) {
+    private void sendFreddyInventory(String name) {
+        Player player = Utility.getPlayerExact(name);
+        if ( player == null || !player.isOnline() ) {
+            return;
+        }
         player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
         player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
         player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
         player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
     }
 
-    private void sendChicaInventory(Player player) {
+    private void sendChicaInventory(String name) {
+        Player player = Utility.getPlayerExact(name);
+        if ( player == null || !player.isOnline() ) {
+            return;
+        }
         player.getInventory().setHelmet(new ItemStack(Material.GOLD_HELMET));
         player.getInventory().setChestplate(new ItemStack(Material.GOLD_CHESTPLATE));
         player.getInventory().setLeggings(new ItemStack(Material.GOLD_LEGGINGS));
         player.getInventory().setBoots(new ItemStack(Material.GOLD_BOOTS));
     }
 
-    private void sendBonnieInventory(Player player) {
+    private void sendBonnieInventory(String name) {
+        Player player = Utility.getPlayerExact(name);
+        if ( player == null || !player.isOnline() ) {
+            return;
+        }
         player.getInventory().setHelmet(new ItemStack(Material.DIAMOND_HELMET));
         player.getInventory().setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE));
         player.getInventory().setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS));
         player.getInventory().setBoots(new ItemStack(Material.DIAMOND_BOOTS));
     }
 
-    private void sendFoxyInventory(Player player) {
+    private void sendFoxyInventory(String name) {
+        Player player = Utility.getPlayerExact(name);
+        if ( player == null || !player.isOnline() ) {
+            return;
+        }
         player.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET));
         player.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE));
         player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
@@ -1028,10 +1089,22 @@ public class GameSession {
 
     /**
      * プレイヤーに情報を流す
+     * @param name プレイヤー名
+     * @param message 情報
+     */
+    private void sendInfoToPlayer(String name, String message) {
+        sendInfoToPlayer(Utility.getPlayerExact(name), message);
+    }
+
+    /**
+     * プレイヤーに情報を流す
      * @param player プレイヤー
      * @param message 情報
      */
     private void sendInfoToPlayer(Player player, String message) {
+        if ( player == null || !player.isOnline() ) {
+            return;
+        }
         message = Messages.get("Prefix_Info") + message;
         player.sendMessage(message);
     }
@@ -1042,11 +1115,17 @@ public class GameSession {
      */
     private void sendInGameAnnounce(String message) {
         message = Messages.get("Prefix_InGame") + message;
-        for ( Player player : entrants ) {
-            player.sendMessage(message);
+        for ( String name : entrants ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null && player.isOnline() ) {
+                player.sendMessage(message);
+            }
         }
-        for ( Player player : spectators ) {
-            player.sendMessage(message);
+        for ( String name : spectators ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null && player.isOnline() ) {
+                player.sendMessage(message);
+            }
         }
         logger.log(message);
     }
@@ -1066,11 +1145,17 @@ public class GameSession {
      * @param sound
      */
     private void sendInGameSound(SoundComponent sound) {
-        for ( Player player : players ) {
-            sound.playSoundToPlayer(player);
+        for ( String name : players ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null && player.isOnline() ) {
+                sound.playSoundToPlayer(player);
+            }
         }
-        for ( Player player : spectators ) {
-            sound.playSoundToPlayer(player);
+        for ( String name : spectators ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null && player.isOnline() ) {
+                sound.playSoundToPlayer(player);
+            }
         }
     }
 
@@ -1079,11 +1164,17 @@ public class GameSession {
      * @param message
      */
     private void sendInGameTitle(String message) {
-        for ( Player player : entrants ) {
-            TitleDisplayComponent.display(player, message, 0, 40, 40);
+        for ( String name : entrants ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null && player.isOnline() ) {
+                TitleDisplayComponent.display(player, message, 0, 40, 40);
+            }
         }
-        for ( Player player : spectators ) {
-            TitleDisplayComponent.display(player, message, 0, 40, 40);
+        for ( String name : spectators ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null && player.isOnline() ) {
+                TitleDisplayComponent.display(player, message, 0, 40, 40);
+            }
         }
         logger.log(message);
     }
@@ -1133,38 +1224,45 @@ public class GameSession {
 
     /**
      * 役割を返す
-     * @param player プレイヤー
+     * @param name プレイヤー名
      * @return 役割
      */
-    private Doll getDollRole(Player player) {
+    private Doll getDollRole(String name) {
 
-        if ( player == null ) {
+        if ( name == null ) {
             return null;
-        } else if ( player.equals(freddy) ) {
+        } else if ( name.equals(freddy) ) {
             return Doll.FREDDY;
-        } else if ( player.equals(chica) ) {
+        } else if ( name.equals(chica) ) {
             return Doll.CHICA;
-        } else if ( player.equals(bonnie) ) {
+        } else if ( name.equals(bonnie) ) {
             return Doll.BONNIE;
-        } else if ( player.equals(foxy) ) {
+        } else if ( name.equals(foxy) ) {
             return Doll.FOXY;
         }
         return null;
     }
 
-    private void removeInventoryAll(Player player) {
+    private void removeInventoryAll(String name) {
+        Player player = Utility.getPlayerExact(name);
+        if ( player == null ) return;
         player.getInventory().clear();
         player.getInventory().setHelmet(new ItemStack(Material.AIR));
         player.getInventory().setChestplate(new ItemStack(Material.AIR));
         player.getInventory().setLeggings(new ItemStack(Material.AIR));
         player.getInventory().setBoots(new ItemStack(Material.AIR));
+        updateInventory(player);
     }
 
-    private void applyMoveSpeedSetting(Player player, int setting) {
+    private void applyMoveSpeedSetting(String name, int setting) {
+        Player player = Utility.getPlayerExact(name);
+        if ( player == null || !player.isOnline() ) {
+            return;
+        }
         if ( setting == -99 ) {
-            effectManager.applyEffect(player, new BindEffect(player));
+            effectManager.applyEffect(name, new BindEffect(player));
         } else {
-            effectManager.applyEffect(player, new SpeedEffect(player, setting));
+            effectManager.applyEffect(name, new SpeedEffect(player, setting));
         }
     }
 }

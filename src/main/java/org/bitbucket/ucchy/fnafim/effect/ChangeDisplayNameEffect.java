@@ -1,5 +1,6 @@
 package org.bitbucket.ucchy.fnafim.effect;
 
+import org.bitbucket.ucchy.fnafim.Utility;
 import org.bukkit.entity.Player;
 
 /**
@@ -11,20 +12,27 @@ public class ChangeDisplayNameEffect implements SpecialEffect {
     public static final String TYPE = "ChangeDisplayName";
 
     private Player player;
-    private String name;
+    private String displayName;
 
-    public ChangeDisplayNameEffect(Player player, String name) {
+    public ChangeDisplayNameEffect(String name, String displayName) {
+        this.player = Utility.getPlayerExact(name);
+        this.displayName = displayName;
+    }
+
+    public ChangeDisplayNameEffect(Player player, String displayName) {
         this.player = player;
-        this.name = name;
+        this.displayName = displayName;
     }
 
     @Override
     public void start() {
-        player.setDisplayName(name);
+        if ( player == null ) return;
+        player.setDisplayName(displayName);
     }
 
     @Override
     public void end() {
+        if ( player == null ) return;
         player.setDisplayName(player.getName());
     }
 
