@@ -351,6 +351,9 @@ public class GameSession {
             effectManager.removeAllEffect(name);
         }
 
+        // バッテリーをクリア
+        batteries.clear();
+
         // タスクをクリア
         if ( foxyMovementTask != null && !foxyMovementTask.isEnded() ) {
             foxyMovementTask.end();
@@ -427,12 +430,17 @@ public class GameSession {
         // エフェクトをクリア
         effectManager.removeAllEffect(player.getName());
 
+        // バッテリーをクリア
+        batteries.remove(player.getName());
+        player.setLevel(0);
+        player.setExp(0);
+
         // 持ち物をクリア
         player.getInventory().clear();
 
         // プレイヤーおよび参加者から削除する
-        entrants.remove(player);
-        players.remove(player);
+        entrants.remove(player.getName());
+        players.remove(player.getName());
 
         // スコアボードを更新
         scoreboardDisplay.setRemainPlayer(players.size());
@@ -508,7 +516,7 @@ public class GameSession {
             effectManager.removeAllEffect(name);
         }
 
-        // Night1-4は、次の夜の準備。その他は終了.
+        // Night1-4は、次の夜の準備。その他は終了。
         final Night next = night.getNext();
         if ( next != null ) {
 
@@ -536,6 +544,12 @@ public class GameSession {
                 effectManager.removeAllEffect(name);
             }
 
+            // バッテリーをクリア
+            for ( PlayerBattery battery : batteries.values() ) {
+                battery.resetExpBar();
+            }
+            batteries.clear();
+
             // 15秒後に、startPreparingを呼び出す
             int wait = config.getSecondsOfNightInterval();
             new BukkitRunnable() {
@@ -562,7 +576,7 @@ public class GameSession {
     protected boolean onEntrantInteract(final Player player) {
 
         // 実行者が観客なら、全てキャンセル
-        if ( spectators.contains(player) ) {
+        if ( spectators.contains(player.getName()) ) {
             return false;
         }
 
@@ -576,12 +590,12 @@ public class GameSession {
         // 懐中電灯のアイテム処理
         if ( name.equals(Messages.get("ItemName_FlashLight")) ) {
             boolean isOn = (item.getType() == flashlightOff.getType());
-            if ( batteries.containsKey(player) ) {
-                if ( batteries.get(player).getPower() <= 0 ) {
+            if ( batteries.containsKey(player.getName()) ) {
+                if ( batteries.get(player.getName()).getPower() <= 0 ) {
                     sendInfoToPlayer(player, Messages.get("Info_BatteryNotEnough"));
                     return false;
                 }
-                batteries.get(player).setUsingFlashlight(isOn);
+                batteries.get(player.getName()).setUsingFlashlight(isOn);
             }
             if ( isOn ) {
                 player.setItemInHand(flashlightOn.clone());
@@ -596,12 +610,12 @@ public class GameSession {
 
         // レーダーのアイテム処理
         if ( name.equals(Messages.get("ItemName_Rader")) ) {
-            if ( batteries.containsKey(player) ) {
-                if ( !batteries.get(player).hasPowerToUserRadar() ) {
+            if ( batteries.containsKey(player.getName()) ) {
+                if ( !batteries.get(player.getName()).hasPowerToUseRadar() ) {
                     sendInfoToPlayer(player, Messages.get("Info_BatteryNotEnough"));
                     return false;
                 }
-                batteries.get(player).decreaseToUseRadar();
+                batteries.get(player.getName()).decreaseToUseRadar();
             }
             boolean found = false;
             int range = config.getRaderSearchingRange();
@@ -632,18 +646,22 @@ public class GameSession {
         // シャッターのアイテム処理
         if ( name.equals(Messages.get("ItemName_Shutter")) ) {
             boolean isOn = (item.getType() == shutterOff.getType());
-            if ( batteries.containsKey(player) ) {
-                if ( batteries.get(player).getPower() <= 0 ) {
+            if ( batteries.containsKey(player.getName()) ) {
+                if ( batteries.get(player.getName()).getPower() <= 0 ) {
                     sendInfoToPlayer(player, Messages.get("Info_BatteryNotEnough"));
                     return false;
                 }
-                batteries.get(player).setUsingShutter(isOn);
+                batteries.get(player.getName()).setUsingShutter(isOn);
             }
             if ( isOn ) {
-                player.setItemInHand(shutterOn.clone());
+                player.setItemInHand(new ItemStack(Material.AIR));
+                player.getInventory().setItem(3, shutterOn.clone());
+                updateInventory(player);
                 effectManager.applyEffect(player.getName(), new InvisibleEffect(player));
             } else {
-                player.setItemInHand(shutterOff.clone());
+                player.setItemInHand(new ItemStack(Material.AIR));
+                player.getInventory().setItem(2, shutterOff.clone());
+                updateInventory(player);
                 effectManager.removeEffect(player.getName(), InvisibleEffect.TYPE);
             }
             config.getSoundUseShutter().playSoundToPlayer(player);
@@ -764,7 +782,7 @@ public class GameSession {
         }
 
         // タッチされた人がプレイヤーでなければ無視
-        if ( !players.contains(target) ) {
+        if ( !players.contains(target.getName()) ) {
             return;
         }
 
@@ -888,7 +906,7 @@ public class GameSession {
      * @return 参加者かどうか
      */
     public boolean isEntrant(Player player) {
-        return entrants.contains(player);
+        return entrants.contains(player.getName());
     }
 
     /**
@@ -905,7 +923,7 @@ public class GameSession {
      * @return Foxyかどうか
      */
     public boolean isFoxy(Player player) {
-        return foxy.equals(player);
+        return foxy.equals(player.getName());
     }
 
     public void setFreddy(Player freddy) {
@@ -930,7 +948,7 @@ public class GameSession {
      * @return playerかどうか
      */
     public boolean isPlayer(Player player) {
-        return players.contains(player);
+        return players.contains(player.getName());
     }
 
     /**
@@ -939,10 +957,10 @@ public class GameSession {
      * @return バッテリー残量
      */
     public double getPowerLevel(Player player) {
-        if ( !batteries.containsKey(player) ) {
+        if ( !batteries.containsKey(player.getName()) ) {
             return -1;
         }
-        return batteries.get(player).getPower();
+        return batteries.get(player.getName()).getPower();
     }
 
     /**
@@ -951,7 +969,7 @@ public class GameSession {
      * @return 観客かどうか
      */
     public boolean isSpectator(Player player) {
-        return spectators.contains(player);
+        return spectators.contains(player.getName());
     }
 
     /**
@@ -1011,7 +1029,8 @@ public class GameSession {
             return;
         }
         player.getInventory().addItem(
-                flashlightOff.clone(), radar.clone(), shutterOff.clone());
+                flashlightOff.clone(), radar.clone());
+        player.getInventory().setItem(2, shutterOff.clone());
         updateInventory(player);
     }
 

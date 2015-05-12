@@ -113,7 +113,7 @@ public class PlayerBattery {
      * レーダーを使用可能な電力が残っているかどうかを確認するメソッド
      * @return
      */
-    protected boolean hasPowerToUserRadar() {
+    protected boolean hasPowerToUseRadar() {
         return power >= 1.0;
     }
 
@@ -147,5 +147,14 @@ public class PlayerBattery {
      */
     public double getPower() {
         return power;
+    }
+
+    /**
+     * プレイヤーのExpを0にする
+     */
+    public void resetExpBar() {
+        if ( player == null ) return;
+        player.setLevel(0);
+        player.setExp(0);
     }
 }

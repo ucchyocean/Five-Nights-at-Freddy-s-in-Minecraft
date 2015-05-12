@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -136,6 +137,28 @@ public class GameSessionListener implements Listener {
     public void onPlayerDropItem(PlayerDropItemEvent event) {
 
         Player player = event.getPlayer();
+
+        // セッションが無いならイベントを無視
+        GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session == null ) {
+            return;
+        }
+
+        // 参加者または観客なら、全てのイベントをキャンセル
+        if ( session.isEntrant(player) || session.isSpectator(player) ) {
+            event.setCancelled(true);
+            return;
+        }
+    }
+
+    /**
+     * プレイヤーがアイテムを落とした時に呼び出されるイベントハンドラ
+     * @param event
+     */
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+
+        Player player = (Player)event.getWhoClicked();
 
         // セッションが無いならイベントを無視
         GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
