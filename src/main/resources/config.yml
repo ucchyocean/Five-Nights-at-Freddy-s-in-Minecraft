@@ -1,0 +1,130 @@
+# ${project.name} v${project.version}
+# @author     ucchy
+# @license    LGPLv3
+# @copyright  Copyright ucchy 2015
+
+
+# =============== Common Settings ===============
+
+# Message language.
+lang: en
+
+# Max player num.
+maxPlayers: 64
+
+# Real time seconds per one hour in game.
+# If you set 90 seconds, one night will be 540 seconds (= 90sec X 6hours).
+secondsOfOneHour: 90
+
+# Interval seconds between previous night and next night.
+secondsOfNightInterval: 15
+
+# Battery decreasement per second.
+batteryDecreasePerSecond: 0.14
+
+# Battery decreasement per second by using flash light.
+batteryFlashLightPerSecond: 0.2
+
+# Battery decreasement per using rader.
+batteryRaderPerUse: 1.0
+
+# Battery decreasement per second by using shutter.
+batteryShutterPerSecond: 0.67
+
+# Rader search range.
+raderSearchingRange: 15
+
+
+# =============== Freddy's Characters Settings ===============
+
+# Movement speed settings of Night1.
+# You can set each character's movement speeds, -99(cannot move) or from -5 to 5.
+# Foxy cannot move always, except using movement item.
+# FoxyMovement is the number of times the Foxy can act per night,
+#   you can set -1(cannot move) or 0(random), or from 1 to 5.
+night1MoveSpeed:
+  freddy: -99
+  chica: -3
+  bonnie: -3
+  foxy: 1
+  foxyMovement: 1
+
+# Movement speed settings of Night2.
+night2MoveSpeed:
+  freddy: -99
+  chica: -2
+  bonnie: -2
+  foxy: 1
+  foxyMovement: 1
+
+# Movement speed settings of Night3.
+night3MoveSpeed:
+  freddy: -1
+  chica: -1
+  bonnie: -1
+  foxy: 2
+  foxyMovement: 2
+
+# Movement speed settings of Night4.
+night4MoveSpeed:
+  freddy: 0
+  chica: 0
+  bonnie: 0
+  foxy: 3
+  foxyMovement: 3
+
+# Movement speed settings of Night5.
+night5MoveSpeed:
+  freddy: 1
+  chica: 1
+  bonnie: 1
+  foxy: 3
+  foxyMovement: 3
+
+# Movement speed settings of Night6.
+night6MoveSpeed:
+  freddy: 2
+  chica: 2
+  bonnie: 2
+  foxy: 4
+  foxyMovement: 4
+
+# Movement speed settings of custom night (Night7).
+customNightMoveSpeed:
+  freddy: 4
+  chica: 4
+  bonnie: 4
+  foxy: 5
+  foxyMovement: 5
+
+# Foxy movable time seconds per using an item.
+foxyMovementSeconds: 15
+
+# =============== Sound Settings ===============
+
+# Using flash light.
+soundUseFlashLight: 'CLICK'
+
+# Using rader.
+soundUseRader: 'IRONGOLEM_HIT-1.0-0.7'
+
+# Using shutter.
+soundUseShutter: 'WITHER_SHOOT-1.0-1.0'
+
+# Using foxy movement item.
+soundFoxyMovement: 'ZOMBIE_REMEDY-1.0-1.0'
+
+# Freddy's teleport sound.
+# All player can hear this sound.
+# # Please change Freddy's music box sound by using Minecraft Resource Pack. :)
+soundFreddyTeleport: 'ENDERMAN_TELEPORT-1.0-0.8,BLAZE_BREATH-1.0-0.5,ENDERMAN_DEATH'
+
+# Starting Night.
+soundNightStart: 'LEVEL_UP-0.8-0.5,ZOMBIE_UNFECT-1.0-0.8,BLAZE_BREATH-1.0-0.5'
+
+# Ending Night.
+# # Please change Applause + Yeaaaaahhh!!!! sound by using Minecraft Resource Pack. :)
+soundNightEnd: 'ENDERDRAGON_DEATH-0.4-2.0'
+
+# Caught player.
+soundPlayerCaught: 'GHAST_SCREAM-1.0-0.5,FIREWORK_LARGE_BLAST-1.0-0.5'

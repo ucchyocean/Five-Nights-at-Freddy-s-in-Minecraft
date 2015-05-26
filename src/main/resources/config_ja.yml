@@ -4,6 +4,8 @@
 # @copyright  Copyright ucchy 2015
 
 
+# =============== 共通設定 ===============
+
 # メッセージの言語
 lang: ja
 
@@ -16,9 +18,6 @@ secondsOfOneHour: 90
 
 # Nightが終わって、次のNightが始まるまでの、インターバル。秒数で指定します。
 secondsOfNightInterval: 15
-
-# Foxyが、一回の行動で移動可能な時間（秒）を指定します。
-foxyMovementSeconds: 15
 
 # 1秒あたりのバッテリー基本消費量
 batteryDecreasePerSecond: 0.14
@@ -35,6 +34,9 @@ batteryShutterPerSecond: 0.67
 # レーダーの索敵範囲。デフォルトは15マスです。
 raderSearchingRange: 15
 
+
+# =============== Freddy's陣営の強さ設定 ===============
+
 # Night1 の各キャラの移動速度。
 # 各キャラの移動速度レベルを、-99(移動不可)か、-5から5で設定します。
 # Foxyは普段は移動不可で、行動時間の時のみ、ここに設定した移動速度で移動できます。
@@ -44,24 +46,24 @@ night1MoveSpeed:
   freddy: -99
   chica: -3
   bonnie: -3
-  foxy: -99
-  foxyMovement: -1
+  foxy: 1
+  foxyMovement: 1
 
 # Night2 の各キャラの移動速度。
 night2MoveSpeed:
   freddy: -99
   chica: -2
   bonnie: -2
-  foxy: -99
-  foxyMovement: -1
+  foxy: 1
+  foxyMovement: 1
 
 # Night3 の各キャラの移動速度。
 night3MoveSpeed:
   freddy: -1
   chica: -1
   bonnie: -1
-  foxy: -99
-  foxyMovement: -1
+  foxy: 2
+  foxyMovement: 2
 
 # Night4 の各キャラの移動速度。
 night4MoveSpeed:
@@ -94,6 +96,9 @@ customNightMoveSpeed:
   bonnie: 4
   foxy: 5
   foxyMovement: 5
+
+# Foxyが、一回の行動で移動可能な時間（秒）を指定します。
+foxyMovementSeconds: 15
 
 # =============== 効果音の設定 ===============
 

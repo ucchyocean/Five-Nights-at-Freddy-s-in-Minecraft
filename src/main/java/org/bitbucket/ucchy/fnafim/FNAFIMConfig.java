@@ -106,11 +106,16 @@ public class FNAFIMConfig {
 
         FiveNightsAtFreddysInMinecraft plugin = FiveNightsAtFreddysInMinecraft.getInstance();
 
-        File configFile = new File(
-                plugin.getDataFolder(), "config.yml");
+        // コンフィグファイルが無いなら生成する
+        File configFile = new File(plugin.getDataFolder(), "config.yml");
         if ( !configFile.exists() ) {
-            Utility.copyFileFromJar(plugin.getPluginJarFile(),
-                    configFile, "config_ja.yml", false);
+            if ( FiveNightsAtFreddysInMinecraft.getDefaultLocaleLanguage().equals("ja") ) {
+                Utility.copyFileFromJar(
+                        plugin.getPluginJarFile(), configFile, "config_ja.yml", false);
+            } else {
+                Utility.copyFileFromJar(
+                        plugin.getPluginJarFile(), configFile, "config.yml", false);
+            }
         }
 
         FiveNightsAtFreddysInMinecraft.getInstance().reloadConfig();
@@ -128,11 +133,11 @@ public class FNAFIMConfig {
         raderSearchingRange = config.getInt("raderSearchingRange", 15);
 
         night1MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night1MoveSpeed", -99, -3, -3, -99, -1);
+                config, "night1MoveSpeed", -99, -3, -3, 1, 1);
         night2MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night2MoveSpeed", -99, -2, -2, -99, -1);
+                config, "night2MoveSpeed", -99, -2, -2, 1, 1);
         night3MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night3MoveSpeed", -1, -1, -1, -99, -1);
+                config, "night3MoveSpeed", -1, -1, -1, 2, 2);
         night4MoveSpeed = FNAFIMConfigMoveSetting.load(
                 config, "night4MoveSpeed", 0, 0, 0, 3, 3);
         night5MoveSpeed = FNAFIMConfigMoveSetting.load(
