@@ -15,7 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public abstract class GameSessionTask extends BukkitRunnable {
 
     protected boolean isEnd;
-    private int seconds;
+    protected int seconds;
 
     public GameSessionTask(int seconds) {
         this.seconds = seconds;

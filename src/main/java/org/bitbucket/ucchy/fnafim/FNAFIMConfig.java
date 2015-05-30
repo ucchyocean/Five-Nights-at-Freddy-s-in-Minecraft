@@ -70,6 +70,9 @@ public class FNAFIMConfig {
     /** CustomNightの移動速度 */
     private FNAFIMConfigMoveSetting customNightMoveSpeed;
 
+    /** Chicaの威嚇音を出す能力のクールダウンタイム */
+    private int chicaThreatCooldownSeconds;
+
     /** 効果音 - 懐中電灯のオンオフ */
     private SoundComponent soundUseFlashLight;
 
@@ -94,6 +97,8 @@ public class FNAFIMConfig {
     /** 効果音 - プレイヤーが捕まったときの効果音 */
     private SoundComponent soundPlayerCaught;
 
+    /** 効果音 - Chicaの威嚇音 */
+    private SoundComponent soundChicaThreat;
 
     /**
      * コンストラクタ
@@ -135,6 +140,7 @@ public class FNAFIMConfig {
         batteryShutterPerSecond = config.getDouble("batteryShutterPerSecond", 0.67);
         raderSearchingRange = config.getInt("raderSearchingRange", 15);
         playerLogoutTrackingSeconds = config.getInt("playerLogoutTrackingSeconds", 20);
+        chicaThreatCooldownSeconds = config.getInt("chicaThreatCooldownSeconds", 40);
 
         night1MoveSpeed = FNAFIMConfigMoveSetting.load(
                 config, "night1MoveSpeed", -99, -3, -3, 1, 1);
@@ -167,6 +173,8 @@ public class FNAFIMConfig {
                 config.getString("soundNightEnd"));
         soundPlayerCaught = SoundComponent.getComponentFromString(
                 config.getString("soundPlayerCaught"));
+        soundChicaThreat = SoundComponent.getComponentFromString(
+                config.getString("soundChicaThreat"));
     }
 
     /**
@@ -322,6 +330,13 @@ public class FNAFIMConfig {
     }
 
     /**
+     * @return chicaThreatCooldownSeconds
+     */
+    public int getChicaThreatCooldownSeconds() {
+        return chicaThreatCooldownSeconds;
+    }
+
+    /**
      * @return soundUseFlashLight
      */
     public SoundComponent getSoundUseFlashLight() {
@@ -377,4 +392,10 @@ public class FNAFIMConfig {
         return soundPlayerCaught;
     }
 
+    /**
+     * @return soundChicaThreat
+     */
+    public SoundComponent getSoundChicaThreat() {
+        return soundChicaThreat;
+    }
 }

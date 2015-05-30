@@ -23,6 +23,7 @@ import org.bitbucket.ucchy.fnafim.effect.BlindnessEffect;
 import org.bitbucket.ucchy.fnafim.effect.ChangeDisplayNameEffect;
 import org.bitbucket.ucchy.fnafim.effect.InvisibleEffect;
 import org.bitbucket.ucchy.fnafim.effect.SpeedEffect;
+import org.bitbucket.ucchy.fnafim.task.ChicaThreatCooldownTimeTask;
 import org.bitbucket.ucchy.fnafim.task.FoxyMovementTask;
 import org.bitbucket.ucchy.fnafim.task.FreddyItemWaitTask;
 import org.bitbucket.ucchy.fnafim.task.FreddyTeleportWaitTask;
@@ -78,6 +79,8 @@ public class GameSession {
     private ItemStack radar;
     private ItemStack shutterOn;
     private ItemStack shutterOff;
+
+    private ItemStack chicaThreat;
 
     /**
      * コンストラクタ
@@ -748,6 +751,22 @@ public class GameSession {
             player.setItemInHand(new ItemStack(Material.AIR));
         }
 
+        // Chicaのアイテム処理
+        if ( item.getType() == Material.GLOWSTONE_DUST ) {
+
+            // 威嚇音を出す
+            config.getSoundChicaThreat().playSoundToWorld(player.getLocation());
+
+            // アイテム消費
+            player.setItemInHand(new ItemStack(Material.AIR));
+
+            // クールダウンタイムを開始する
+            int seconds = config.getChicaThreatCooldownSeconds();
+            ChicaThreatCooldownTimeTask task = new ChicaThreatCooldownTimeTask(this, seconds);
+            task.start();
+            tasks.add(task);
+        }
+
         return true;
     }
 
@@ -951,20 +970,12 @@ public class GameSession {
         return foxy.equals(player.getName());
     }
 
-    public void setFreddy(Player freddy) {
-        this.freddy = freddy.getName();
-    }
-
-    public void setChica(Player chica) {
-        this.chica = chica.getName();
-    }
-
-    public void setBonnie(Player bonnie) {
-        this.bonnie = bonnie.getName();
-    }
-
-    public void setFoxy(Player foxy) {
-        this.foxy = foxy.getName();
+    /**
+     * Foxyを取得する
+     * @return foxy
+     */
+    public String getFoxy() {
+        return foxy;
     }
 
     /**
@@ -1101,6 +1112,8 @@ public class GameSession {
         player.getInventory().setChestplate(new ItemStack(Material.GOLD_CHESTPLATE));
         player.getInventory().setLeggings(new ItemStack(Material.GOLD_LEGGINGS));
         player.getInventory().setBoots(new ItemStack(Material.GOLD_BOOTS));
+
+        giveThreatItemToChica();
     }
 
     private void sendBonnieInventory(String name) {
@@ -1143,6 +1156,16 @@ public class GameSession {
         }
     }
 
+    /**
+     * Chicaに威嚇用アイテムを渡す
+     */
+    public void giveThreatItemToChica() {
+
+        Player player = Utility.getPlayerExact(chica);
+        if ( player == null ) return;
+        player.getInventory().setItem(1, chicaThreat);
+        updateInventory(player);
+    }
 
     /**
      * インベントリのアップデートを行う
@@ -1286,6 +1309,11 @@ public class GameSession {
         meta = shutterOn.getItemMeta();
         meta.setDisplayName(Messages.get("ItemName_Shutter"));
         shutterOn.setItemMeta(meta);
+
+        chicaThreat = new ItemStack(Material.GLOWSTONE_DUST);
+        meta = chicaThreat.getItemMeta();
+        meta.setDisplayName(Messages.get("ItemName_ChicaThreat"));
+        chicaThreat.setItemMeta(meta);
     }
 
     /**

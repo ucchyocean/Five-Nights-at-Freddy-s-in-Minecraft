@@ -103,6 +103,9 @@ customNightMoveSpeed:
 # Foxyが、一回の行動で移動可能な時間（秒）を指定します。
 foxyMovementSeconds: 15
 
+# Chicaが、威嚇をしてから、次の威嚇が可能になるまでの時間（秒）を指定します。
+chicaThreatCooldownSeconds: 40
+
 # =============== 効果音の設定 ===============
 
 # 懐中電灯のオンオフ
@@ -131,3 +134,7 @@ soundNightEnd: 'ENDERDRAGON_DEATH-0.4-2.0'
 
 # プレイヤーが捕まったときの効果音
 soundPlayerCaught: 'GHAST_SCREAM-1.0-0.5,FIREWORK_LARGE_BLAST-1.0-0.5'
+
+# Chicaが威嚇するときの効果音
+soundChicaThreat: 'GLASS,IRONGOLEM_DEATH-0.7'
+

@@ -103,6 +103,9 @@ customNightMoveSpeed:
 # Foxy movable time seconds per using an item.
 foxyMovementSeconds: 15
 
+# Chica threat Cooldown time.
+chicaThreatCooldownSeconds: 40
+
 # =============== Sound Settings ===============
 
 # Using flash light.
@@ -131,3 +134,7 @@ soundNightEnd: 'ENDERDRAGON_DEATH-0.4-2.0'
 
 # Caught player.
 soundPlayerCaught: 'GHAST_SCREAM-1.0-0.5,FIREWORK_LARGE_BLAST-1.0-0.5'
+
+# Chica threaten.
+soundChicaThreat: 'GLASS,IRONGOLEM_DEATH-0.7'
+
