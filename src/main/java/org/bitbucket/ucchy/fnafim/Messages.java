@@ -26,7 +26,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class Messages {
 
     private static YamlConfiguration defaultMessages;
-    private static File configFolder;
+    private static File folder;
     private static File jar;
 
     private static Messages instance;
@@ -40,7 +40,7 @@ public class Messages {
     private Messages(String filename) {
 
         // メッセージファイルをロード
-        File file = new File(configFolder, filename);
+        File file = new File(folder, filename);
         if ( !file.exists() ) {
             try {
                 defaultMessages.save(file);
@@ -128,21 +128,21 @@ public class Messages {
      * Jarファイル内から直接 messages_en.yml を読み込み、
      * defaultMessagesとしてロードする。
      * @param _jar jarファイル
-     * @param _configFolder コンフィグフォルダ
+     * @param _folder フォルダ
      * @param lang デフォルト言語
      */
-    protected static void initialize(File _jar, File _configFolder, String lang) {
+    protected static void initialize(File _jar, File _folder, String lang) {
 
         jar = _jar;
-        configFolder = _configFolder;
+        folder = _folder;
 
-        if ( !configFolder.exists() ) {
-            configFolder.mkdirs();
+        if ( !folder.exists() ) {
+            folder.mkdirs();
         }
 
-        // コンフィグフォルダにメッセージファイルがまだ無いなら、コピーしておく
-        for ( String filename : new String[]{"messages_ja.yml"} ) {
-            File file = new File(configFolder, filename);
+        // フォルダにメッセージファイルがまだ無いなら、コピーしておく
+        for ( String filename : new String[]{"messages_ja.yml", "messages_en.yml"} ) {
+            File file = new File(folder, filename);
             if ( !file.exists() ) {
                 Utility.copyFileFromJar(jar, file, filename, true);
             }
