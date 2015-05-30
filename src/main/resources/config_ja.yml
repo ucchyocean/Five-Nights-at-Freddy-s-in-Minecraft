@@ -34,6 +34,9 @@ batteryShutterPerSecond: 0.67
 # レーダーの索敵範囲。デフォルトは15マスです。
 raderSearchingRange: 15
 
+# プレイヤーのログアウト逃げ期限時間（秒）。
+# もしプレイヤーがゲーム中にログアウトし、設定時間が過ぎた場合、そのプレイヤーは負けになります。
+playerLogoutTrackingSeconds: 20
 
 # =============== Freddy's陣営の強さ設定 ===============
 

@@ -31,9 +31,12 @@ batteryRaderPerUse: 1.0
 # Battery decreasement per second by using shutter.
 batteryShutterPerSecond: 0.67
 
-# Rader search range.
+# Rader search range. Default is 15 meters.
 raderSearchingRange: 15
 
+# Player logout tracking seconds.
+# If a player log out in midway of game, and expire this time, that player will lose.
+playerLogoutTrackingSeconds: 20
 
 # =============== Freddy's Characters Settings ===============
 

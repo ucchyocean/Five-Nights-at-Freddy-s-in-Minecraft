@@ -3,31 +3,23 @@
  * @license    LGPLv3
  * @copyright  Copyright ucchy 2015
  */
-package org.bitbucket.ucchy.fnafim.game;
+package org.bitbucket.ucchy.fnafim.task;
 
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
- * Foxyの行動タスク
+ * ゲーム内で実行される各種タスク処理
  * @author ucchy
  */
-public class FoxyMovementTask extends BukkitRunnable {
+public abstract class GameSessionTask extends BukkitRunnable {
 
-    private GameSession session;
-    private boolean isEnd;
+    protected boolean isEnd;
     private int seconds;
 
-    protected FoxyMovementTask(GameSession session, int seconds) {
-        this.session = session;
+    public GameSessionTask(int seconds) {
         this.seconds = seconds;
         isEnd = false;
-    }
-
-    @Override
-    public void run() {
-        session.onFoxyMovementEnd();
-        isEnd = true;
     }
 
     public void start() {

@@ -6,6 +6,7 @@
 package org.bitbucket.ucchy.fnafim.game;
 
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
+import org.bitbucket.ucchy.fnafim.task.PlayerLogoutTrackingTask;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -193,13 +194,15 @@ public class GameSessionListener implements Listener {
             return;
         }
 
-        // Foxyではないならイベントを無視
-        if ( !session.isFoxy(player) ) {
-            return;
+        // Foxyなら、リスポーン地点に飛ばして、バインドを設定する
+        if ( session.isFoxy(player) ) {
+            session.onFoxyMovementEnd();
         }
 
-        // リスポーン地点に飛ばして、バインドを設定する
-        session.onFoxyMovementEnd();
+        // プレイヤーなら、ゲーム中離脱したペナルティとして、バッテリーを20減らす
+        if ( session.isPlayer(player) ) {
+            session.decreaseBattery(player, 20);
+        }
     }
 
     /**
@@ -228,8 +231,16 @@ public class GameSessionListener implements Listener {
         }
 
         // 電力切れプレイヤーなら、即座に脱落させる
-        if ( session.getPowerLevel(player) == 0 ) {
-            session.onCaughtPlayer(player, null);
+        // 電力がまだあるプレイヤーなら、タイマーを動かす
+        if ( session.getBatteryLevel(player) == 0 ) {
+            session.onCaughtPlayer(player.getName(), null);
+        } else {
+            int seconds = FiveNightsAtFreddysInMinecraft.getInstance()
+                    .getFNAFIMConfig().getPlayerLogoutTrackingSeconds();
+            PlayerLogoutTrackingTask task
+                    = new PlayerLogoutTrackingTask(session, player.getName(), seconds);
+            task.start();
+            session.addTask(task);
         }
     }
 }

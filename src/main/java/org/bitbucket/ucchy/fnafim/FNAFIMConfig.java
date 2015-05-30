@@ -46,6 +46,9 @@ public class FNAFIMConfig {
     /** レーダーの索敵範囲（マス） */
     private int raderSearchingRange;
 
+    /** プレイヤーのログアウト逃げ期限時間（秒） */
+    private int playerLogoutTrackingSeconds;
+
     /** Night1の移動速度 */
     private FNAFIMConfigMoveSetting night1MoveSpeed;
 
@@ -131,6 +134,7 @@ public class FNAFIMConfig {
         batteryRaderPerUse = config.getDouble("batteryRaderPerUse", 1.0);
         batteryShutterPerSecond = config.getDouble("batteryShutterPerSecond", 0.67);
         raderSearchingRange = config.getInt("raderSearchingRange", 15);
+        playerLogoutTrackingSeconds = config.getInt("playerLogoutTrackingSeconds", 20);
 
         night1MoveSpeed = FNAFIMConfigMoveSetting.load(
                 config, "night1MoveSpeed", -99, -3, -3, 1, 1);
@@ -233,6 +237,13 @@ public class FNAFIMConfig {
      */
     public int getRaderSearchingRange() {
         return raderSearchingRange;
+    }
+
+    /**
+     * @return playerLogoutTrackingSeconds
+     */
+    public int getPlayerLogoutTrackingSeconds() {
+        return playerLogoutTrackingSeconds;
     }
 
     /**

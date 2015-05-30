@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
  */
 public class PlayerBattery {
 
-    private Player player;
+    private String name;
     private GameSession session;
     private double power;
     private boolean isUsingFlashlight;
@@ -35,22 +35,14 @@ public class PlayerBattery {
      * @param session
      */
     public PlayerBattery(String name, GameSession session) {
-        this(Utility.getPlayerExact(name), session);
-    }
-
-    /**
-     * コンストラクタ
-     * @param player
-     * @param session
-     */
-    public PlayerBattery(Player player, GameSession session) {
-        this.player = player;
+        this.name = name;
         this.session = session;
         power = 100;
         isUsingFlashlight = false;
         isUsingShutter = false;
         isDown = false;
 
+        Player player = Utility.getPlayerExact(name);
         if ( player != null ) {
             player.setLevel(100);
             player.setExp(1.0f);
@@ -97,7 +89,7 @@ public class PlayerBattery {
             isUsingShutter = false;
 
             // 電力切れイベントを呼びだす
-            session.onBatteryDown(player);
+            session.onBatteryDown(name);
         }
     }
 
@@ -106,6 +98,15 @@ public class PlayerBattery {
      */
     protected void decreaseToUseRadar() {
         power -= batteryRaderPerUse;
+        refreshExpBar();
+    }
+
+    /**
+     * 指定された量だけ、バッテリー残量を減らす
+     * @param amount
+     */
+    protected void decrease(double amount) {
+        power -= amount;
         refreshExpBar();
     }
 
@@ -125,6 +126,14 @@ public class PlayerBattery {
     }
 
     /**
+     * 現在のバッテリー残量を返す
+     * @return 現在のバッテリー残量
+     */
+    public double getPower() {
+        return power;
+    }
+
+    /**
      * @param isUsingShutter isUsingShutter
      */
     public void setUsingShutter(boolean isUsingShutter) {
@@ -135,6 +144,7 @@ public class PlayerBattery {
      * 現在の電力を、Exp表示部分に反映する
      */
     private void refreshExpBar() {
+        Player player = Utility.getPlayerExact(name);
         if ( player == null ) return;
         player.setLevel((int)power);
         float progress = (float)(power / 100);
@@ -142,17 +152,10 @@ public class PlayerBattery {
     }
 
     /**
-     * 現在のバッテリー残量を返す
-     * @return 現在のバッテリー残量
-     */
-    public double getPower() {
-        return power;
-    }
-
-    /**
      * プレイヤーのExpを0にする
      */
     public void resetExpBar() {
+        Player player = Utility.getPlayerExact(name);
         if ( player == null ) return;
         player.setLevel(0);
         player.setExp(0);

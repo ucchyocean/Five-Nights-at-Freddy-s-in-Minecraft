@@ -32,7 +32,7 @@ Announce_GameClear: 'ゲーム終了。プレイヤー側の勝利！'
 Announce_EntrantJoin: '%playerがゲームに参加しました。'
 Announce_EntrantLeave: '%playerがゲームから離脱しました。'
 
-Description_Freddy: 'あなたはFreddyに選ばれました。Night1とNight2は移動できません。電力が尽きたプレイヤーを、テレポートして襲うことができます。'
+Description_Freddy: 'あなたはFreddyに選ばれました。電力が尽きたプレイヤーを、テレポートして襲うことができます。'
 Description_Chica: 'あなたはChicaに選ばれました。プレイヤーをクリックして襲うことができます。'
 Description_Bonnie: 'あなたはBonnieに選ばれました。プレイヤーをクリックして襲うことができます。'
 Description_Foxy: 'あなたはFoxyに選ばれました。普段は行動できませんが、配布されるアイテムをクリックすることで短時間だけ行動可能になり、プレイヤーを襲うことができます。'
