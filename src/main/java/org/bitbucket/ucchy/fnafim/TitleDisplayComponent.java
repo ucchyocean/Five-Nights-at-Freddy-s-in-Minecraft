@@ -23,6 +23,8 @@ public class TitleDisplayComponent {
             player.sendMessage(Utility.replaceColorCode(text));
         }
 
+        String[] temp = text.split("\n");
+
         // sendCommandFeedbackの状態を取得、有効だったなら一旦無効にする。
         World world = player.getWorld();
         boolean pre = Boolean.parseBoolean(
@@ -34,11 +36,15 @@ public class TitleDisplayComponent {
         String command = String.format("title %s times %d %d %d",
                 player.getName(), fadein, duration, fadeout);
         Bukkit.dispatchCommand(sender, command);
-//        command = String.format("title %s subtitle {text:\"%s\"}",
-//                player.getName(), Utility.replaceColorCode(text));
-//        Bukkit.dispatchCommand(sender, command);
+
+        if ( temp.length >= 2 ) {
+            command = String.format("title %s subtitle {text:\"%s\"}",
+                    player.getName(), Utility.replaceColorCode(temp[1]));
+            Bukkit.dispatchCommand(sender, command);
+        }
+
         command = String.format("title %s title {text:\"%s\"}",
-                player.getName(), Utility.replaceColorCode(text));
+                player.getName(), Utility.replaceColorCode(temp[0]));
         Bukkit.dispatchCommand(sender, command);
 
         // sendCommandFeedbackの状態を戻す。

@@ -20,7 +20,7 @@ ItemName_ChicaThreat: 'Play threat sound'
 
 Announce_OpenInvitation: '%owner started to invite Five Nights at Freddy''s in Minecraft. You can join by using "/fn join" command.'
 Announce_CloseInvitation: '%owner Cancelled to invite Five Nights at Freddy''s in Minecraft.'
-Announce_GameStart: '&f%night  12:00 AM'
+Announce_GameStart: '12:00 AM\n%night'
 Announce_GameCanceled: 'Game Cancelled.'
 Announce_PlayerCaught: '%player was caught by %caught(%doll).'
 Announce_PlayerRunMidway: '%player was caught by an enigma.'

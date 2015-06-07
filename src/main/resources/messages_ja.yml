@@ -20,7 +20,7 @@ ItemName_ChicaThreat: '音を出して威嚇する'
 
 Announce_OpenInvitation: '%ownerが Five Nights at Freddy''s in Minecraft の参加者募集を開始しました。 "/fn join"コマンドで参加することができます。'
 Announce_CloseInvitation: '%ownerが Five Nights at Freddy''s in Minecraft の参加者募集を中断しました。'
-Announce_GameStart: '&f%night  12:00 AM'
+Announce_GameStart: '12:00 AM\n%night'
 Announce_GameCanceled: 'ゲームを強制中断しました。'
 Announce_PlayerCaught: '%player が %caught(%doll) に捕まった。。。'
 Announce_PlayerRunMidway: '%player は、謎の力に飲み込まれて脱落した。。。'
