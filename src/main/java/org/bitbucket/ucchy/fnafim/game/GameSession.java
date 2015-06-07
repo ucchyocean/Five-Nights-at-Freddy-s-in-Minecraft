@@ -761,6 +761,8 @@ public class GameSession {
 
             // アイテム消費
             player.setItemInHand(new ItemStack(Material.AIR));
+
+            return false;
         }
 
         // Chicaのアイテム処理
@@ -777,6 +779,8 @@ public class GameSession {
             ChicaThreatCooldownTimeTask task = new ChicaThreatCooldownTimeTask(this, seconds);
             task.start();
             tasks.add(task);
+
+            return false;
         }
 
         return true;

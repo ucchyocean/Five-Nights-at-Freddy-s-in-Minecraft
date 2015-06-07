@@ -263,8 +263,9 @@ public class FNAFIMCommand implements TabExecutor {
             return;
         }
 
-        sendInformationMessage(sender, Messages.get("Info_GamePhase") + session.getPhase()
-                + ", " + session.getNight());
+        String nightDesc = session.getNight() == null ? "-" : session.getNight().toString();
+        sendInformationMessage(sender,
+                Messages.get("Info_GamePhase") + session.getPhase() + ", " + nightDesc);
 
         StringBuilder buffer = new StringBuilder();
         buffer.append(Messages.get("Info_GameEntrants"));

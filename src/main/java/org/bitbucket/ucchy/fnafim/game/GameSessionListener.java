@@ -9,6 +9,7 @@ import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bitbucket.ucchy.fnafim.task.PlayerLogoutTrackingTask;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -29,7 +30,7 @@ public class GameSessionListener implements Listener {
      * プレイヤーがクリックした時に呼び出されるイベントハンドラ
      * @param event
      */
-    @EventHandler
+    @EventHandler(priority=EventPriority.NORMAL)
     public void onPlayerInteract(PlayerInteractEvent event) {
 
         Player player = event.getPlayer();
@@ -69,7 +70,7 @@ public class GameSessionListener implements Listener {
      * エンティティがダメージを受けた時に呼び出されるイベントハンドラ
      * @param event
      */
-    @EventHandler
+    @EventHandler(priority=EventPriority.HIGH, ignoreCancelled=true)
     public void onDamage(EntityDamageEvent event) {
 
         // Playerでないならイベントを無視
@@ -96,7 +97,7 @@ public class GameSessionListener implements Listener {
      * エンティティがエンティティからダメージを受けた時に呼び出されるイベントハンドラ
      * @param event
      */
-    @EventHandler
+    @EventHandler(priority=EventPriority.NORMAL)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 
         // セッションが無いならイベントを無視
@@ -134,7 +135,7 @@ public class GameSessionListener implements Listener {
      * プレイヤーがアイテムを落とした時に呼び出されるイベントハンドラ
      * @param event
      */
-    @EventHandler
+    @EventHandler(priority=EventPriority.NORMAL)
     public void onPlayerDropItem(PlayerDropItemEvent event) {
 
         Player player = event.getPlayer();
@@ -153,10 +154,10 @@ public class GameSessionListener implements Listener {
     }
 
     /**
-     * プレイヤーがアイテムを落とした時に呼び出されるイベントハンドラ
+     * プレイヤーがインベントリをクリックした時に呼び出されるイベントハンドラ
      * @param event
      */
-    @EventHandler
+    @EventHandler(priority=EventPriority.NORMAL)
     public void onInventoryClick(InventoryClickEvent event) {
 
         Player player = (Player)event.getWhoClicked();
@@ -178,7 +179,7 @@ public class GameSessionListener implements Listener {
      * プレイヤーがサーバーに参加した時に呼び出されるイベントハンドラ
      * @param event
      */
-    @EventHandler
+    @EventHandler(priority=EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
 
         Player player = event.getPlayer();
@@ -209,7 +210,7 @@ public class GameSessionListener implements Listener {
      * プレイヤーがサーバーを退出した時に呼び出されるイベントハンドラ
      * @param event
      */
-    @EventHandler
+    @EventHandler(priority=EventPriority.NORMAL)
     public void onPlayerQuit(PlayerQuitEvent event) {
 
         Player player = event.getPlayer();
