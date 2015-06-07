@@ -261,7 +261,7 @@ public class GameSession {
         new DelayedTeleportTask(locationMap, TELEPORT_WAIT_TICKS).startTask();
 
         // サイドバーを用意する
-        scoreboardDisplay = new ScoreboardDisplay("fnafim");
+        scoreboardDisplay = new ScoreboardDisplay();
         for ( String name : entrants ) {
             player = Utility.getPlayerExact(name);
             if ( player != null ) {
@@ -277,6 +277,18 @@ public class GameSession {
         scoreboardDisplay.setTitle(ChatColor.RED + night.toString());
         scoreboardDisplay.setRemainTime(night, 12);
         scoreboardDisplay.setRemainPlayer(players.size());
+
+        scoreboardDisplay.setRole(freddy, ChatColor.RED + "Freddy");
+        scoreboardDisplay.setRole(chica, ChatColor.RED + "Chica");
+        scoreboardDisplay.setRole(bonnie, ChatColor.RED + "Bonnie");
+        scoreboardDisplay.setRole(foxy, ChatColor.RED + "Foxy");
+        for ( String name : players ) {
+            scoreboardDisplay.setRole(name, ChatColor.AQUA + "Guard");
+        }
+        for ( String name : spectators ) {
+            scoreboardDisplay.setRole(name, ChatColor.GRAY + "Spectator");
+        }
+
 
 //        for ( Player player : players ) {
 //            scoreboardDisplay.setPlayersTeam(player);

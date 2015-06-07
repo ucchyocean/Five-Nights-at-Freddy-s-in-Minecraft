@@ -10,6 +10,7 @@ Prefix_Info: '&c[FNAF]&7'
 
 Sidebar_Title: '&f%night  &c%hour&fAM'
 Sidebar_RemainingPlayers: 'RemainingPlayers'
+Sidebar_Role: 'You are %role'
 
 ItemName_FlashLight: 'Flash Light'
 ItemName_Rader: 'Rader'
