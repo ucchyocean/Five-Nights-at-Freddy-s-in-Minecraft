@@ -289,7 +289,6 @@ public class GameSession {
             scoreboardDisplay.setRole(name, ChatColor.GRAY + "Spectator");
         }
 
-
 //        for ( Player player : players ) {
 //            scoreboardDisplay.setPlayersTeam(player);
 //        }
@@ -298,7 +297,7 @@ public class GameSession {
 //        scoreboardDisplay.setFreddysTeam(bonnie);
 //        scoreboardDisplay.setFreddysTeam(foxy);
 
-        // プレイヤー人数✕TELEPORT_WAIT＋α 分だけ待ってから、ゲームを開始する。
+        // プレイヤー人数✕TELEPORT_WAIT＋α だけ待ってから、ゲームを開始する。
         int delay = entrants.size() * TELEPORT_WAIT_TICKS + 10;
         new BukkitRunnable() {
             public void run() {
@@ -598,8 +597,20 @@ public class GameSession {
             ));
 
         } else {
-            onEnd();
+
+            // 勝利したプレイヤーの名前を記録する、アナウンスする
+            StringBuffer winners = new StringBuffer();
+            for ( String winner : players ) {
+                if ( winners.length() > 0 ) {
+                    winners.append(", ");
+                }
+                winners.append(winner);
+            }
             sendInGameAnnounce(Messages.get("Announce_GameClear"));
+            sendInGameAnnounce(Messages.get("Announce_GameClear2", "%players", winners.toString()));
+
+            // onEnd() を呼んで終了処理をしておく。
+            onEnd();
         }
     }
 
@@ -1179,7 +1190,7 @@ public class GameSession {
 
         Player player = Utility.getPlayerExact(chica);
         if ( player == null ) return;
-        player.getInventory().setItem(1, chicaThreat);
+        player.getInventory().addItem(chicaThreat.clone());
         updateInventory(player);
     }
 
