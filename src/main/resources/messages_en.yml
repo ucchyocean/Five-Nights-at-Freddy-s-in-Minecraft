@@ -18,6 +18,8 @@ ItemName_Shutter: 'Shutter'
 ItemName_FoxyMovement: 'StartToMove - You can move %secondssec.'
 ItemName_FreddyTeleport: 'Teleport to %target'
 ItemName_ChicaThreat: 'Play threat sound'
+ItemName_SpectatorTeleport: 'Teleport to player location'
+ItemName_SpectatorTeleportItem: 'Teleport to %target'
 
 Announce_OpenInvitation: '%owner started to invite Five Nights at Freddy''s in Minecraft. You can join by using "/fn join" command.'
 Announce_CloseInvitation: '%owner Cancelled to invite Five Nights at Freddy''s in Minecraft.'

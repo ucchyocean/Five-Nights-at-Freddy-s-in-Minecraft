@@ -37,6 +37,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -81,6 +82,8 @@ public class GameSession {
     private ItemStack shutterOff;
 
     private ItemStack chicaThreat;
+
+    private ItemStack spectatorTeleport;
 
     /**
      * コンストラクタ
@@ -185,6 +188,10 @@ public class GameSession {
         sendChicaInventory(chica);
         sendBonnieInventory(bonnie);
         sendFoxyInventory(foxy);
+
+        for ( String name : spectators ) {
+            sendSpectatorInventory(name);
+        }
 
         // エフェクトの設定
         for ( String name : entrants ) {
@@ -557,6 +564,9 @@ public class GameSession {
             removeInventoryAll(name);
             effectManager.removeAllEffect(name);
         }
+        for ( String name : spectators ) {
+            removeInventoryAll(name);
+        }
 
         // Night1-4は、次の夜の準備。その他は終了。
         final Night next = night.getNext();
@@ -595,7 +605,7 @@ public class GameSession {
             }.runTaskLater(FiveNightsAtFreddysInMinecraft.getInstance(), wait * 20);
             sendInGameAnnounce(Messages.get("Announce_NextNight",
                     new String[]{"%seconds", "%night"},
-                    new Object[]{wait, night}
+                    new Object[]{wait, next}
             ));
 
         } else {
@@ -622,11 +632,6 @@ public class GameSession {
      * @return
      */
     protected boolean onEntrantInteract(final Player player) {
-
-        // 実行者が観客なら、全てキャンセル
-        if ( spectators.contains(player.getName()) ) {
-            return false;
-        }
 
         // 表示名のないアイテムを持っていたなら無視。
         ItemStack item = player.getItemInHand();
@@ -779,7 +784,7 @@ public class GameSession {
         }
 
         // Chicaのアイテム処理
-        if ( item.getType() == Material.GLOWSTONE_DUST ) {
+        if ( item.getType() == chicaThreat.getType() ) {
 
             // 威嚇音を出す
             config.getSoundChicaThreat().playSoundToWorld(player.getLocation());
@@ -797,6 +802,27 @@ public class GameSession {
         }
 
         return true;
+    }
+
+    /**
+     * 観客がクリックをしたときに呼び出される
+     * @param player
+     */
+    protected void onSpectatorInteract(Player player) {
+
+        // 表示名のないアイテムを持っていたなら無視。
+        ItemStack item = player.getItemInHand();
+        String name = getDisplayName(item);
+        if ( name == null ) {
+            return;
+        }
+
+        // テレポートアイテムの処理
+        if ( item.getType() == spectatorTeleport.getType() ) {
+
+            // テレポートメニューを開く
+            openTeleportMenuInventory(player);
+        }
     }
 
     /**
@@ -931,6 +957,9 @@ public class GameSession {
         if ( !storage.isInventoryExists(player) ) {
             storage.sendToTemp(player);
         }
+
+        // 観客用のアイテムを渡す
+        sendSpectatorInventory(player.getName());
 
         // 観客リスポーン地点に移動する
         Location spectate = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getSpectate();
@@ -1121,6 +1150,19 @@ public class GameSession {
         updateInventory(player);
     }
 
+    /**
+     * 観客用のアイテムを配布する
+     * @param name
+     */
+    private void sendSpectatorInventory(String name) {
+        Player player = Utility.getPlayerExact(name);
+        if ( player == null || !player.isOnline() ) {
+            return;
+        }
+        player.getInventory().addItem(spectatorTeleport.clone());
+        updateInventory(player);
+    }
+
     private void sendFreddyInventory(String name) {
         Player player = Utility.getPlayerExact(name);
         if ( player == null || !player.isOnline() ) {
@@ -1203,6 +1245,34 @@ public class GameSession {
      */
     protected void addChatLog(Player player, String message) {
         logger.log(String.format("<%s> %s", player.getDisplayName(), message));
+    }
+
+    /**
+     * 指定したプレイヤーに、テレポート用のメニューインベントリを開く
+     * @param player プレイヤー
+     */
+    protected void openTeleportMenuInventory(Player player) {
+
+        Inventory inv = Bukkit.createInventory(player, 9 * 6, Messages.get("ItemName_SpectatorTeleport"));
+        ArrayList<String> targets = new ArrayList<String>();
+        targets.add(freddy);
+        targets.add(chica);
+        targets.add(bonnie);
+        targets.add(foxy);
+        targets.addAll(players);
+
+        for ( String name : targets ) {
+            Player target = Utility.getPlayerExact(name);
+            if ( target == null ) continue;
+            ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
+            SkullMeta meta = (SkullMeta)skull.getItemMeta();
+            meta.setOwner(target.getName());
+            meta.setDisplayName(Messages.get("ItemName_SpectatorTeleportItem", "%target", target.getDisplayName()));
+            skull.setItemMeta(meta);
+            inv.addItem(skull);
+        }
+
+        player.openInventory(inv);
     }
 
     /**
@@ -1352,6 +1422,11 @@ public class GameSession {
         meta = chicaThreat.getItemMeta();
         meta.setDisplayName(Messages.get("ItemName_ChicaThreat"));
         chicaThreat.setItemMeta(meta);
+
+        spectatorTeleport = new ItemStack(Material.APPLE);
+        meta = spectatorTeleport.getItemMeta();
+        meta.setDisplayName(Messages.get("ItemName_SpectatorTeleport"));
+        spectatorTeleport.setItemMeta(meta);
     }
 
     /**

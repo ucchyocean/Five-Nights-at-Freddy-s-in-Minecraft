@@ -6,7 +6,10 @@
 package org.bitbucket.ucchy.fnafim.game;
 
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
+import org.bitbucket.ucchy.fnafim.Messages;
+import org.bitbucket.ucchy.fnafim.Utility;
 import org.bitbucket.ucchy.fnafim.task.PlayerLogoutTrackingTask;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,12 +17,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 /**
  * リスナークラス
@@ -42,28 +48,34 @@ public class GameSessionListener implements Listener {
             return;
         }
 
-        // 観客なら全てをキャンセル
-        if ( session.isSpectator(player) ) {
+        if ( session.isEntrant(player) ) {
+            // 参加者
+
+            // アイテムの使用判定は、セッションの方に送って処理する。
+            // falseが返されたらイベントをキャンセルする。
+            if ( event.getAction() == Action.RIGHT_CLICK_AIR
+                    || event.getAction() == Action.RIGHT_CLICK_BLOCK )  {
+
+                if ( !session.onEntrantInteract(player) ) {
+                    event.setCancelled(true);
+                }
+            }
+
+            return;
+
+        } else if ( session.isSpectator(player) ) {
+
+            // アイテムの使用判定
+            if ( event.getAction() == Action.RIGHT_CLICK_AIR
+                    || event.getAction() == Action.RIGHT_CLICK_BLOCK ) {
+
+                session.onSpectatorInteract(player);
+            }
+
+            // 全てキャンセルする
             event.setCancelled(true);
-            return;
-        }
 
-        // 参加者ではないならイベントを無視
-        if ( !session.isEntrant(player) ) {
             return;
-        }
-
-        // 感圧板イベント、左クリックイベントなら、イベントを無視
-        if ( event.getAction() == Action.PHYSICAL
-                || event.getAction() == Action.LEFT_CLICK_AIR
-                || event.getAction() == Action.LEFT_CLICK_BLOCK ) {
-            return;
-        }
-
-        // アイテムの使用判定は、セッションの方に送って処理する。
-        // falseが返されたらイベントをキャンセルする。
-        if ( !session.onEntrantInteract(player) ) {
-            event.setCancelled(true);
         }
     }
 
@@ -169,8 +181,29 @@ public class GameSessionListener implements Listener {
             return;
         }
 
-        // 参加者または観客なら、全てのイベントをキャンセル
-        if ( session.isEntrant(player) || session.isSpectator(player) ) {
+        // 参加者なら全てのイベントをキャンセル
+        if ( session.isEntrant(player) ) {
+            event.setCancelled(true);
+            return;
+        }
+
+        // 観客
+        if ( session.isSpectator(player) ) {
+            if ( event.getInventory().getTitle().equals(Messages.get("ItemName_SpectatorTeleport"))
+                    && event.getAction() == InventoryAction.PICKUP_ALL ) {
+
+                // テレポートメニューの処理
+                ItemStack item = event.getCurrentItem();
+                if ( item.getType() == Material.SKULL_ITEM ) {
+                    SkullMeta meta = (SkullMeta)item.getItemMeta();
+                    String owner = meta.getOwner();
+                    Player target = Utility.getPlayerExact(owner);
+                    if ( target != null && target.isOnline() ) {
+                        player.teleport(target.getLocation());
+                    }
+                }
+            }
+            player.closeInventory();
             event.setCancelled(true);
             return;
         }
