@@ -64,7 +64,7 @@ public class GameSessionLogger {
 
     private void writeLogInternal(String message) {
 
-        String msg = ChatColor.stripColor(message).replace(",", "，");
+        String msg = ChatColor.stripColor(message).replace(",", "，").replace("\n", " ");
         FileWriter writer = null;
         try {
             writer = new FileWriter(file, true);

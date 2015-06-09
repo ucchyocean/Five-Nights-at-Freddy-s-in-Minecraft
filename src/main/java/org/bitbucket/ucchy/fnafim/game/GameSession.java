@@ -336,6 +336,8 @@ public class GameSession {
      */
     private void onEnd() {
 
+        phase = GameSessionPhase.END;
+
         // タイマーの停止
         if ( timer != null ) {
             timer.end();
@@ -514,7 +516,6 @@ public class GameSession {
      */
     protected void onGameover() {
 
-        phase = GameSessionPhase.END;
         sendInGameTitle(Messages.get("Announce_GameOver1"));
         sendInGameAnnounce(Messages.get("Announce_GameOver2"));
         onEnd();
@@ -545,7 +546,6 @@ public class GameSession {
      */
     protected void onTimerZero() {
 
-        phase = GameSessionPhase.END;
         sendInGameTitle(Messages.get("Announce_NightClear1"));
         sendInGameAnnounce(Messages.get("Announce_NightClear2", "%num", players.size()));
 
@@ -561,6 +561,8 @@ public class GameSession {
         // Night1-4は、次の夜の準備。その他は終了。
         final Night next = night.getNext();
         if ( next != null ) {
+
+            phase = GameSessionPhase.PREPARING_NEXT;
 
             // タスクをクリア
             for ( GameSessionTask task : tasks ) {
@@ -1195,6 +1197,15 @@ public class GameSession {
     }
 
     /**
+     * チャットログを記録する
+     * @param player プレイヤー
+     * @param message チャット
+     */
+    protected void addChatLog(Player player, String message) {
+        logger.log(String.format("<%s> %s", player.getDisplayName(), message));
+    }
+
+    /**
      * インベントリのアップデートを行う
      * @param player 更新対象のプレイヤー
      */
@@ -1364,6 +1375,10 @@ public class GameSession {
         return null;
     }
 
+    /**
+     * 指定された名前のプレイヤーのインベントリをからっぽにする
+     * @param name
+     */
     private void removeInventoryAll(String name) {
         Player player = Utility.getPlayerExact(name);
         if ( player == null ) return;
@@ -1375,6 +1390,11 @@ public class GameSession {
         updateInventory(player);
     }
 
+    /**
+     * 指定された名前のプレイヤーに、指定の速度設定を適用する。
+     * @param name プレイヤー名
+     * @param setting 速度設定。-99の場合は動けなくする。
+     */
     private void applyMoveSpeedSetting(String name, int setting) {
         Player player = Utility.getPlayerExact(name);
         if ( player == null || !player.isOnline() ) {

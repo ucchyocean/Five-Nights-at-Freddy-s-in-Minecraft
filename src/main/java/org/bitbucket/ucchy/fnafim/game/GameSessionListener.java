@@ -15,6 +15,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -243,5 +244,35 @@ public class GameSessionListener implements Listener {
             task.start();
             session.addTask(task);
         }
+    }
+
+    /**
+     * プレイヤーがチャット発言した時に呼び出されるイベントハンドラ
+     * @param event
+     */
+    @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
+    public void onPlayerChat(AsyncPlayerChatEvent event) {
+
+        Player player = event.getPlayer();
+
+        // セッションが無いならイベントを無視
+        GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session == null ) {
+            return;
+        }
+
+        // ゲームが終了しているならイベントを無視
+        if ( session.getPhase() == GameSessionPhase.END
+                || session.getPhase() == GameSessionPhase.CANCELED ) {
+            return;
+        }
+
+        // 参加者または観客ではないならイベントを無視
+        if ( !session.isEntrant(player) && !session.isSpectator(player) ) {
+            return;
+        }
+
+        // チャットログを記録する
+        session.addChatLog(player, event.getMessage());
     }
 }
