@@ -49,6 +49,9 @@ public class FNAFIMCommand implements TabExecutor {
         } else if ( args[0].equalsIgnoreCase("info") ) {
             infoCommand(sender, command, label, args);
             return true;
+        } else if ( args[0].equalsIgnoreCase("reserve") ) {
+            reserveCommand(sender, command, label, args);
+            return true;
         } else if ( args[0].equalsIgnoreCase("open") ) {
             openCommand(sender, command, label, args);
             return true;
@@ -278,6 +281,56 @@ public class FNAFIMCommand implements TabExecutor {
             }
         }
         sendInformationMessage(sender, buffer.toString());
+    }
+
+    private void reserveCommand(
+            CommandSender sender, Command command, String label, String[] args) {
+
+        // パーミッションチェック
+        if ( !sender.hasPermission(PERMISSION_PREFIX + "reserve") ) {
+            sendErrorMessage(sender, Messages.get("Error_Permission"));
+            return;
+        }
+
+        // ゲームセッションがないならエラー
+        GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session != null && (session.getPhase() == GameSessionPhase.CANCELED
+                || session.getPhase() == GameSessionPhase.END) ) {
+            FiveNightsAtFreddysInMinecraft.getInstance().removeGameSession();
+            session = null;
+        }
+        if ( session == null ) {
+            sendErrorMessage(sender, Messages.get("Error_NoSession"));
+            return;
+        }
+
+        // プレイヤーを指定していないならエラー
+        if ( args.length < 2 ) {
+            sendErrorMessage(sender, Messages.get("Error_ParameterTooLessPlayerName"));
+            return;
+        }
+
+        // 指定されたプレイヤーが見つからないならエラー
+        Player target = Utility.getPlayerExact(args[1]);
+        if ( target == null ) {
+            sendErrorMessage(sender, Messages.get("Error_NotFoundPlayer", "%arg", args[1]));
+            return;
+        }
+
+        // 既にゲーム参加者ならエラー
+        if ( session.isEntrant(target) ) {
+            sendErrorMessage(sender, Messages.get("Error_AlreadyJoinEntrant", "%arg", args[1]));
+            return;
+        }
+
+        // 既にゲーム参加予約者ならエラー
+        if ( session.isReservation(target) ) {
+            sendErrorMessage(sender, Messages.get("Error_AlreadyJoinReservation", "%arg", args[1]));
+            return;
+        }
+
+        // 参加予約者に追加
+        session.joinReservation(target);
     }
 
     private void openCommand(

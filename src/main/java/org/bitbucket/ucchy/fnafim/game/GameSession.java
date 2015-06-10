@@ -59,6 +59,7 @@ public class GameSession {
     private List<String> entrants;
     private List<String> players;
     private List<String> spectators;
+    private List<String> reservations;
     private String freddy;
     private String chica;
     private String bonnie;
@@ -95,6 +96,7 @@ public class GameSession {
         entrants = new ArrayList<String>();
         players = new ArrayList<String>();
         spectators = new ArrayList<String>();
+        reservations = new ArrayList<String>();
 
         storage = new TemporaryStorage();
         effectManager = new EffectManager();
@@ -139,6 +141,21 @@ public class GameSession {
         phase = GameSessionPhase.PREPARING;
         this.night = night;
         this.tasks = new ArrayList<GameSessionTask>();
+
+        // 予約者を参加者に追加する
+        for ( String name : reservations ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null && player.isOnline() && !entrants.contains(name) ) {
+                entrants.add(name);
+
+                if ( spectators.contains(name) ) {
+                    // 観客から参加者に変更するために、いったん持ち物の除去をする
+                    removeInventoryAll(name);
+                    spectators.remove(name);
+                }
+            }
+        }
+        reservations.clear();
 
         // 役割を設定する。
         players.clear();
@@ -304,7 +321,7 @@ public class GameSession {
 //        scoreboardDisplay.setFreddysTeam(bonnie);
 //        scoreboardDisplay.setFreddysTeam(foxy);
 
-        // プレイヤー人数✕TELEPORT_WAIT＋α だけ待ってから、ゲームを開始する。
+        // プレイヤー人数 x TELEPORT_WAIT＋α だけ待ってから、ゲームを開始する。
         int delay = entrants.size() * TELEPORT_WAIT_TICKS + 10;
         new BukkitRunnable() {
             public void run() {
@@ -992,6 +1009,29 @@ public class GameSession {
 
             sendInfoToPlayer(player, Messages.get("Info_LeaveSpectator"));
         }
+    }
+
+    /**
+     * 予約参加者として、次のNightからゲームに参加する
+     * @param player
+     */
+    public void joinReservation(Player player) {
+
+        if ( isEntrant(player) ) return;
+        if ( reservations.contains(player.getName()) ) return;
+
+        reservations.add(player.getName());
+        sendInGameAnnounce(Messages.get("Announce_EntrantJoin", "%player", player.getName()));
+        sendInfoToPlayer(player, Messages.get("Info_ReservationAdd"));
+    }
+
+    /**
+     * 指定されたプレイヤーは参加予約者かどうかを確認する
+     * @param player
+     * @return
+     */
+    public boolean isReservation(Player player) {
+        return reservations.contains(player.getName());
     }
 
     /**

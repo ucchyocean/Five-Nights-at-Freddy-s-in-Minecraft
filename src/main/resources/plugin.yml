@@ -15,6 +15,7 @@ commands:
            /<command> leave - Leave the game.
            /<command> spectate - join/leave the game as spactator.
            /<command> info - Show game session status.
+           /<command> reserve (player) - Add player as reservation player.
            /<command> open - Open player invitation.
            /<command> close - Close player invitation.
            /<command> start night<1-7> - Start new game.
@@ -40,6 +41,9 @@ permissions:
   fnafim.info:
     description: Permission of info command.
     default: true
+  fnafim.reserve:
+    description: Permission of reserve command.
+    default: op
   fnafim.open:
     description: Permission of open command.
     default: op
@@ -66,6 +70,7 @@ permissions:
       fnafim.leave: true
       fnafim.spectate: true
       fnafim.info: true
+      fnafim.reserve: true
       fnafim.open: true
       fnafim.close: true
       fnafim.start: true
