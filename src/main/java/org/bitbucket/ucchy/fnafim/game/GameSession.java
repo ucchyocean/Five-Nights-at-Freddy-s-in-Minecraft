@@ -130,6 +130,14 @@ public class GameSession {
 
         phase = GameSessionPhase.CANCELED;
         sendBroadcastAnnounce(Messages.get("Announce_CloseInvitation", "%owner", owner.getName()));
+
+        // 預かっていた持ち物を返す
+        for ( String name : entrants ) {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null ) {
+                storage.restoreFromTemp(player);
+            }
+        }
     }
 
     /**
