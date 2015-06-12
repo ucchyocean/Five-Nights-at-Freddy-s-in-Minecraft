@@ -255,27 +255,37 @@ public class GameSessionListener implements Listener {
             return;
         }
 
-        // ゲーム中でないならイベントを無視
-        if ( session.getPhase() != GameSessionPhase.IN_GAME ) {
-            return;
-        }
+        if ( session.getPhase() == GameSessionPhase.INVITATION ) {
+            // ゲームが参加受付中の場合
+            // 参加表明していたなら、参加を解除する
 
-        // プレイヤーではないならイベントを無視
-        if ( !session.isPlayer(player) ) {
-            return;
-        }
+            if ( session.isEntrant(player) ) {
+                session.leaveEntrant(player);
+            }
 
-        // 電力切れプレイヤーなら、即座に脱落させる
-        // 電力がまだあるプレイヤーなら、タイマーを動かす
-        if ( session.getBatteryLevel(player) == 0 ) {
-            session.onCaughtPlayer(player.getName(), null);
-        } else {
-            int seconds = FiveNightsAtFreddysInMinecraft.getInstance()
-                    .getFNAFIMConfig().getPlayerLogoutTrackingSeconds();
-            PlayerLogoutTrackingTask task
-                    = new PlayerLogoutTrackingTask(session, player.getName(), seconds);
-            task.start();
-            session.addTask(task);
+            return;
+
+        } else if ( session.getPhase() == GameSessionPhase.IN_GAME ) {
+
+            // プレイヤーではないならイベントを無視
+            if ( !session.isPlayer(player) ) {
+                return;
+            }
+
+            // 電力切れプレイヤーなら、即座に脱落させる
+            // 電力がまだあるプレイヤーなら、タイマーを動かす
+            if ( session.getBatteryLevel(player) == 0 ) {
+                session.onCaughtPlayer(player.getName(), null);
+            } else {
+                int seconds = FiveNightsAtFreddysInMinecraft.getInstance()
+                        .getFNAFIMConfig().getPlayerLogoutTrackingSeconds();
+                PlayerLogoutTrackingTask task
+                        = new PlayerLogoutTrackingTask(session, player.getName(), seconds);
+                task.start();
+                session.addTask(task);
+            }
+
+            return;
         }
     }
 
