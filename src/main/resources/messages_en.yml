@@ -55,7 +55,7 @@ Info_ReservationAdd: 'You have been added to the participating subscribers. You 
 
 Info_Joined: 'You joined the game.'
 Info_Left: 'You left the game.'
-Info_JoinSpectator: 'You joined the game as spectator. You can leave by using "/fn spectate" command.'
+Info_JoinSpectator: 'You joined the game as spectator. You can leave by using "/fn spectate" command. You can open teleport menu by clicking.'
 Info_LeaveSpectator: 'You left the game.'
 Info_GamePhase: 'Game Phase : '
 Info_GameEntrants: 'Participants : '

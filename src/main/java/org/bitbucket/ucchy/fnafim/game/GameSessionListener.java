@@ -65,12 +65,7 @@ public class GameSessionListener implements Listener {
 
         } else if ( session.isSpectator(player) ) {
 
-            // アイテムの使用判定
-            if ( event.getAction() == Action.RIGHT_CLICK_AIR
-                    || event.getAction() == Action.RIGHT_CLICK_BLOCK ) {
-
-                session.onSpectatorInteract(player);
-            }
+            session.onSpectatorInteract(player);
 
             // 全てキャンセルする
             event.setCancelled(true);

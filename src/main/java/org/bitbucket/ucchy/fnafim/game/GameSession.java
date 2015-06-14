@@ -84,8 +84,6 @@ public class GameSession {
 
     private ItemStack chicaThreat;
 
-    private ItemStack spectatorTeleport;
-
     /**
      * コンストラクタ
      * @param owner オーナー
@@ -835,19 +833,8 @@ public class GameSession {
      */
     protected void onSpectatorInteract(Player player) {
 
-        // 表示名のないアイテムを持っていたなら無視。
-        ItemStack item = player.getItemInHand();
-        String name = getDisplayName(item);
-        if ( name == null ) {
-            return;
-        }
-
-        // テレポートアイテムの処理
-        if ( item.getType() == spectatorTeleport.getType() ) {
-
-            // テレポートメニューを開く
-            openTeleportMenuInventory(player);
-        }
+        // テレポートメニューを開く
+        openTeleportMenuInventory(player);
     }
 
     /**
@@ -1203,12 +1190,13 @@ public class GameSession {
      * @param name
      */
     private void sendSpectatorInventory(String name) {
-        Player player = Utility.getPlayerExact(name);
-        if ( player == null || !player.isOnline() ) {
-            return;
-        }
-        player.getInventory().addItem(spectatorTeleport.clone());
-        updateInventory(player);
+//        Player player = Utility.getPlayerExact(name);
+//        if ( player == null || !player.isOnline() ) {
+//            return;
+//        }
+//        player.getInventory().addItem(spectatorTeleport.clone());
+//        updateInventory(player);
+        // 現在、配布するものはない。
     }
 
     private void sendFreddyInventory(String name) {
@@ -1470,11 +1458,6 @@ public class GameSession {
         meta = chicaThreat.getItemMeta();
         meta.setDisplayName(Messages.get("ItemName_ChicaThreat"));
         chicaThreat.setItemMeta(meta);
-
-        spectatorTeleport = new ItemStack(Material.APPLE);
-        meta = spectatorTeleport.getItemMeta();
-        meta.setDisplayName(Messages.get("ItemName_SpectatorTeleport"));
-        spectatorTeleport.setItemMeta(meta);
     }
 
     /**

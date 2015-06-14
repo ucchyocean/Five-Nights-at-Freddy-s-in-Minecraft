@@ -55,7 +55,7 @@ Info_ReservationAdd: 'あなたは参加予約者に追加されました。次�
 
 Info_Joined: 'ゲームに参加しました。'
 Info_Left: 'ゲームから離脱しました。'
-Info_JoinSpectator: '観客として参加しました。 "/fn spectate"コマンドで、ゲームから離脱できます。'
+Info_JoinSpectator: '観客として参加しました。 "/fn spectate"コマンドで、ゲームから離脱できます。クリックするとメニューが開いて、参加者のところへテレポートすることができます。'
 Info_LeaveSpectator: 'ゲームから離脱しました。'
 Info_GamePhase: '現在のゲームフェーズ：'
 Info_GameEntrants: '現在の参加者：'
