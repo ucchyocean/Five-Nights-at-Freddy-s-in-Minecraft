@@ -21,6 +21,7 @@ public class TitleDisplayComponent {
 
         if ( !Utility.isCB180orLater() ) {
             player.sendMessage(Utility.replaceColorCode(text));
+            return;
         }
 
         String[] temp = text.split("\n");

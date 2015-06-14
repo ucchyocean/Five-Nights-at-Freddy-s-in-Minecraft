@@ -10,7 +10,7 @@ Prefix_Info: '&c[FNAF]&7'
 
 Sidebar_Title: '&f%night  &c%hour&fAM'
 Sidebar_RemainingPlayers: '残りプレイヤー'
-Sidebar_Role: 'あなたの役割： %role'
+Sidebar_Role: 'あなたの役割：%role'
 
 ItemName_FlashLight: '懐中電灯'
 ItemName_Rader: 'レーダー'

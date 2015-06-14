@@ -53,8 +53,9 @@ public class ScoreboardDisplay {
      * @param title タイトル
      */
     public void setTitle(String title) {
-        if ( title.length() > 32 )
+        if ( !Utility.isCB180orLater() && title.length() > 32 ) {
             title = title.substring(0, 32);
+        }
         for ( Scoreboard sb : scoreboards.values() ) {
             Objective obj = sb.getObjective(OBJECTIVE_NAME);
             if ( obj == null ) continue;
@@ -69,9 +70,6 @@ public class ScoreboardDisplay {
      * @param point 項目のスコア
      */
     public void setScore(String name, int point) {
-        if ( name.length() > 16 ) {
-            name = name.substring(0, 16);
-        }
         for ( Scoreboard sb : scoreboards.values() ) {
             Objective obj = sb.getObjective(OBJECTIVE_NAME);
             if ( point == 0 ) {
@@ -87,9 +85,6 @@ public class ScoreboardDisplay {
      * @param amount 加算する値
      */
     public void addScore(String name, int amount) {
-        if ( name.length() > 16 ) {
-            name = name.substring(0, 16);
-        }
         for ( Scoreboard sb : scoreboards.values() ) {
             Objective obj = sb.getObjective(OBJECTIVE_NAME);
             Score score = getScoreItem(obj, name);
@@ -132,6 +127,9 @@ public class ScoreboardDisplay {
      */
     @SuppressWarnings("deprecation")
     private Score getScoreItem(Objective obj, String name) {
+        if ( !Utility.isCB180orLater() && name.length() > 16 ) {
+            name = name.substring(0, 16);
+        }
         if ( Utility.isCB178orLater() ) {
             return obj.getScore(name);
         } else {
