@@ -65,7 +65,10 @@ public class GameSessionListener implements Listener {
 
         } else if ( session.isSpectator(player) ) {
 
-            session.onSpectatorInteract(player);
+            // 感圧板イベント以外は、セッションの方に送って処理する。see issue #12
+            if ( event.getAction() != Action.PHYSICAL ) {
+                session.onSpectatorInteract(player);
+            }
 
             // 全てキャンセルする
             event.setCancelled(true);
