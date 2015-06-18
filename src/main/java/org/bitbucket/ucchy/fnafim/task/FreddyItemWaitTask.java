@@ -33,6 +33,7 @@ public class FreddyItemWaitTask extends GameSessionTask {
         } else if ( !isSameLocation(location, target.getLocation()) ) {
             session.onFreddyItemGet(target.getName());
             isEnd = true;
+            end();
         }
     }
 
