@@ -5,7 +5,10 @@
  */
 package org.bitbucket.ucchy.fnafim.task;
 
+import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bitbucket.ucchy.fnafim.game.GameSession;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
 
 /**
  * Freddyがバッテリーダウンしたプレイヤーのスカルを取得するまでのウエイトタスク
@@ -14,9 +17,10 @@ import org.bitbucket.ucchy.fnafim.game.GameSession;
 public class FreddyItemWaitTask extends GameSessionTask {
 
     private GameSession session;
-    private String target;
+    private Player target;
+    private Location location;
 
-    public FreddyItemWaitTask(GameSession session, String target, int wait) {
+    public FreddyItemWaitTask(GameSession session, Player target, int wait) {
         super(wait);
         this.session = session;
         this.target = target;
@@ -24,7 +28,22 @@ public class FreddyItemWaitTask extends GameSessionTask {
 
     @Override
     public void run() {
-        session.onFreddyItemGet(target);
-        isEnd = true;
+        if ( location == null ) {
+            location = target.getLocation();
+        } else if ( !isSameLocation(location, target.getLocation()) ) {
+            session.onFreddyItemGet(target.getName());
+            isEnd = true;
+        }
+    }
+
+    @Override
+    public void start() {
+        runTaskTimer(FiveNightsAtFreddysInMinecraft.getInstance(), 20 * seconds, 20);
+    }
+
+    private static boolean isSameLocation(Location loc1, Location loc2) {
+        return loc1.getX() == loc2.getX()
+                && loc1.getY() == loc2.getY()
+                && loc1.getZ() == loc2.getZ();
     }
 }

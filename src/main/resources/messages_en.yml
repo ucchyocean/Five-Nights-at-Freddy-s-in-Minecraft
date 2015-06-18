@@ -43,6 +43,7 @@ Description_Bonnie: 'You are Bonnie. You can catch the player by left clicking.'
 Description_Foxy: 'You are Foxy. You can move and attack in a short period by using item.'
 
 Info_BatteryNotEnough: 'Battery is not enough!'
+Info_BatteryEmpty: 'Your battery has been empty...'
 Info_ItemRader: '%target(%doll) is %distance meters away from you!!'
 Info_ItemRaderNone: 'No enemies around you...'
 Info_FoxyMovementStart: 'You can move %seconds seconds!'

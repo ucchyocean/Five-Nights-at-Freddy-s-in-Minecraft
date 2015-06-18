@@ -867,7 +867,7 @@ public class GameSession {
         effectManager.removeEffect(name, InvisibleEffect.TYPE);
 
         // プレイヤーを停止する
-        effectManager.applyEffect(name, new BindEffect(name));
+//        effectManager.applyEffect(name, new BindEffect(name));
 
         // 手持ちのアイテムを全て無くす
         Player player = Utility.getPlayerExact(name);
@@ -875,9 +875,12 @@ public class GameSession {
             player.getInventory().clear();
         }
 
+        // メッセージを流す
+        sendInfoToPlayer(player, Messages.get("Info_BatteryEmpty"));
+
         // フレディにテレポート用アイテムを渡す
-        int wait = (int)(Math.random() * 8) + 1;
-        FreddyItemWaitTask task = new FreddyItemWaitTask(this, name, wait);
+        int wait = (int)(Math.random() * 8);
+        FreddyItemWaitTask task = new FreddyItemWaitTask(this, player, wait);
         task.start();
         tasks.add(task);
     }

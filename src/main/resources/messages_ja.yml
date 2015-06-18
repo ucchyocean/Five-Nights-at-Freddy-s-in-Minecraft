@@ -43,6 +43,7 @@ Description_Bonnie: 'あなたはBonnieに選ばれました。プレイヤー�
 Description_Foxy: 'あなたはFoxyに選ばれました。普段は行動できませんが、配布されるアイテムをクリックすることで短時間だけ行動可能になり、プレイヤーを襲うことができます。'
 
 Info_BatteryNotEnough: '電力が足りないので操作できない！'
+Info_BatteryEmpty: '電力が無くなった。。。'
 Info_ItemRader: '%target(%doll) が、%distanceｍ先にいる！！'
 Info_ItemRaderNone: '誰も近くにいないようだ。。。'
 Info_FoxyMovementStart: '%seconds秒間行動できるようになった！'
