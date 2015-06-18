@@ -74,6 +74,8 @@ public class GameSession {
     private EffectManager effectManager;
     private ScoreboardDisplay scoreboardDisplay;
 
+    private boolean freddyReturn;
+
     private Night night;
 
     private ItemStack flashlightOn;
@@ -147,6 +149,8 @@ public class GameSession {
         phase = GameSessionPhase.PREPARING;
         this.night = night;
         this.tasks = new ArrayList<GameSessionTask>();
+
+        freddyReturn = false;
 
         // 予約者を参加者に追加する
         for ( String name : reservations ) {
@@ -514,6 +518,14 @@ public class GameSession {
         scoreboardDisplay.setRemainPlayer(players.size());
         if ( player != null ) {
             scoreboardDisplay.leavePlayersTeam(player);
+        }
+
+        // 捕まえたのがfreddyで、行動不能のnightなら、リスポーン地点に戻して行動不能にする
+        if ( caught != null && freddy.equals(caught.getName()) && freddyReturn ) {
+            freddyReturn = false;
+            effectManager.applyEffect(freddy, new BindEffect(freddy));
+            Location loc = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getFreddy();
+            caught.teleport(loc, TeleportCause.PLUGIN);
         }
 
         if ( players.size() <= 0 ) {
@@ -1166,8 +1178,18 @@ public class GameSession {
      * Freddyがテレポート後に行動可能になる時に呼び出されるメソッド
      */
     public void onFreddyTPWaitEnd() {
+
+        // freddyの行動不能を解除する
         sendInfoToPlayer(freddy, Messages.get("Info_FreddyTeleportWaitEnd"));
         effectManager.removeEffect(freddy, BindEffect.TYPE);
+
+        // freddyの行動スピードを適用する
+        int speed = config.getMoveSpeed(night).getFreddy();
+        if ( speed != -99 ) {
+            effectManager.applyEffect(freddy, new SpeedEffect(freddy, speed));
+        } else {
+            freddyReturn = true;
+        }
     }
 
     /**
