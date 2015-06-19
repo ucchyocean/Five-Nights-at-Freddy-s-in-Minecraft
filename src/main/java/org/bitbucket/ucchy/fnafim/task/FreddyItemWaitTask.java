@@ -30,7 +30,7 @@ public class FreddyItemWaitTask extends GameSessionTask {
     public void run() {
         if ( location == null ) {
             location = target.getLocation();
-        } else if ( !isSameLocation(location, target.getLocation()) ) {
+        } else if ( !isSameDirection(location, target.getLocation()) ) {
             session.onFreddyItemGet(target.getName());
             isEnd = true;
             end();
@@ -42,9 +42,7 @@ public class FreddyItemWaitTask extends GameSessionTask {
         runTaskTimer(FiveNightsAtFreddysInMinecraft.getInstance(), 20 * seconds, 20);
     }
 
-    private static boolean isSameLocation(Location loc1, Location loc2) {
-        return loc1.getX() == loc2.getX()
-                && loc1.getY() == loc2.getY()
-                && loc1.getZ() == loc2.getZ();
+    private static boolean isSameDirection(Location loc1, Location loc2) {
+        return loc1.getYaw() == loc2.getYaw() && loc1.getPitch() == loc2.getPitch();
     }
 }
