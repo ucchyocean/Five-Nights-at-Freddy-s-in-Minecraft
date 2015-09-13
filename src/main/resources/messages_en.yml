@@ -89,7 +89,7 @@ Error_LostLocationCannotOpen: 'Location %location is not registered. Beforehand,
 Error_NoSessionCannotStart: 'You cannot start the game. Beforehand, you have to invite the participants by using "/fn open" command.'
 Error_ParameterInvalid: 'The parameter %arg was invalid.'
 Error_ParameterNightInvalid: 'The specified parameter %arg is invalid. You have to specify the valid night, from "night1" to "night7".'
-Error_EntrantsTooLess: 'You cannot start the game, because the participants are too few. You need at least 5 participants.'
+Error_EntrantsTooLess: 'You cannot start the game, because the participants are too few. You need at least %min participants.'
 Error_SessionNotInGame: 'There are no games started.'
 Error_ParameterTooLessPlayerName: 'Parameter is not enough. Please specify the player name you want to join reservation.'
 Error_NotFoundPlayer: 'The specified player %arg is not found.'

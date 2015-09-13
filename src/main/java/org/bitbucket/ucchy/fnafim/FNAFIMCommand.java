@@ -430,8 +430,9 @@ public class FNAFIMCommand implements TabExecutor {
         }
 
         // 人数チェック、最小人数を下回っていたらエラー
-        if ( session.getEntrants().size() < 5 ) {
-            sendErrorMessage(sender, Messages.get("Error_EntrantsTooLess"));
+        int minplayer = FiveNightsAtFreddysInMinecraft.getInstance().getFNAFIMConfig().getMinPlayers();
+        if ( session.getEntrants().size() < minplayer ) {
+            sendErrorMessage(sender, Messages.get("Error_EntrantsTooLess", "%min", minplayer));
             return;
         }
 

@@ -42,10 +42,9 @@ public class FoxyMovementTask extends GameSessionTask {
             public void run() {
 
                 // Foxy を取得
+                if ( session.getFoxy() == null ) return;
                 Player foxy = Utility.getPlayerExact(session.getFoxy());
-                if ( foxy == null ) {
-                    return;
-                }
+                if ( foxy == null ) return;
 
                 // 近くに居るプレイヤーを検索
                 double nearest = 999;
@@ -84,6 +83,7 @@ public class FoxyMovementTask extends GameSessionTask {
     }
 
     private void setFoxyExpZero() {
+        if ( session.getFoxy() == null ) return;
         Player foxy = Utility.getPlayerExact(session.getFoxy());
         if ( foxy == null ) {
             return;

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.bitbucket.ucchy</groupId>
   <artifactId>FiveNightAtFreddysInMinecraft</artifactId>
-  <version>0.6.4</version>
+  <version>0.7.0</version>
 
   <licenses>
     <license>
@@ -82,7 +82,7 @@
       <groupId>org.bukkit</groupId>
       <artifactId>bukkit</artifactId>
       <!-- <version>1.7.2-R0.3</version> -->
-      <version>1.8.7-R0.1-SNAPSHOT</version>
+      <version>1.8.8-R0.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>

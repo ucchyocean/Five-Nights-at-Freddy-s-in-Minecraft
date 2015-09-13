@@ -23,6 +23,7 @@ public class EffectManager {
     }
 
     public void applyEffect(String name, SpecialEffect effect) {
+        if ( name == null ) return;
         if ( !effects.containsKey(name) ) {
             effects.put(name, new ArrayList<SpecialEffect>());
         }

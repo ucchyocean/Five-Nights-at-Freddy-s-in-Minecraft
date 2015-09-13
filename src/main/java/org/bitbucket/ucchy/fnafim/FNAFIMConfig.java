@@ -19,6 +19,9 @@ public class FNAFIMConfig {
     /** メッセージ言語 */
     private String lang;
 
+    /** 最小参加可能人数 */
+    private int minPlayers;
+
     /** 最大参加可能人数 */
     private int maxPlayers;
 
@@ -130,6 +133,7 @@ public class FNAFIMConfig {
         FileConfiguration config = plugin.getConfig();
 
         lang = config.getString("lang", "ja");
+        minPlayers = config.getInt("minPlayers", 2);
         maxPlayers = config.getInt("maxPlayers", 64);
         secondsOfOneHour = config.getInt("secondsOfOneHour", 90);
         secondsOfNightInterval = config.getInt("secondsOfNightInterval", 15);
@@ -182,6 +186,13 @@ public class FNAFIMConfig {
      */
     public String getLang() {
         return lang;
+    }
+
+    /**
+     * @return minPlayers
+     */
+    public int getMinPlayers() {
+        return minPlayers;
     }
 
     /**

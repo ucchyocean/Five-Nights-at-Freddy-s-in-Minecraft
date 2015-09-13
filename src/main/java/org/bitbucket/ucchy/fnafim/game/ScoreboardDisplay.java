@@ -169,6 +169,7 @@ public class ScoreboardDisplay {
      * @param role 役割
      */
     public void setRole(String name, String role) {
+        if ( name == null ) return;
         if ( !scoreboards.containsKey(name) ) {
             return;
         }

@@ -89,7 +89,7 @@ Error_LostLocationCannotOpen: '地点 %location が未登録のままです。�
 Error_NoSessionCannotStart: '募集中のゲームがありません。先に"/fn open"を実行して、参加者を募集してください。'
 Error_ParameterInvalid: '指定されたパラメータ %arg が無効です。'
 Error_ParameterNightInvalid: '指定されたパラメータ %arg が無効です。night1 から night7 までのいずれかを指定してください。'
-Error_EntrantsTooLess: '参加者が少なすぎるので、ゲームを開始できません。最低でも5人が必要です。'
+Error_EntrantsTooLess: '参加者が少なすぎるので、ゲームを開始できません。最低でも%min人が必要です。'
 Error_SessionNotInGame: 'ゲームは開始していません。'
 Error_ParameterTooLessPlayerName: 'パラメータが足りません。参加予約したいプレイヤー名を指定してください。'
 Error_NotFoundPlayer: '指定されたプレイヤー %arg が見つかりません。'

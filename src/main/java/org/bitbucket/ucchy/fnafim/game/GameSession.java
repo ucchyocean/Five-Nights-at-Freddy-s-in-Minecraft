@@ -175,15 +175,7 @@ public class GameSession {
             }
         }
 
-        if ( freddy == null ) {
-            int random = (int)(Math.random() * players.size());
-            freddy = players.get(random);
-            players.remove(random);
-            sendInGameAnnounce("Freddy : " + freddy);
-            sendInfoToPlayer(freddy, Messages.get("Description_Freddy"));
-        }
-
-        if ( chica == null ) {
+        if ( chica == null && players.size() >= 2 ) {
             int random = (int)(Math.random() * players.size());
             chica = players.get(random);
             players.remove(random);
@@ -191,7 +183,7 @@ public class GameSession {
             sendInfoToPlayer(chica, Messages.get("Description_Chica"));
         }
 
-        if ( bonnie == null ) {
+        if ( bonnie == null && players.size() >= 2 ) {
             int random = (int)(Math.random() * players.size());
             bonnie = players.get(random);
             players.remove(random);
@@ -199,7 +191,15 @@ public class GameSession {
             sendInfoToPlayer(bonnie, Messages.get("Description_Bonnie"));
         }
 
-        if ( foxy == null ) {
+        if ( freddy == null && players.size() >= 2 ) {
+            int random = (int)(Math.random() * players.size());
+            freddy = players.get(random);
+            players.remove(random);
+            sendInGameAnnounce("Freddy : " + freddy);
+            sendInfoToPlayer(freddy, Messages.get("Description_Freddy"));
+        }
+
+        if ( foxy == null && players.size() >= 2 ) {
             int random = (int)(Math.random() * players.size());
             foxy = players.get(random);
             players.remove(random);
@@ -234,24 +234,32 @@ public class GameSession {
         }
 
         // Freddyのエフェクトの設定
-        applyMoveSpeedSetting(freddy, config.getMoveSpeed(night).getFreddy());
-        effectManager.applyEffect(freddy, new ChangeDisplayNameEffect(freddy,
-                ChatColor.GOLD + freddy + ChatColor.RED + "(Freddy)" + ChatColor.RESET));
+        if ( freddy != null ) {
+            applyMoveSpeedSetting(freddy, config.getMoveSpeed(night).getFreddy());
+            effectManager.applyEffect(freddy, new ChangeDisplayNameEffect(freddy,
+                    ChatColor.GOLD + freddy + ChatColor.RED + "(Freddy)" + ChatColor.RESET));
+        }
 
         // Chicaのエフェクト設定
-        applyMoveSpeedSetting(chica, config.getMoveSpeed(night).getChica());
-        effectManager.applyEffect(chica, new ChangeDisplayNameEffect(chica,
-                ChatColor.GOLD + chica + ChatColor.RED + "(Chica)" + ChatColor.RESET));
+        if ( chica != null ) {
+            applyMoveSpeedSetting(chica, config.getMoveSpeed(night).getChica());
+            effectManager.applyEffect(chica, new ChangeDisplayNameEffect(chica,
+                    ChatColor.GOLD + chica + ChatColor.RED + "(Chica)" + ChatColor.RESET));
+        }
 
         // Bonnieのエフェクト設定
-        applyMoveSpeedSetting(bonnie, config.getMoveSpeed(night).getBonnie());
-        effectManager.applyEffect(bonnie, new ChangeDisplayNameEffect(bonnie,
-                ChatColor.GOLD + bonnie + ChatColor.RED + "(Bonnie)" + ChatColor.RESET));
+        if ( bonnie != null ) {
+            applyMoveSpeedSetting(bonnie, config.getMoveSpeed(night).getBonnie());
+            effectManager.applyEffect(bonnie, new ChangeDisplayNameEffect(bonnie,
+                    ChatColor.GOLD + bonnie + ChatColor.RED + "(Bonnie)" + ChatColor.RESET));
+        }
 
         // Foxyのエフェクト設定、常に移動不可にしておく
-        effectManager.applyEffect(foxy, new BindEffect(foxy));
-        effectManager.applyEffect(foxy, new ChangeDisplayNameEffect(foxy,
-                ChatColor.GOLD + foxy + ChatColor.RED + "(Foxy)" + ChatColor.RESET));
+        if ( foxy != null ) {
+            effectManager.applyEffect(foxy, new BindEffect(foxy));
+            effectManager.applyEffect(foxy, new ChangeDisplayNameEffect(foxy,
+                    ChatColor.GOLD + foxy + ChatColor.RED + "(Foxy)" + ChatColor.RESET));
+        }
 
         // 観客のエフェクト設定
         for ( String name : spectators ) {
@@ -275,35 +283,42 @@ public class GameSession {
                 locationMap.put(player, lmanager.getPlayer());
             }
         }
-        Player player = Utility.getPlayerExact(freddy);
-        if ( player != null ) {
-            locationMap.put(player, lmanager.getFreddy());
+        if ( freddy != null ) {
+            Player player = Utility.getPlayerExact(freddy);
+            if ( player != null ) {
+                locationMap.put(player, lmanager.getFreddy());
+            }
         }
-        player = Utility.getPlayerExact(chica);
-        if ( player != null ) {
-            locationMap.put(player, lmanager.getChica());
+        if ( chica != null ) {
+            Player player = Utility.getPlayerExact(chica);
+            if ( player != null ) {
+                locationMap.put(player, lmanager.getChica());
+            }
         }
-        player = Utility.getPlayerExact(bonnie);
-        if ( player != null ) {
-            locationMap.put(player, lmanager.getBonnie());
+        if ( bonnie != null ) {
+            Player player = Utility.getPlayerExact(bonnie);
+            if ( player != null ) {
+                locationMap.put(player, lmanager.getBonnie());
+            }
         }
-        player = Utility.getPlayerExact(foxy);
-        if ( player != null ) {
-            locationMap.put(player, lmanager.getFoxy());
+        if ( foxy != null ) {
+            Player player = Utility.getPlayerExact(foxy);
+            if ( player != null ) {
+                locationMap.put(player, lmanager.getFoxy());
+            }
         }
-
         new DelayedTeleportTask(locationMap, TELEPORT_WAIT_TICKS).startTask();
 
         // サイドバーを用意する
         scoreboardDisplay = new ScoreboardDisplay();
         for ( String name : entrants ) {
-            player = Utility.getPlayerExact(name);
+            Player player = Utility.getPlayerExact(name);
             if ( player != null ) {
                 scoreboardDisplay.setShowPlayer(player);
             }
         }
         for ( String name : spectators ) {
-            player = Utility.getPlayerExact(name);
+            Player player = Utility.getPlayerExact(name);
             if ( player != null ) {
                 scoreboardDisplay.setShowPlayer(player);
             }
@@ -521,7 +536,7 @@ public class GameSession {
         }
 
         // 捕まえたのがfreddyで、行動不能のnightなら、リスポーン地点に戻して行動不能にする
-        if ( caught != null && freddy.equals(caught.getName()) && freddyReturn ) {
+        if ( caught != null && freddy != null && freddy.equals(caught.getName()) && freddyReturn ) {
             freddyReturn = false;
             effectManager.applyEffect(freddy, new BindEffect(freddy));
             Location loc = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager().getFreddy();
@@ -1075,6 +1090,7 @@ public class GameSession {
      * @return Foxyかどうか
      */
     public boolean isFoxy(Player player) {
+        if ( foxy == null ) return false;
         return foxy.equals(player.getName());
     }
 
@@ -1150,6 +1166,7 @@ public class GameSession {
      * Foxyが行動時間を終了した時に呼び出されるメソッド
      */
     public void onFoxyMovementEnd() {
+        if ( foxy == null ) return;
         Player player = Utility.getPlayerExact(foxy);
         if ( player == null ) return;
         sendInfoToPlayer(foxy, Messages.get("Info_FoxyMovementEnd"));
@@ -1165,6 +1182,7 @@ public class GameSession {
      * @param target ターゲットプレイヤー
      */
     public void onFreddyItemGet(String target) {
+        if ( freddy == null ) return;
         Player player = Utility.getPlayerExact(freddy);
         if ( player == null ) return;
         sendInfoToPlayer(freddy, Messages.get("Info_FreddyTeleportItem",
@@ -1225,6 +1243,7 @@ public class GameSession {
     }
 
     private void sendFreddyInventory(String name) {
+        if ( name == null ) return;
         Player player = Utility.getPlayerExact(name);
         if ( player == null || !player.isOnline() ) {
             return;
@@ -1236,6 +1255,7 @@ public class GameSession {
     }
 
     private void sendChicaInventory(String name) {
+        if ( name == null ) return;
         Player player = Utility.getPlayerExact(name);
         if ( player == null || !player.isOnline() ) {
             return;
@@ -1249,6 +1269,7 @@ public class GameSession {
     }
 
     private void sendBonnieInventory(String name) {
+        if ( name == null ) return;
         Player player = Utility.getPlayerExact(name);
         if ( player == null || !player.isOnline() ) {
             return;
@@ -1260,6 +1281,7 @@ public class GameSession {
     }
 
     private void sendFoxyInventory(String name) {
+        if ( name == null ) return;
         Player player = Utility.getPlayerExact(name);
         if ( player == null || !player.isOnline() ) {
             return;
@@ -1292,7 +1314,7 @@ public class GameSession {
      * Chicaに威嚇用アイテムを渡す
      */
     public void giveThreatItemToChica() {
-
+        if ( chica == null ) return;
         Player player = Utility.getPlayerExact(chica);
         if ( player == null ) return;
         player.getInventory().addItem(chicaThreat.clone());
@@ -1316,10 +1338,10 @@ public class GameSession {
 
         Inventory inv = Bukkit.createInventory(player, 9 * 6, Messages.get("ItemName_SpectatorTeleport"));
         ArrayList<String> targets = new ArrayList<String>();
-        targets.add(freddy);
-        targets.add(chica);
-        targets.add(bonnie);
-        targets.add(foxy);
+        if ( freddy != null ) targets.add(freddy);
+        if ( chica != null ) targets.add(chica);
+        if ( bonnie != null ) targets.add(bonnie);
+        if ( foxy != null ) targets.add(foxy);
         targets.addAll(players);
 
         for ( String name : targets ) {
@@ -1351,6 +1373,7 @@ public class GameSession {
      * @param message 情報
      */
     private void sendInfoToPlayer(String name, String message) {
+        if ( name == null ) return;
         sendInfoToPlayer(Utility.getPlayerExact(name), message);
     }
 
@@ -1527,6 +1550,7 @@ public class GameSession {
      * @param setting 速度設定。-99の場合は動けなくする。
      */
     private void applyMoveSpeedSetting(String name, int setting) {
+        if ( name == null ) return;
         Player player = Utility.getPlayerExact(name);
         if ( player == null || !player.isOnline() ) {
             return;

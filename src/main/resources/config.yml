@@ -9,6 +9,9 @@
 # Message language.
 lang: en
 
+# Min player num.
+minPlayers: 2
+
 # Max player num.
 maxPlayers: 64
 
