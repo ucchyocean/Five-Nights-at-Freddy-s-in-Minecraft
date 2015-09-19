@@ -76,6 +76,9 @@ public class FNAFIMConfig {
     /** Chicaの威嚇音を出す能力のクールダウンタイム */
     private int chicaThreatCooldownSeconds;
 
+    /** FredBearの高速行動のスピード上昇量 */
+    private int fredbearSpeedUp;
+
     /** 効果音 - 懐中電灯のオンオフ */
     private SoundComponent soundUseFlashLight;
 
@@ -135,7 +138,7 @@ public class FNAFIMConfig {
         lang = config.getString("lang", "ja");
         minPlayers = config.getInt("minPlayers", 2);
         maxPlayers = config.getInt("maxPlayers", 64);
-        secondsOfOneHour = config.getInt("secondsOfOneHour", 90);
+        secondsOfOneHour = config.getInt("secondsOfOneHour", 60);
         secondsOfNightInterval = config.getInt("secondsOfNightInterval", 15);
         foxyMovementSeconds = config.getInt("foxyMovementSeconds", 15);
         batteryDecreasePerSecond = config.getDouble("batteryDecreasePerSecond", 0.14);
@@ -144,22 +147,23 @@ public class FNAFIMConfig {
         batteryShutterPerSecond = config.getDouble("batteryShutterPerSecond", 0.67);
         raderSearchingRange = config.getInt("raderSearchingRange", 15);
         playerLogoutTrackingSeconds = config.getInt("playerLogoutTrackingSeconds", 20);
-        chicaThreatCooldownSeconds = config.getInt("chicaThreatCooldownSeconds", 40);
+        chicaThreatCooldownSeconds = config.getInt("chicaThreatCooldownSeconds", 20);
+        fredbearSpeedUp = config.getInt("fredbearSpeedUp", 3);
 
         night1MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night1MoveSpeed", -99, -3, -3, 1, 1);
+                config, "night1MoveSpeed", -99, -3, -3, 1, -1, 1, 1);
         night2MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night2MoveSpeed", -99, -2, -2, 1, 1);
+                config, "night2MoveSpeed", -99, -2, -2, 1, -1, 1, 1);
         night3MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night3MoveSpeed", -1, -1, -1, 2, 2);
+                config, "night3MoveSpeed", -1, -1, -1, 2, 0, 2, 2);
         night4MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night4MoveSpeed", 0, 0, 0, 3, 3);
+                config, "night4MoveSpeed", 0, 0, 0, 3, 0, 3, 2);
         night5MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night5MoveSpeed", 1, 1, 1, 3, 3);
+                config, "night5MoveSpeed", 1, 1, 1, 3, 1, 3, 2);
         night6MoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "night6MoveSpeed", 2, 2, 2, 4, 4);
+                config, "night6MoveSpeed", 2, 2, 2, 4, 2, 4, 3);
         customNightMoveSpeed = FNAFIMConfigMoveSetting.load(
-                config, "customNightMoveSpeed", 4, 4, 4, 5, 5);
+                config, "customNightMoveSpeed", 4, 4, 4, 5, 3, 5, 4);
 
         soundUseFlashLight = SoundComponent.getComponentFromString(
                 config.getString("soundUseFlashLight"));
@@ -345,6 +349,13 @@ public class FNAFIMConfig {
      */
     public int getChicaThreatCooldownSeconds() {
         return chicaThreatCooldownSeconds;
+    }
+
+    /**
+     * @return fredbearSpeedUp
+     */
+    public int getFredbearSpeedUp() {
+        return fredbearSpeedUp;
     }
 
     /**

@@ -25,6 +25,7 @@ import org.bitbucket.ucchy.fnafim.effect.InvisibleEffect;
 import org.bitbucket.ucchy.fnafim.effect.SpeedEffect;
 import org.bitbucket.ucchy.fnafim.task.ChicaThreatCooldownTimeTask;
 import org.bitbucket.ucchy.fnafim.task.FoxyMovementTask;
+import org.bitbucket.ucchy.fnafim.task.FredBearMovementTask;
 import org.bitbucket.ucchy.fnafim.task.FreddyItemWaitTask;
 import org.bitbucket.ucchy.fnafim.task.FreddyTeleportWaitTask;
 import org.bitbucket.ucchy.fnafim.task.GameSessionTask;
@@ -64,6 +65,7 @@ public class GameSession {
     private String chica;
     private String bonnie;
     private String foxy;
+    private String fredbear;
 
     private HashMap<String, PlayerBattery> batteries;
     private ArrayList<GameSessionTask> tasks;
@@ -175,6 +177,14 @@ public class GameSession {
             }
         }
 
+        if ( fredbear == null && entrants.size() == 2 ) {
+            int random = (int)(Math.random() * players.size());
+            fredbear = players.get(random);
+            players.remove(random);
+            sendInGameAnnounce("FredBear : " + fredbear);
+            sendInfoToPlayer(fredbear, Messages.get("Description_FredBear"));
+        }
+
         if ( chica == null && players.size() >= 2 ) {
             int random = (int)(Math.random() * players.size());
             chica = players.get(random);
@@ -211,6 +221,7 @@ public class GameSession {
         for ( String name : players ) {
             sendPlayerInventory(name);
         }
+        sendFredBearInventory(fredbear);
         sendFreddyInventory(freddy);
         sendChicaInventory(chica);
         sendBonnieInventory(bonnie);
@@ -231,6 +242,13 @@ public class GameSession {
             effectManager.applyEffect(name, new ChangeDisplayNameEffect(name,
                     ChatColor.AQUA + name + ChatColor.WHITE + "(Player)"
                             + ChatColor.RESET));
+        }
+
+        // FredBearのエフェクトの設定
+        if ( fredbear != null ) {
+            applyMoveSpeedSetting(fredbear, config.getMoveSpeed(night).getFredbear());
+            effectManager.applyEffect(fredbear, new ChangeDisplayNameEffect(fredbear,
+                    ChatColor.GOLD + fredbear + ChatColor.RED + "(FredBear)" + ChatColor.RESET));
         }
 
         // Freddyのエフェクトの設定
@@ -283,6 +301,12 @@ public class GameSession {
                 locationMap.put(player, lmanager.getPlayer());
             }
         }
+        if ( fredbear != null ) {
+            Player player = Utility.getPlayerExact(fredbear);
+            if ( player != null ) {
+                locationMap.put(player, lmanager.getFreddy());
+            }
+        }
         if ( freddy != null ) {
             Player player = Utility.getPlayerExact(freddy);
             if ( player != null ) {
@@ -327,6 +351,7 @@ public class GameSession {
         scoreboardDisplay.setRemainTime(night, 12);
         scoreboardDisplay.setRemainPlayer(players.size());
 
+        scoreboardDisplay.setRole(fredbear, ChatColor.RED + "FredBear");
         scoreboardDisplay.setRole(freddy, ChatColor.RED + "Freddy");
         scoreboardDisplay.setRole(chica, ChatColor.RED + "Chica");
         scoreboardDisplay.setRole(bonnie, ChatColor.RED + "Bonnie");
@@ -338,13 +363,14 @@ public class GameSession {
             scoreboardDisplay.setRole(name, ChatColor.GRAY + "Spectator");
         }
 
-//        for ( Player player : players ) {
-//            scoreboardDisplay.setPlayersTeam(player);
-//        }
-//        scoreboardDisplay.setFreddysTeam(freddy);
-//        scoreboardDisplay.setFreddysTeam(chica);
-//        scoreboardDisplay.setFreddysTeam(bonnie);
-//        scoreboardDisplay.setFreddysTeam(foxy);
+        for ( String player : players ) {
+            scoreboardDisplay.setPlayersTeam(player);
+        }
+        scoreboardDisplay.setFreddysTeam(fredbear);
+        scoreboardDisplay.setFreddysTeam(freddy);
+        scoreboardDisplay.setFreddysTeam(chica);
+        scoreboardDisplay.setFreddysTeam(bonnie);
+        scoreboardDisplay.setFreddysTeam(foxy);
 
         // プレイヤー人数 x TELEPORT_WAIT＋α だけ待ってから、ゲームを開始する。
         int delay = entrants.size() * TELEPORT_WAIT_TICKS + 10;
@@ -532,7 +558,7 @@ public class GameSession {
         // スコアボードを更新
         scoreboardDisplay.setRemainPlayer(players.size());
         if ( player != null ) {
-            scoreboardDisplay.leavePlayersTeam(player);
+            scoreboardDisplay.leavePlayersTeam(player.getName());
         }
 
         // 捕まえたのがfreddyで、行動不能のnightなら、リスポーン地点に戻して行動不能にする
@@ -775,8 +801,8 @@ public class GameSession {
         if ( name.equals(Messages.get(
                 "ItemName_FoxyMovement", "%seconds", config.getFoxyMovementSeconds())) ) {
 
-            // 行動不可の状態になっていないなら、アイテムを使う必要は無い
-            if ( effectManager.hasEffect(foxy, SpeedEffect.TYPE) ) {
+            // 行動中なら、アイテムを使う必要は無い
+            if ( isFoxyMoving() ) {
                 sendInfoToPlayer(player, Messages.get("Info_FoxyMovementAlready"));
                 return false;
             }
@@ -796,6 +822,40 @@ public class GameSession {
             effectManager.applyEffect(player.getName(), new SpeedEffect(player, speed));
             sendInfoToPlayer(player, Messages.get("Info_FoxyMovementStart", "%seconds", seconds));
             GameSessionTask task = new FoxyMovementTask(this, seconds);
+            task.start();
+            tasks.add(task);
+
+            // SEを流す
+            config.getSoundFoxyMovement().playSoundToPlayer(player);
+
+            return false;
+        }
+
+        // FredBearの高速移動アイテム処理
+        if ( name.equals(Messages.get(
+                "ItemName_FredBearMovement", "%seconds", config.getFoxyMovementSeconds())) ) {
+
+            // 行動中なら、アイテムを使う必要は無い
+            if ( isFredBearMoving() ) {
+                sendInfoToPlayer(player, Messages.get("Info_FoxyMovementAlready"));
+                return false;
+            }
+
+            // 1つ消費する
+            int amount = item.getAmount() - 1;
+            if ( amount > 0 ) {
+                player.getItemInHand().setAmount(amount);
+            } else {
+                player.setItemInHand(new ItemStack(Material.AIR));
+            }
+
+            // 30秒間のスピード上昇+3を与える
+            int seconds = config.getFoxyMovementSeconds();
+            int speed = config.getMoveSpeed(night).getFredbear() + config.getFredbearSpeedUp();
+            effectManager.removeEffect(player.getName(), SpeedEffect.TYPE);
+            effectManager.applyEffect(player.getName(), new SpeedEffect(player, speed));
+            sendInfoToPlayer(player, Messages.get("Info_FoxyMovementStart", "%seconds", seconds));
+            GameSessionTask task = new FredBearMovementTask(this, seconds);
             task.start();
             tasks.add(task);
 
@@ -844,7 +904,8 @@ public class GameSession {
 
             // クールダウンタイムを開始する
             int seconds = config.getChicaThreatCooldownSeconds();
-            ChicaThreatCooldownTimeTask task = new ChicaThreatCooldownTimeTask(this, seconds);
+            ChicaThreatCooldownTimeTask task
+                = new ChicaThreatCooldownTimeTask(this, player.getName(), seconds);
             task.start();
             tasks.add(task);
 
@@ -1103,6 +1164,14 @@ public class GameSession {
     }
 
     /**
+     * FredBearを取得する
+     * @return fredbear
+     */
+    public String getFredBear() {
+        return fredbear;
+    }
+
+    /**
      * 指定されたプレイヤーが、ゲームのプレイヤーとして参加しているかどうかを判定する
      * @param player プレイヤー
      * @return playerかどうか
@@ -1163,12 +1232,25 @@ public class GameSession {
     }
 
     /**
+     * FredBearが行動時間を終了した時に呼び出されるメソッド
+     */
+    public void onFredBearMovementEnd() {
+        if ( fredbear == null ) return;
+        Player player = Utility.getPlayerExact(fredbear);
+        if ( player == null || !player.isOnline() ) return;
+        sendInfoToPlayer(fredbear, Messages.get("Info_FoxyMovementEnd"));
+        effectManager.removeEffect(fredbear, SpeedEffect.TYPE);
+        int speed = config.getMoveSpeed(night).getFredbear();
+        effectManager.applyEffect(fredbear, new SpeedEffect(player, speed));
+    }
+
+    /**
      * Foxyが行動時間を終了した時に呼び出されるメソッド
      */
     public void onFoxyMovementEnd() {
         if ( foxy == null ) return;
         Player player = Utility.getPlayerExact(foxy);
-        if ( player == null ) return;
+        if ( player == null || !player.isOnline() ) return;
         sendInfoToPlayer(foxy, Messages.get("Info_FoxyMovementEnd"));
         Location respawn = FiveNightsAtFreddysInMinecraft
                 .getInstance().getLocationManager().getFoxy();
@@ -1214,6 +1296,34 @@ public class GameSession {
     }
 
     /**
+     * Foxyが現在行動中かどうかを返す
+     * @return 行動中かどうか
+     */
+    private boolean isFoxyMoving() {
+        if ( tasks == null ) return false;
+        for ( GameSessionTask task : tasks ) {
+            if ( task instanceof FoxyMovementTask && !task.isEnded() ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * FredBearが現在行動中かどうかを返す
+     * @return 行動中かどうか
+     */
+    private boolean isFredBearMoving() {
+        if ( tasks == null ) return false;
+        for ( GameSessionTask task : tasks ) {
+            if ( task instanceof FredBearMovementTask && !task.isEnded() ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * プレイヤー用アイテムを配布する
      * @param player
      */
@@ -1242,6 +1352,38 @@ public class GameSession {
         // 現在、配布するものはない。
     }
 
+    private void sendFredBearInventory(String name) {
+        if ( name == null ) return;
+        Player player = Utility.getPlayerExact(name);
+        if ( player == null || !player.isOnline() ) {
+            return;
+        }
+        player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
+        player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+        player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
+        player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+
+        giveThreatItemToChica(name);
+
+        int amount = FiveNightsAtFreddysInMinecraft.getInstance()
+                .getFNAFIMConfig().getMoveSpeed(night).getFredbearMovement();
+        if ( amount >= 0 ) {
+            if ( amount == 0 ) {
+                amount = (int)(Math.random() * 5) + 1;
+            } else if ( amount > 10 ) {
+                amount = 10;
+            }
+
+            ItemStack leather = new ItemStack(Material.LEATHER);
+            ItemMeta meta = leather.getItemMeta();
+            int seconds = config.getFoxyMovementSeconds();
+            meta.setDisplayName(Messages.get("ItemName_FredBearMovement", "%seconds", seconds));
+            leather.setItemMeta(meta);
+            leather.setAmount(amount);
+            player.getInventory().addItem(leather);
+        }
+    }
+
     private void sendFreddyInventory(String name) {
         if ( name == null ) return;
         Player player = Utility.getPlayerExact(name);
@@ -1265,7 +1407,7 @@ public class GameSession {
         player.getInventory().setLeggings(new ItemStack(Material.GOLD_LEGGINGS));
         player.getInventory().setBoots(new ItemStack(Material.GOLD_BOOTS));
 
-        giveThreatItemToChica();
+        giveThreatItemToChica(name);
     }
 
     private void sendBonnieInventory(String name) {
@@ -1311,12 +1453,13 @@ public class GameSession {
     }
 
     /**
-     * Chicaに威嚇用アイテムを渡す
+     * Chica, FredBearに威嚇用アイテムを渡す
+     * @param name 与えるプレイヤーのプレイヤー名
      */
-    public void giveThreatItemToChica() {
-        if ( chica == null ) return;
-        Player player = Utility.getPlayerExact(chica);
-        if ( player == null ) return;
+    public void giveThreatItemToChica(String name) {
+        if ( name == null ) return;
+        Player player = Utility.getPlayerExact(name);
+        if ( player == null || !player.isOnline() ) return;
         player.getInventory().addItem(chicaThreat.clone());
         updateInventory(player);
     }
@@ -1525,6 +1668,8 @@ public class GameSession {
             return Doll.BONNIE;
         } else if ( name.equals(foxy) ) {
             return Doll.FOXY;
+        } else if ( name.equals(fredbear) ) {
+            return Doll.FREDBEAR;
         }
         return null;
     }

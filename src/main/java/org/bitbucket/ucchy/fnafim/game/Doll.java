@@ -21,5 +21,8 @@ public enum Doll {
     BONNIE,
 
     /** フォクシー */
-    FOXY;
+    FOXY,
+
+    /** フレッドベアー */
+    FREDBEAR,
 }

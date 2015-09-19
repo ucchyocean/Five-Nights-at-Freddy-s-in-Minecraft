@@ -16,8 +16,8 @@ minPlayers: 2
 maxPlayers: 64
 
 # Real time seconds per one hour in game.
-# If you set 90 seconds, one night will be 540 seconds (= 90sec X 6hours).
-secondsOfOneHour: 90
+# If you set 60 seconds, one night will be 360 seconds (= 60sec X 6hours).
+secondsOfOneHour: 60
 
 # Interval seconds between previous night and next night.
 secondsOfNightInterval: 15
@@ -46,14 +46,17 @@ playerLogoutTrackingSeconds: 20
 # Movement speed settings of Night1.
 # You can set each character's movement speeds, -99(cannot move) or from -5 to 5.
 # Foxy cannot move always, except using movement item.
-# FoxyMovement is the number of times the Foxy can act per night,
+# foxyMovement is the number of times the Foxy can act per night,
+# feadbearMovement is the number of times the FredBear can use speed-up per night,
 #   you can set -1(cannot move) or 0(random), or from 1 to 5.
 night1MoveSpeed:
   freddy: -99
   chica: -3
   bonnie: -3
   foxy: 1
+  fredbear: -1
   foxyMovement: 1
+  fredbearMovement: 1
 
 # Movement speed settings of Night2.
 night2MoveSpeed:
@@ -61,7 +64,9 @@ night2MoveSpeed:
   chica: -2
   bonnie: -2
   foxy: 1
+  fredbear: -1
   foxyMovement: 1
+  fredbearMovement: 1
 
 # Movement speed settings of Night3.
 night3MoveSpeed:
@@ -69,7 +74,9 @@ night3MoveSpeed:
   chica: -1
   bonnie: -1
   foxy: 2
+  fredbear: 0
   foxyMovement: 2
+  fredbearMovement: 2
 
 # Movement speed settings of Night4.
 night4MoveSpeed:
@@ -77,7 +84,9 @@ night4MoveSpeed:
   chica: 0
   bonnie: 0
   foxy: 3
+  fredbear: 0
   foxyMovement: 3
+  fredbearMovement: 2
 
 # Movement speed settings of Night5.
 night5MoveSpeed:
@@ -85,7 +94,9 @@ night5MoveSpeed:
   chica: 1
   bonnie: 1
   foxy: 3
+  fredbear: 1
   foxyMovement: 3
+  fredbearMovement: 2
 
 # Movement speed settings of Night6.
 night6MoveSpeed:
@@ -93,7 +104,9 @@ night6MoveSpeed:
   chica: 2
   bonnie: 2
   foxy: 4
+  fredbear: 2
   foxyMovement: 4
+  fredbearMovement: 3
 
 # Movement speed settings of custom night (Night7).
 customNightMoveSpeed:
@@ -101,13 +114,18 @@ customNightMoveSpeed:
   chica: 4
   bonnie: 4
   foxy: 5
+  fredbear: 3
   foxyMovement: 5
+  fredbearMovement: 4
 
 # Foxy movable time seconds per using an item.
 foxyMovementSeconds: 15
 
 # Chica threat Cooldown time.
-chicaThreatCooldownSeconds: 40
+chicaThreatCooldownSeconds: 20
+
+# The speed up amount of FredBear's speed up skill.
+fredbearSpeedUp: 3
 
 # =============== Sound Settings ===============
 
@@ -139,5 +157,4 @@ soundNightEnd: 'ENDERDRAGON_DEATH-0.4-2.0'
 soundPlayerCaught: 'GHAST_SCREAM-1.0-0.5,FIREWORK_LARGE_BLAST-1.0-0.5'
 
 # Chica threaten.
-soundChicaThreat: 'GLASS,IRONGOLEM_DEATH-0.7'
-
+soundChicaThreat: 'GLASS,ZOMBIE_UNFECT-1.0-0.8,IRONGOLEM_DEATH-0.7-1.0-3'

@@ -17,57 +17,54 @@ public class FNAFIMConfigMoveSetting {
     private int chica;
     private int bonnie;
     private int foxy;
+    private int fredbear;
     private int foxyMovement;
+    private int fredbearMovement;
 
     private FNAFIMConfigMoveSetting() {
     }
 
     public static FNAFIMConfigMoveSetting load(
             ConfigurationSection config, String sectionName,
-            int freddyDefault, int chicaDefault, int bonnieDefault, int foxyDefault,
-            int foxyMovementDefault) {
+            int freddyDefault, int chicaDefault, int bonnieDefault, int foxyDefault, int fredbearDefault,
+            int foxyMovementDefault, int fredbearMovementDefault) {
 
         FNAFIMConfigMoveSetting setting = new FNAFIMConfigMoveSetting();
         setting.freddy = config.getInt(sectionName + ".freddy", freddyDefault);
         setting.chica = config.getInt(sectionName + ".chica", chicaDefault);
         setting.bonnie = config.getInt(sectionName + ".bonnie", bonnieDefault);
         setting.foxy = config.getInt(sectionName + ".foxy", foxyDefault);
+        setting.fredbear = config.getInt(sectionName + ".fredbear", fredbearDefault);
         setting.foxyMovement = config.getInt(sectionName + ".foxyMovement", foxyMovementDefault);
+        setting.fredbearMovement = config.getInt(sectionName + ".fredbearMovement", fredbearMovementDefault);
         return setting;
     }
 
-    /**
-     * @return freddy
-     */
     public int getFreddy() {
         return freddy;
     }
 
-    /**
-     * @return chica
-     */
     public int getChica() {
         return chica;
     }
 
-    /**
-     * @return bonnie
-     */
     public int getBonnie() {
         return bonnie;
     }
 
-    /**
-     * @return foxy
-     */
     public int getFoxy() {
         return foxy;
     }
 
-    /**
-     * @return foxyMovement
-     */
+    public int getFredbear() {
+        return fredbear;
+    }
+
     public int getFoxyMovement() {
         return foxyMovement;
+    }
+
+    public int getFredbearMovement() {
+        return fredbearMovement;
     }
 }

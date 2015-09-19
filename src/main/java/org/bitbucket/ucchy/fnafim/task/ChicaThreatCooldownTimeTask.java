@@ -14,15 +14,17 @@ import org.bitbucket.ucchy.fnafim.game.GameSession;
 public class ChicaThreatCooldownTimeTask extends GameSessionTask {
 
     private GameSession session;
+    private String name;
 
-    public ChicaThreatCooldownTimeTask(GameSession session, int seconds) {
+    public ChicaThreatCooldownTimeTask(GameSession session, String name, int seconds) {
         super(seconds);
         this.session = session;
+        this.name = name;
     }
 
     @Override
     public void run() {
-        session.giveThreatItemToChica();
+        session.giveThreatItemToChica(name);
         isEnd = true;
     }
 }

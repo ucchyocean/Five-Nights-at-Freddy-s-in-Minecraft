@@ -10,12 +10,15 @@ import java.util.HashMap;
 import org.bitbucket.ucchy.fnafim.Messages;
 import org.bitbucket.ucchy.fnafim.Utility;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.Team;
 
 /**
  * スコアボード表示クラス
@@ -143,24 +146,50 @@ public class ScoreboardDisplay {
      * プレイヤーをフレディチームに所属させる
      * @param player
      */
-    public void setFreddysTeam(Player player) {
-//        getTeam("Freddys", ChatColor.RED.toString()).addPlayer(player);
+    public void setFreddysTeam(String name) {
+        if ( name == null ) return;
+        if ( scoreboards.containsKey(name) ) return;
+        Scoreboard board = scoreboards.get(name);
+        Team team = board.getTeam("Freddys");
+        if ( team == null ) {
+            team = board.registerNewTeam("Freddys");
+            team.setPrefix(ChatColor.RED.toString());
+            team.setSuffix(ChatColor.RESET.toString());
+            team.setNameTagVisibility(NameTagVisibility.NEVER);
+        }
+        addTeamMember(team, name);
     }
 
     /**
      * プレイヤーをプレイヤーズチームに所属させる
      * @param player
      */
-    public void setPlayersTeam(Player player) {
-//        getTeam("Players", ChatColor.BLUE.toString()).addPlayer(player);
+    public void setPlayersTeam(String name) {
+        if ( name == null ) return;
+        if ( scoreboards.containsKey(name) ) return;
+        Scoreboard board = scoreboards.get(name);
+        Team team = board.getTeam("Players");
+        if ( team == null ) {
+            team = board.registerNewTeam("Players");
+            team.setPrefix(ChatColor.BLUE.toString());
+            team.setSuffix(ChatColor.RESET.toString());
+            team.setNameTagVisibility(NameTagVisibility.NEVER);
+        }
+        addTeamMember(team, name);
     }
 
     /**
      * プレイヤーをプレイヤーズチームから脱退させる
      * @param player
      */
-    public void leavePlayersTeam(Player player) {
-//        getTeam("Players", ChatColor.BLUE.toString()).removePlayer(player);
+    public void leavePlayersTeam(String name) {
+        if ( name == null ) return;
+        if ( scoreboards.containsKey(name) ) return;
+        Scoreboard board = scoreboards.get(name);
+        Team team = board.getTeam("Players");
+        if ( team != null ) {
+            removeTeamMember(team, name);
+        }
     }
 
     /**
@@ -198,5 +227,29 @@ public class ScoreboardDisplay {
      */
     public void setRemainPlayer(int remain) {
         setScore(Messages.get("Sidebar_RemainingPlayers"), remain);
+    }
+
+    @SuppressWarnings("deprecation")
+    private void addTeamMember(Team team, String name) {
+        if ( Utility.isCB186orLater() ) {
+            team.addEntry(name);
+        } else {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null && player.isOnline() ) {
+                team.addPlayer(player);
+            }
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void removeTeamMember(Team team, String name) {
+        if ( Utility.isCB186orLater() ) {
+            team.removeEntry(name);
+        } else {
+            Player player = Utility.getPlayerExact(name);
+            if ( player != null && player.isOnline() ) {
+                team.removePlayer(player);
+            }
+        }
     }
 }
