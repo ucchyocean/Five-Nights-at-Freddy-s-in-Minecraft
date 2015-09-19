@@ -876,11 +876,17 @@ public class GameSession {
                 if ( target != null && target.isOnline() ) {
                     int wait = (int)(Math.random() * 8) + 1;
                     player.teleport(target, TeleportCause.PLUGIN);
-                    GameSessionTask task = new FreddyTeleportWaitTask(this, wait);
+                    int speed;
+                    if ( player.getName().equals(fredbear) ) {
+                        speed = config.getMoveSpeed(night).getFredbear();
+                    } else {
+                        speed = config.getMoveSpeed(night).getFreddy();
+                    }
+                    GameSessionTask task = new FreddyTeleportWaitTask(this, player.getName(), wait, speed);
                     task.start();
                     tasks.add(task);
-                    sendInfoToPlayer(freddy, Messages.get("Info_FreddyTeleportWait", "%seconds", wait));
-                    effectManager.applyEffect(freddy, new BindEffect(freddy));
+                    sendInfoToPlayer(player.getName(), Messages.get("Info_FreddyTeleportWait", "%seconds", wait));
+                    effectManager.applyEffect(player.getName(), new BindEffect(player.getName()));
 
                     // SEを流す
                     config.getSoundFreddyTeleport().playSoundToWorld(target.getLocation());
@@ -1278,18 +1284,35 @@ public class GameSession {
     }
 
     /**
+     * FredBearがテレポート用アイテムを取得する時に呼び出されるメソッド
+     * @param target ターゲットプレイヤー
+     */
+    public void onFredBearItemGet(String target) {
+        if ( fredbear == null ) return;
+        Player player = Utility.getPlayerExact(fredbear);
+        if ( player == null ) return;
+        sendInfoToPlayer(fredbear, Messages.get("Info_FreddyTeleportItem",
+                "%player", target));
+        ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short)3);
+        SkullMeta meta = (SkullMeta)skull.getItemMeta();
+        meta.setOwner(target);
+        meta.setDisplayName(Messages.get("ItemName_FreddyTeleport", "%target", target));
+        skull.setItemMeta(meta);
+        player.getInventory().addItem(skull);
+    }
+
+    /**
      * Freddyがテレポート後に行動可能になる時に呼び出されるメソッド
      */
-    public void onFreddyTPWaitEnd() {
+    public void onFreddyTPWaitEnd(String name, int speed) {
 
         // freddyの行動不能を解除する
-        sendInfoToPlayer(freddy, Messages.get("Info_FreddyTeleportWaitEnd"));
-        effectManager.removeEffect(freddy, BindEffect.TYPE);
+        sendInfoToPlayer(name, Messages.get("Info_FreddyTeleportWaitEnd"));
+        effectManager.removeEffect(name, BindEffect.TYPE);
 
         // freddyの行動スピードを適用する
-        int speed = config.getMoveSpeed(night).getFreddy();
         if ( speed != -99 ) {
-            effectManager.applyEffect(freddy, new SpeedEffect(freddy, speed));
+            effectManager.applyEffect(name, new SpeedEffect(name, speed));
         } else {
             freddyReturn = true;
         }

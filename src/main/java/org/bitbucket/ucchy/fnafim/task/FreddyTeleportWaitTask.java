@@ -14,15 +14,19 @@ import org.bitbucket.ucchy.fnafim.game.GameSession;
 public class FreddyTeleportWaitTask extends GameSessionTask {
 
     private GameSession session;
+    private String name;
+    private int speed;
 
-    public FreddyTeleportWaitTask(GameSession session, int wait) {
+    public FreddyTeleportWaitTask(GameSession session, String name, int wait, int speed) {
         super(wait);
         this.session = session;
+        this.name = name;
+        this.speed = speed;
     }
 
     @Override
     public void run() {
-        session.onFreddyTPWaitEnd();
+        session.onFreddyTPWaitEnd(name, speed);
         isEnd = true;
     }
 }
