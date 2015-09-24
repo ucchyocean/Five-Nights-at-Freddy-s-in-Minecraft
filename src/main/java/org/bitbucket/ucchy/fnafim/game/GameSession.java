@@ -116,6 +116,7 @@ public class GameSession {
     public void openInvitation() {
 
         phase = GameSessionPhase.INVITATION;
+        FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
         sendBroadcastAnnounce(Messages.get("Announce_OpenInvitation", "%owner", owner.getName()));
     }
 
@@ -131,6 +132,7 @@ public class GameSession {
         }
 
         phase = GameSessionPhase.CANCELED;
+        FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
         sendBroadcastAnnounce(Messages.get("Announce_CloseInvitation", "%owner", owner.getName()));
 
         // 預かっていた持ち物を返す
@@ -149,6 +151,7 @@ public class GameSession {
     public void startPreparing(Night night) {
 
         phase = GameSessionPhase.PREPARING;
+        FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
         this.night = night;
         this.tasks = new ArrayList<GameSessionTask>();
 
@@ -387,6 +390,7 @@ public class GameSession {
     private void startGame() {
 
         phase = GameSessionPhase.IN_GAME;
+        FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
         sendInGameTitle(Messages.get("Announce_GameStart", "%night", night.toString()));
         sendInGameSound(config.getSoundNightStart());
 
@@ -402,6 +406,7 @@ public class GameSession {
     public void cancelGame() {
 
         phase = GameSessionPhase.CANCELED;
+        FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
         sendInGameAnnounce(Messages.get("Announce_GameCanceled"));
         onEnd();
     }
@@ -412,6 +417,7 @@ public class GameSession {
     private void onEnd() {
 
         phase = GameSessionPhase.END;
+        FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
 
         // タイマーの停止
         if ( timer != null ) {
@@ -1024,6 +1030,8 @@ public class GameSession {
             player.setFoodLevel(20);
             player.setHealth(player.getMaxHealth());
 
+            FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
+
             sendInGameAnnounce(Messages.get("Announce_EntrantJoin", "%player", player.getName()));
         }
     }
@@ -1040,6 +1048,8 @@ public class GameSession {
 
             // 預かっていた持ち物を返す
             storage.restoreFromTemp(player);
+
+            FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
 
             sendInGameAnnounce(Messages.get("Announce_EntrantLeave", "%player", player.getName()));
         }

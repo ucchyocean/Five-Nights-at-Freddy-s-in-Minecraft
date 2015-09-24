@@ -22,6 +22,7 @@ commands:
            /<command> start night<1-7> - Start new game.
            /<command> cancel - Cancel game.
            /<command> set <lobby|player|spectate|freddy|chica|bonny|foxy> - Set each respawn point.
+           /<command> sign - Register new Join Sign.
            /<command> reload - Reload config data.
     permission: fnafim.command
     permission-message: 'You don''t have a permission "<permission>".'
@@ -60,9 +61,13 @@ permissions:
   fnafim.set:
     description: Permission of set command.
     default: op
+  fnafim.sign:
+    description: Permission of sign command.
+    default: op
   fnafim.reload:
     description: Permission of reload command.
     default: op
+
   fnafim.*:
     description: All permission.
     children:

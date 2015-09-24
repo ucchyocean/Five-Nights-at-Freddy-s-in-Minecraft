@@ -15,6 +15,7 @@ import org.bitbucket.ucchy.fnafim.game.GameSessionPhase;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -26,6 +27,7 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
     private FNAFIMCommand command;
     private FNAFIMConfig config;
     private LocationManager locationManager;
+    private JoinSignManager joinsignManager;
     private GameSession session;
 
     /**
@@ -48,9 +50,11 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
 
         // 地点管理のロード
         locationManager = LocationManager.load(new File(getDataFolder(), "location.yml"));
+        joinsignManager = JoinSignManager.load(new File(getDataFolder(), "joinsign.yml"));
 
         // リスナーの登録
         getServer().getPluginManager().registerEvents(new GameSessionListener(), this);
+        getServer().getPluginManager().registerEvents(new JoinSignListener(this), this);
     }
 
     /**
@@ -75,6 +79,7 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
         config.reloadConfig();
         Messages.reload(config.getLang());
         locationManager = LocationManager.load(new File(getDataFolder(), "location.yml"));
+        joinsignManager = JoinSignManager.load(new File(getDataFolder(), "joinsign.yml"));
     }
 
     /**
@@ -137,6 +142,30 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
      */
     public LocationManager getLocationManager() {
         return locationManager;
+    }
+
+    /**
+     * 参加看板管理を返す
+     * @return 参加看板管理
+     */
+    public JoinSignManager getJoinsignManager() {
+        return joinsignManager;
+    }
+
+    /**
+     * 指定したプレイヤーが、/fn join コマンドを実行したことにする
+     * @param player プレイヤー
+     */
+    public void runJoinCommand(Player player) {
+        command.joinCommand(player, null, null, null);
+    }
+
+    /**
+     * 指定したプレイヤーが、/fn spectate コマンドを実行したことにする
+     * @param player プレイヤー
+     */
+    public void runSpectateCommand(Player player) {
+        command.spectateCommand(player, null, null, null);
     }
 
     /**

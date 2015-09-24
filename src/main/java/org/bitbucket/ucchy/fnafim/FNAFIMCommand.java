@@ -15,6 +15,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * コマンドクラス
@@ -67,6 +69,9 @@ public class FNAFIMCommand implements TabExecutor {
         } else if ( args[0].equalsIgnoreCase("set") ) {
             setCommand(sender, command, label, args);
             return true;
+        } else if ( args[0].equalsIgnoreCase("sign") ) {
+            signCommand(sender, command, label, args);
+            return true;
         } else if ( args[0].equalsIgnoreCase("reload") ) {
             reloadCommand(sender, command, label, args);
             return true;
@@ -85,7 +90,7 @@ public class FNAFIMCommand implements TabExecutor {
             String pre = args[0].toLowerCase();
             List<String> candidates = new ArrayList<String>();
             for ( String c : new String[]{"join", "leave", "open",
-                    "close", "start", "cancel", "set", "reload"} ) {
+                    "close", "start", "cancel", "set", "sign", "reload"} ) {
                 if ( c.startsWith(pre) && sender.hasPermission(PERMISSION_PREFIX + c) ) {
                     candidates.add(c);
                 }
@@ -119,7 +124,7 @@ public class FNAFIMCommand implements TabExecutor {
         return null;
     }
 
-    private void joinCommand(
+    public void joinCommand(
             CommandSender sender, Command command, String label, String[] args) {
 
         // パーミッションチェック
@@ -208,7 +213,7 @@ public class FNAFIMCommand implements TabExecutor {
         sendInformationMessage(sender, Messages.get("Info_Left"));
     }
 
-    private void spectateCommand(CommandSender sender, Command command, String label, String[] args) {
+    public void spectateCommand(CommandSender sender, Command command, String label, String[] args) {
 
         // パーミッションチェック
         if ( !sender.hasPermission(PERMISSION_PREFIX + "spectate") ) {
@@ -523,6 +528,44 @@ public class FNAFIMCommand implements TabExecutor {
         manager.save();
     }
 
+    private void signCommand(CommandSender sender, Command command, String label, String[] args) {
+
+        // パーミッションチェック
+        if ( !sender.hasPermission(PERMISSION_PREFIX + "sign") ) {
+            sendErrorMessage(sender, Messages.get("Error_Permission"));
+            return;
+        }
+
+        // プレイヤーでないならエラー
+        if ( !(sender instanceof Player) ) {
+            sendErrorMessage(sender, Messages.get("Error_RunInGame"));
+            return;
+        }
+
+        // 引数チェック
+        boolean isRemove = ( args.length >= 2 && args[1].equalsIgnoreCase("remove") );
+        final String meta = isRemove ? JoinSignListener.META_SIGN_COMMAND_REMOVE
+                        : JoinSignListener.META_SIGN_COMMAND;
+
+        // メタデータを仕込む、時間経過（15秒）で解除する
+        final FiveNightsAtFreddysInMinecraft plugin = FiveNightsAtFreddysInMinecraft.getInstance();
+        final Player player = (Player)sender;
+        player.setMetadata(meta, new FixedMetadataValue(plugin , true));
+        new BukkitRunnable() {
+            public void run() {
+                if ( player.isOnline() && player.hasMetadata(meta) ) {
+                    player.removeMetadata(meta, plugin);
+                }
+            }
+        }.runTaskLater(plugin, 15 * 20);
+
+        if ( !isRemove ) {
+            sendInformationMessage(sender, Messages.get("Info_SignPre"));
+        } else {
+            sendInformationMessage(sender, Messages.get("Info_SignRemovePre"));
+        }
+    }
+
     private void reloadCommand(
             CommandSender sender, Command command, String label, String[] args) {
 
@@ -534,6 +577,7 @@ public class FNAFIMCommand implements TabExecutor {
 
         // 再読込する
         FiveNightsAtFreddysInMinecraft.getInstance().reloadAll();
+        sendInformationMessage(sender, Messages.get("Info_Reloaded"));
     }
 
     private void sendInformationMessage(CommandSender sender, String message) {
