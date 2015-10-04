@@ -17,6 +17,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -315,5 +316,41 @@ public class GameSessionListener implements Listener {
 
         // チャットログを記録する
         session.addChatLog(player, event.getMessage());
+    }
+
+    /**
+     * スタミナ量に変化があった時に呼び出されるイベントハンドラ
+     * @param event
+     */
+    @EventHandler(priority=EventPriority.NORMAL)
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+
+        // プレイヤーでないならイベントを無視
+        if ( !(event.getEntity() instanceof Player) ) {
+            return;
+        }
+
+        Player player = (Player)event.getEntity();
+
+        // セッションが無いならイベントを無視
+        GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session == null ) {
+            return;
+        }
+
+        // ゲームが終了しているならイベントを無視
+        if ( session.getPhase() == GameSessionPhase.END
+                || session.getPhase() == GameSessionPhase.CANCELED ) {
+            return;
+        }
+
+        // 参加者または観客ではないならイベントを無視
+        if ( !session.isEntrant(player) && !session.isSpectator(player) ) {
+            return;
+        }
+
+        // イベントをキャンセルしてスタミナを全回復する
+        event.setCancelled(true);
+        player.setFoodLevel(20);
     }
 }
