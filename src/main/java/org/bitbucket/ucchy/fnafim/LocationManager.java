@@ -7,6 +7,7 @@ package org.bitbucket.ucchy.fnafim;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -161,6 +162,23 @@ public class LocationManager {
 
     public Set<String> getArenaNames() {
         return arenas.keySet();
+    }
+
+    public ArrayList<String> getReadyArenaNames() {
+        ArrayList<String> list = new ArrayList<String>();
+        for ( String arenaName : arenas.keySet() ) {
+            boolean isOk = true;
+            for ( String name : NAMES ) {
+                if ( !arenas.get(arenaName).containsKey(name) ) {
+                    isOk = false;
+                    break;
+                }
+            }
+            if ( isOk ) {
+                list.add(arenaName);
+            }
+        }
+        return list;
     }
 
     /**

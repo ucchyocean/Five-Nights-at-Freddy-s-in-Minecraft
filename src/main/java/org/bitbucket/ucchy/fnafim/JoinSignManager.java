@@ -137,6 +137,10 @@ public class JoinSignManager {
         switch (phase) {
         case INVITATION:
             status = Messages.get("JoinSign_StatusOpen");
+            if ( session.getAutoStartTimer() != null ) {
+                int seconds = session.getAutoStartTimer().getSecondsLeft();
+                status = status + " " + seconds;
+            }
             message = Messages.get("JoinSign_MessageOpen");
             num = session.getEntrants().size();
             break;

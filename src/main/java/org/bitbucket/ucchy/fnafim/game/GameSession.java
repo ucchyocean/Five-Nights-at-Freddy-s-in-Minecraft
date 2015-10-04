@@ -23,6 +23,7 @@ import org.bitbucket.ucchy.fnafim.effect.BlindnessEffect;
 import org.bitbucket.ucchy.fnafim.effect.ChangeDisplayNameEffect;
 import org.bitbucket.ucchy.fnafim.effect.InvisibleEffect;
 import org.bitbucket.ucchy.fnafim.effect.SpeedEffect;
+import org.bitbucket.ucchy.fnafim.task.AutoStartTimerTask;
 import org.bitbucket.ucchy.fnafim.task.ChicaThreatCooldownTimeTask;
 import org.bitbucket.ucchy.fnafim.task.FoxyMovementTask;
 import org.bitbucket.ucchy.fnafim.task.FredBearMovementTask;
@@ -55,6 +56,7 @@ public class GameSession {
 
     private GameSessionPhase phase;
     private FNAFIMConfig config;
+    private AutoStartTimerTask autoStartTimer;
 
     private CommandSender owner;
     private List<String> entrants;
@@ -112,20 +114,24 @@ public class GameSession {
 
     /**
      * 募集を開始する
+     * @param isSilent アナウンスなしにするかどうか
      */
-    public void openInvitation() {
+    public void openInvitation(boolean isSilent) {
 
         phase = GameSessionPhase.INVITATION;
         FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
-        sendBroadcastAnnounce(Messages.get("Announce_OpenInvitation", "%owner", owner.getName()));
+        if ( !isSilent ) {
+            sendBroadcastAnnounce(Messages.get("Announce_OpenInvitation", "%owner", owner.getName()));
+        }
     }
 
     /**
      * 募集を中断する。
      * 呼び出す時は、中断可能なフェーズ（INVITATION）であることをあらかじめ確認すること。
      * @param owner キャンセルした人
+     * @param isSilent アナウンスなしにするかどうか
      */
-    public void closeInvitation(CommandSender owner) {
+    public void closeInvitation(CommandSender owner, boolean isSilent) {
 
         if ( phase != GameSessionPhase.INVITATION ) {
             return;
@@ -133,7 +139,14 @@ public class GameSession {
 
         phase = GameSessionPhase.CANCELED;
         FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
-        sendBroadcastAnnounce(Messages.get("Announce_CloseInvitation", "%owner", owner.getName()));
+        if ( !isSilent ) {
+            sendBroadcastAnnounce(Messages.get("Announce_CloseInvitation", "%owner", owner.getName()));
+        }
+
+        if ( autoStartTimer != null ) {
+            autoStartTimer.end();
+            autoStartTimer = null;
+        }
 
         // 預かっていた持ち物を返す
         for ( String name : entrants ) {
@@ -184,7 +197,7 @@ public class GameSession {
             int random = (int)(Math.random() * players.size());
             fredbear = players.get(random);
             players.remove(random);
-            sendInGameAnnounce("FredBear : " + fredbear);
+            sendInGameAnnounce("FredBear : " + ChatColor.GOLD + fredbear);
             sendInfoToPlayer(fredbear, Messages.get("Description_FredBear"));
         }
 
@@ -192,7 +205,7 @@ public class GameSession {
             int random = (int)(Math.random() * players.size());
             chica = players.get(random);
             players.remove(random);
-            sendInGameAnnounce("Chica : " + chica);
+            sendInGameAnnounce("Chica : " + ChatColor.GOLD + chica);
             sendInfoToPlayer(chica, Messages.get("Description_Chica"));
         }
 
@@ -200,7 +213,7 @@ public class GameSession {
             int random = (int)(Math.random() * players.size());
             bonnie = players.get(random);
             players.remove(random);
-            sendInGameAnnounce("Bonnie : " + bonnie);
+            sendInGameAnnounce("Bonnie : " + ChatColor.GOLD + bonnie);
             sendInfoToPlayer(bonnie, Messages.get("Description_Bonnie"));
         }
 
@@ -208,7 +221,7 @@ public class GameSession {
             int random = (int)(Math.random() * players.size());
             freddy = players.get(random);
             players.remove(random);
-            sendInGameAnnounce("Freddy : " + freddy);
+            sendInGameAnnounce("Freddy : " + ChatColor.GOLD + freddy);
             sendInfoToPlayer(freddy, Messages.get("Description_Freddy"));
         }
 
@@ -216,7 +229,7 @@ public class GameSession {
             int random = (int)(Math.random() * players.size());
             foxy = players.get(random);
             players.remove(random);
-            sendInGameAnnounce("Foxy : " + foxy);
+            sendInGameAnnounce("Foxy : " + ChatColor.GOLD + foxy);
             sendInfoToPlayer(foxy, Messages.get("Description_Foxy"));
         }
 
@@ -1017,23 +1030,34 @@ public class GameSession {
      */
     public void joinEntrant(Player player) {
 
-        if ( !entrants.contains(player.getName()) ) {
-            entrants.add(player.getName());
-
-            // プレイヤーの持ち物を預かる
-            storage.sendToTemp(player);
-
-            // ポーション効果を除去する、回復しておく
-            for ( PotionEffect e : player.getActivePotionEffects() ) {
-                player.removePotionEffect(e.getType());
-            }
-            player.setFoodLevel(20);
-            player.setHealth(player.getMaxHealth());
-
-            FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
-
-            sendInGameAnnounce(Messages.get("Announce_EntrantJoin", "%player", player.getName()));
+        if ( entrants.contains(player.getName()) ) {
+            return;
         }
+
+        entrants.add(player.getName());
+
+        // プレイヤーの持ち物を預かる
+        storage.sendToTemp(player);
+
+        // ポーション効果を除去する、回復しておく
+        for ( PotionEffect e : player.getActivePotionEffects() ) {
+            player.removePotionEffect(e.getType());
+        }
+        player.setFoodLevel(20);
+        player.setHealth(player.getMaxHealth());
+
+        // アナウンス
+        sendInGameAnnounce(Messages.get("Announce_EntrantJoin", "%player", player.getName()));
+
+        // 自動開始なら、参加人数が上回ったかどうかを確認し、上回っているならタイマーを起動する
+        if ( config.isAutoStartTimer() && autoStartTimer == null
+                && entrants.size() >= config.getMinPlayers()
+                && entrants.size() >= config.getAutoStartTimerPlayerNum() ) {
+            launchAutoStartTimer();
+        }
+
+        // JoinSignの更新
+        FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
     }
 
     /**
@@ -1043,16 +1067,27 @@ public class GameSession {
      */
     public void leaveEntrant(Player player) {
 
-        if ( entrants.contains(player.getName()) ) {
-            entrants.remove(player.getName());
-
-            // 預かっていた持ち物を返す
-            storage.restoreFromTemp(player);
-
-            FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
-
-            sendInGameAnnounce(Messages.get("Announce_EntrantLeave", "%player", player.getName()));
+        if ( !entrants.contains(player.getName()) ) {
+            return;
         }
+
+        entrants.remove(player.getName());
+
+        // 預かっていた持ち物を返す
+        storage.restoreFromTemp(player);
+
+        // アナウンス
+        sendInGameAnnounce(Messages.get("Announce_EntrantLeave", "%player", player.getName()));
+
+        // 自動開始なら、参加人数が下回ったかどうかを確認し、下回っているならタイマーをキャンセルする
+        if ( config.isAutoStartTimer() && autoStartTimer != null
+                && (entrants.size() < config.getMinPlayers()
+                        || entrants.size() < config.getAutoStartTimerPlayerNum() ) ) {
+            cancelAutoStartTimer();
+        }
+
+        // JoinSignの更新
+        FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
     }
 
     /**
@@ -1570,7 +1605,7 @@ public class GameSession {
      * ゲーム内にアナウンスを流す
      * @param message メッセージ
      */
-    private void sendInGameAnnounce(String message) {
+    public void sendInGameAnnounce(String message) {
         message = Messages.get("Prefix_InGame") + message;
         for ( String name : entrants ) {
             Player player = Utility.getPlayerExact(name);
@@ -1585,6 +1620,48 @@ public class GameSession {
             }
         }
         logger.log(message);
+    }
+
+    /**
+     * 自動開始タイマーを起動する
+     */
+    private void launchAutoStartTimer() {
+        int seconds = config.getAutoStartTimerSeconds();
+        autoStartTimer = new AutoStartTimerTask(seconds, this);
+        autoStartTimer.start();
+
+        String message = Messages.get("Announce_AutoStartTimerCount", "%seconds", seconds);
+        sendInGameAnnounce(message);
+    }
+
+    /**
+     * 自動開始タイマーを返す
+     * @return 自動開始タイマー
+     */
+    public AutoStartTimerTask getAutoStartTimer() {
+        return autoStartTimer;
+    }
+
+    /**
+     * 自動開始タイマーをキャンセルする
+     */
+    private void cancelAutoStartTimer() {
+        removeAutoStartTimer();
+
+        int num = config.getAutoStartTimerPlayerNum();
+        String message = Messages.get("Announce_AutoStartTimerCancel", "%num", num);
+        sendInGameAnnounce(message);
+
+        FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
+    }
+
+    /**
+     * 自動開始タイマーを削除する
+     */
+    public void removeAutoStartTimer() {
+        if ( autoStartTimer == null ) return;
+        autoStartTimer.end();
+        autoStartTimer = null;
     }
 
     /**

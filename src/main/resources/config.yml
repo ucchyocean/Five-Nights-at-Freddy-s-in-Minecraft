@@ -22,6 +22,27 @@ secondsOfOneHour: 60
 # Interval seconds between previous night and next night.
 secondsOfNightInterval: 15
 
+
+# =============== Auto Start Settings ===============
+
+# Use auto start timer, or not.
+autoStartTimer: false
+
+# Player num to start the timer.
+# If you set 2, and two players join to game, the timer will start automatically.
+autoStartTimerPlayerNum: 2
+
+# The seconds of auto start timer.
+# If you set 15, the game will start after 15 seconds.
+autoStartTimerSeconds: 15
+
+# If the arena setting is more than one, when opening new game session automatically,
+# you can specify whether randomly switch the arena setting.
+autoStartTimerRandomArenaSwitch: true
+
+
+# =============== Players' Settings ===============
+
 # Battery decreasement per second.
 batteryDecreasePerSecond: 0.14
 
@@ -40,6 +61,7 @@ raderSearchingRange: 15
 # Player logout tracking seconds.
 # If a player log out in midway of game, and expire this time, that player will lose.
 playerLogoutTrackingSeconds: 20
+
 
 # =============== Freddy's Characters Settings ===============
 

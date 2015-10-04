@@ -55,6 +55,14 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
         // リスナーの登録
         getServer().getPluginManager().registerEvents(new GameSessionListener(), this);
         getServer().getPluginManager().registerEvents(new JoinSignListener(this), this);
+
+        // 自動開始設定なら、新しいセッションをオープンする
+        if ( config.isAutoStartTimer() ) {
+            if ( config.isAutoStartTimerRandomArenaSwitch() ) {
+                command.switchCommand(Bukkit.getConsoleSender(), null, null, new String[]{"switch", "random"});
+            }
+            command.openCommand(Bukkit.getConsoleSender(), null, null, new String[]{"open", "silent"});
+        }
     }
 
     /**
@@ -113,11 +121,12 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
     /**
      * ゲームセッションを作成して返す
      * @param owner 作成するゲームセッションのオーナー
+     * @param isSilent アナウンスなしにするかどうか
      * @return 作成されたゲームセッション
      */
-    public GameSession createNewGameSession(CommandSender owner) {
+    public GameSession createNewGameSession(CommandSender owner, boolean isSilent) {
         session = new GameSession(owner);
-        session.openInvitation();
+        session.openInvitation(isSilent);
         return session;
     }
 
@@ -125,7 +134,23 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
      * ゲームセッションを削除する
      */
     public void removeGameSession() {
+
+        // 前回のセッション情報を取得しておく
+        GameSessionPhase pre = null;
+        if ( session != null ) {
+            pre = session.getPhase();
+        }
+
+        // セッションクリア
         session = null;
+
+        // 自動開始設定なら、そのまま新しいセッションを生成する
+        if ( config.isAutoStartTimer() && pre == GameSessionPhase.END ) {
+            if ( config.isAutoStartTimerRandomArenaSwitch() ) {
+                command.switchCommand(Bukkit.getConsoleSender(), null, null, new String[]{"switch", "random"});
+            }
+            command.openCommand(Bukkit.getConsoleSender(), null, null, new String[]{"open", "silent"});
+        }
     }
 
     /**

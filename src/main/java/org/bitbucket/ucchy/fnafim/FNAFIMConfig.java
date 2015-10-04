@@ -34,6 +34,18 @@ public class FNAFIMConfig {
     /** Foxyが一回の行動で移動可能な時間（秒） */
     private int foxyMovementSeconds;
 
+    /** 自動開始タイマーを使うかどうか */
+    private boolean autoStartTimer;
+
+    /** 自動開始タイマーを起動する最小参加人数 */
+    private int autoStartTimerPlayerNum;
+
+    /** 自動開始タイマーの秒数 */
+    private int autoStartTimerSeconds;
+
+    /** 自動開始タイマー起動時に、アリーナ設定をランダム切り替えするかどうか */
+    private boolean autoStartTimerRandomArenaSwitch;
+
     /** 1秒あたりのバッテリー基本消費量 */
     private double batteryDecreasePerSecond;
 
@@ -141,6 +153,13 @@ public class FNAFIMConfig {
         secondsOfOneHour = config.getInt("secondsOfOneHour", 60);
         secondsOfNightInterval = config.getInt("secondsOfNightInterval", 15);
         foxyMovementSeconds = config.getInt("foxyMovementSeconds", 15);
+
+        autoStartTimer = config.getBoolean("autoStartTimer", false);
+        autoStartTimerPlayerNum = config.getInt("autoStartTimerPlayerNum", 2);
+        autoStartTimerSeconds = config.getInt("autoStartTimerSeconds", 15);
+        autoStartTimerRandomArenaSwitch
+            = config.getBoolean("autoStartTimerRandomArenaSwitch", true);
+
         batteryDecreasePerSecond = config.getDouble("batteryDecreasePerSecond", 0.14);
         batteryFlashLightPerSecond = config.getDouble("batteryFlashLightPerSecond", 0.2);
         batteryRaderPerUse = config.getDouble("batteryRaderPerUse", 1.0);
@@ -225,6 +244,34 @@ public class FNAFIMConfig {
      */
     public int getFoxyMovementSeconds() {
         return foxyMovementSeconds;
+    }
+
+    /**
+     * @return autoStartTimer
+     */
+    public boolean isAutoStartTimer() {
+        return autoStartTimer;
+    }
+
+    /**
+     * @return autoStartTimerPlayerNum
+     */
+    public int getAutoStartTimerPlayerNum() {
+        return autoStartTimerPlayerNum;
+    }
+
+    /**
+     * @return autoStartTimerSeconds
+     */
+    public int getAutoStartTimerSeconds() {
+        return autoStartTimerSeconds;
+    }
+
+    /**
+     * @return autoStartTimerRandomArenaSwitch
+     */
+    public boolean isAutoStartTimerRandomArenaSwitch() {
+        return autoStartTimerRandomArenaSwitch;
     }
 
     /**

@@ -6,7 +6,6 @@
 package org.bitbucket.ucchy.fnafim;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.bitbucket.ucchy.fnafim.game.GameSession;
@@ -342,7 +341,7 @@ public class FNAFIMCommand implements TabExecutor {
         session.joinReservation(target);
     }
 
-    private void openCommand(
+    public void openCommand(
             CommandSender sender, Command command, String label, String[] args) {
 
         // パーミッションチェック
@@ -373,7 +372,8 @@ public class FNAFIMCommand implements TabExecutor {
         }
 
         // ゲームセッションを作成して、募集を開始する。
-        session = FiveNightsAtFreddysInMinecraft.getInstance().createNewGameSession(sender);
+        boolean isSilent = (args.length >= 2 && args[1].equalsIgnoreCase("silent"));
+        session = FiveNightsAtFreddysInMinecraft.getInstance().createNewGameSession(sender, isSilent);
         sendInformationMessage(sender, Messages.get("Info_Opened"));
     }
 
@@ -400,7 +400,7 @@ public class FNAFIMCommand implements TabExecutor {
         }
 
         // 募集を中断する。
-        session.closeInvitation(sender);
+        session.closeInvitation(sender, false);
         FiveNightsAtFreddysInMinecraft.getInstance().removeGameSession();
         sendInformationMessage(sender, Messages.get("Info_Closed"));
     }
@@ -606,9 +606,9 @@ public class FNAFIMCommand implements TabExecutor {
         if ( args[1].equalsIgnoreCase("random") ) {
             // 引数randomが指定された場合は、ランダムに選択して設定する。
 
-            ArrayList<String> temp = new ArrayList<String>(manager.getArenaNames());
-            Collections.shuffle(temp);
-            arena = temp.get(0);
+            ArrayList<String> temp = manager.getReadyArenaNames();
+            int index = (int)(Math.random() * temp.size());
+            arena = temp.get(index);
 
         } else {
             // そのほかの場合は、指定されたアリーナ名に切り替える。

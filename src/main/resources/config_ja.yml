@@ -22,6 +22,28 @@ secondsOfOneHour: 60
 # Nightが終わって、次のNightが始まるまでの、インターバル。秒数で指定します。
 secondsOfNightInterval: 15
 
+
+# =============== 自動開始の設定 ===============
+
+# 自動開始タイマー機能を使用するかどうかです。
+# true = 使用する、false = 使用しない
+autoStartTimer: false
+
+# 自動開始タイマーを起動する人数です。
+# 2 を設定したら、2人が参加した段階で自動開始タイマーが起動します。
+autoStartTimerPlayerNum: 2
+
+# 自動開始タイマーの秒数です。
+# 15 を設定したら、自動開始タイマーが起動してから15秒後にゲームが開始します。
+autoStartTimerSeconds: 15
+
+# アリーナ設定が複数ある場合、自動で募集を開始するときに、
+# ランダムにアリーナ設定を切り替えるかどうかを指定します。
+autoStartTimerRandomArenaSwitch: true
+
+
+# =============== Players陣営の設定 ===============
+
 # 1秒あたりのバッテリー基本消費量
 batteryDecreasePerSecond: 0.14
 
@@ -41,7 +63,8 @@ raderSearchingRange: 15
 # もしプレイヤーがゲーム中にログアウトし、設定時間が過ぎた場合、そのプレイヤーは負けになります。
 playerLogoutTrackingSeconds: 20
 
-# =============== Freddy's陣営の強さ設定 ===============
+
+# =============== Freddy's陣営の設定 ===============
 
 # Night1 の各キャラの移動速度。
 # 各キャラの移動速度レベルを、-99(移動不可)か、-5から5で設定します。
