@@ -6,6 +6,7 @@
 package org.bitbucket.ucchy.fnafim;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.bitbucket.ucchy.fnafim.game.GameSession;
@@ -71,6 +72,9 @@ public class FNAFIMCommand implements TabExecutor {
             return true;
         } else if ( args[0].equalsIgnoreCase("sign") ) {
             signCommand(sender, command, label, args);
+            return true;
+        } else if ( args[0].equalsIgnoreCase("switch") ) {
+            switchCommand(sender, command, label, args);
             return true;
         } else if ( args[0].equalsIgnoreCase("reload") ) {
             reloadCommand(sender, command, label, args);
@@ -564,6 +568,63 @@ public class FNAFIMCommand implements TabExecutor {
         } else {
             sendInformationMessage(sender, Messages.get("Info_SignRemovePre"));
         }
+    }
+
+    public void switchCommand(
+            CommandSender sender, Command command, String label, String[] args) {
+
+        // パーミッションチェック
+        if ( !sender.hasPermission(PERMISSION_PREFIX + "switch") ) {
+            sendErrorMessage(sender, Messages.get("Error_Permission"));
+            return;
+        }
+
+        LocationManager manager = FiveNightsAtFreddysInMinecraft.getInstance().getLocationManager();
+
+        // 引数未指定は、現在のアリーナ設定を表示する。
+        if ( args.length <= 1 ) {
+            String arena = manager.getArenaName();
+            sendInformationMessage(sender, Messages.get("Info_Switch", "%arena", arena));
+            String lost = manager.getNullLocationName();
+            if ( lost != null ) {
+                sendInformationMessage(sender, Messages.get("Info_SwitchLocationNG", "%location", lost));
+            }
+            return;
+        }
+
+        // 既にゲームが開始中なら、アリーナ設定を変更できないので、エラーにする。
+        GameSession session = FiveNightsAtFreddysInMinecraft.getInstance().getGameSession();
+        if ( session != null
+                && session.getPhase() != GameSessionPhase.END
+                && session.getPhase() != GameSessionPhase.CANCELED ) {
+            sendErrorMessage(sender, Messages.get("Error_AlreadyStartedCannotSwitch"));
+            return;
+        }
+
+        String arena;
+
+        if ( args[1].equalsIgnoreCase("random") ) {
+            // 引数randomが指定された場合は、ランダムに選択して設定する。
+
+            ArrayList<String> temp = new ArrayList<String>(manager.getArenaNames());
+            Collections.shuffle(temp);
+            arena = temp.get(0);
+
+        } else {
+            // そのほかの場合は、指定されたアリーナ名に切り替える。
+            arena = args[1];
+        }
+
+        // 切り替え
+        manager.switchTo(arena);
+
+        // メッセージ送信
+        sendInformationMessage(sender, Messages.get("Info_SwitchSet", "%arena", arena));
+        String lost = manager.getNullLocationName();
+        if ( lost != null ) {
+            sendInformationMessage(sender, Messages.get("Info_SwitchLocationNG", "%location", lost));
+        }
+        return;
     }
 
     private void reloadCommand(

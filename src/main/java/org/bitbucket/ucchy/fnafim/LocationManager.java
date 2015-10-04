@@ -7,6 +7,8 @@ package org.bitbucket.ucchy.fnafim;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -20,14 +22,21 @@ import org.bukkit.configuration.file.YamlConfiguration;
  */
 public class LocationManager {
 
+    private static final String[] NAMES = {
+        "lobby", "player", "spectate", "freddy", "chica", "bonnie", "foxy"
+    };
+
     private File file;
-    private Location lobby;
-    private Location player;
-    private Location spectate;
-    private Location freddy;
-    private Location chica;
-    private Location bonnie;
-    private Location foxy;
+    private HashMap<String, Location> arena;
+    private HashMap<String, HashMap<String, Location>> arenas;
+    private String arenaName;
+
+    private LocationManager(File file) {
+        this.file = file;
+        this.arena = new HashMap<String, Location>();
+        this.arenas = new HashMap<String, HashMap<String,Location>>();
+        this.arenaName = "default";
+    }
 
     public static LocationManager load(File file) {
 
@@ -39,37 +48,36 @@ public class LocationManager {
             }
         }
 
-        LocationManager manager = new LocationManager();
+        LocationManager manager = new LocationManager(file);
         YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
-        manager.file = file;
 
-        if ( config.contains("lobby") ) {
-            manager.lobby = getLocationFromSection(
-                    config.getConfigurationSection("lobby"));
+        if ( config.contains("arenaName") ) {
+            manager.arenaName = config.getString("arenaName");
         }
-        if ( config.contains("player") ) {
-            manager.player = getLocationFromSection(
-                    config.getConfigurationSection("player"));
+
+        for ( String name : NAMES ) {
+            if ( config.contains(name) ) {
+                manager.arena.put(name, getLocationFromSection(config.getConfigurationSection(name)));
+            }
         }
-        if ( config.contains("spectate") ) {
-            manager.spectate = getLocationFromSection(
-                    config.getConfigurationSection("spectate"));
+
+        if ( config.contains("arenas") ) {
+            for ( String aname : config.getConfigurationSection("arenas").getKeys(false) ) {
+                ConfigurationSection section = config.getConfigurationSection("arenas." + aname);
+                HashMap<String, Location> setting = new HashMap<String, Location>();
+                for ( String name : NAMES ) {
+                    if ( config.contains(name) ) {
+                        setting.put(name, getLocationFromSection(section.getConfigurationSection(name)));
+                    }
+                }
+                manager.arenas.put(aname, setting);
+            }
         }
-        if ( config.contains("freddy") ) {
-            manager.freddy = getLocationFromSection(
-                    config.getConfigurationSection("freddy"));
-        }
-        if ( config.contains("chica") ) {
-            manager.chica = getLocationFromSection(
-                    config.getConfigurationSection("chica"));
-        }
-        if ( config.contains("bonnie") ) {
-            manager.bonnie = getLocationFromSection(
-                    config.getConfigurationSection("bonnie"));
-        }
-        if ( config.contains("foxy") ) {
-            manager.foxy = getLocationFromSection(
-                    config.getConfigurationSection("foxy"));
+
+        // 過去バージョンからのアップデート (v0.7.1以前 → v0.7.2以降)
+        if ( !config.contains("arenas.default") ) {
+            manager.arenas.put("default", manager.arena);
+            manager.save();
         }
 
         return manager;
@@ -79,26 +87,19 @@ public class LocationManager {
 
         YamlConfiguration config = new YamlConfiguration();
 
-        if ( lobby != null ) {
-            setLocationToSection(config.createSection("lobby"), lobby);
+        config.set("arenaName", arenaName);
+
+        for ( String name : arena.keySet() ) {
+            ConfigurationSection section = config.createSection(name);
+            setLocationToSection(section, arena.get(name));
         }
-        if ( player != null ) {
-            setLocationToSection(config.createSection("player"), player);
-        }
-        if ( spectate != null ) {
-            setLocationToSection(config.createSection("spectate"), spectate);
-        }
-        if ( freddy != null ) {
-            setLocationToSection(config.createSection("freddy"), freddy);
-        }
-        if ( chica != null ) {
-            setLocationToSection(config.createSection("chica"), chica);
-        }
-        if ( bonnie != null ) {
-            setLocationToSection(config.createSection("bonnie"), bonnie);
-        }
-        if ( foxy != null ) {
-            setLocationToSection(config.createSection("foxy"), foxy);
+
+        for ( String aname : arenas.keySet() ) {
+            HashMap<String, Location> setting = arenas.get(aname);
+            for ( String name : setting.keySet() ) {
+                ConfigurationSection section = config.createSection("arenas." + aname + "." + name);
+                setLocationToSection(section, setting.get(name));
+            }
         }
 
         try {
@@ -106,6 +107,18 @@ public class LocationManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void switchTo(String arenaName) {
+
+        arenaName = arenaName.toLowerCase();
+        this.arenaName = arenaName;
+
+        if ( !arenas.containsKey(arenaName) ) {
+            arenas.put(arenaName, new HashMap<String, Location>());
+        }
+
+        arena = arenas.get(arenaName);
     }
 
     private static void setLocationToSection(ConfigurationSection section, Location location) {
@@ -140,119 +153,118 @@ public class LocationManager {
 
     public String getNullLocationName() {
 
-        if ( lobby == null ) {
-            return "lobby";
-        } else if ( player == null ) {
-            return "player";
-        } else if ( spectate == null ) {
-            return "spectate";
-        } else if ( freddy == null ) {
-            return "freddy";
-        } else if ( chica == null ) {
-            return "chica";
-        } else if ( bonnie == null ) {
-            return "bonnie";
-        } else if ( foxy == null ) {
-            return "foxy";
+        for ( String name : NAMES ) {
+            if ( !arena.containsKey(name) ) return name;
         }
         return null;
+    }
+
+    public Set<String> getArenaNames() {
+        return arenas.keySet();
+    }
+
+    /**
+     * @return arenaName
+     */
+    public String getArenaName() {
+        return arenaName;
     }
 
     /**
      * @return lobby
      */
     public Location getLobby() {
-        return lobby;
+        return arena.get("lobby");
     }
 
     /**
      * @param lobby lobby
      */
     public void setLobby(Location lobby) {
-        this.lobby = lobby;
+        arena.put("lobby", lobby);
     }
 
     /**
      * @return player
      */
     public Location getPlayer() {
-        return player;
+        return arena.get("player");
     }
 
     /**
      * @param player player
      */
     public void setPlayer(Location player) {
-        this.player = player;
+        arena.put("player", player);
     }
 
     /**
      * @return spectate
      */
     public Location getSpectate() {
-        return spectate;
+        return arena.get("spactate");
     }
 
     /**
      * @param spectate spectate
      */
     public void setSpectate(Location spectate) {
-        this.spectate = spectate;
+        arena.put("spectate", spectate);
     }
 
     /**
      * @return freddy
      */
     public Location getFreddy() {
-        return freddy;
+        return arena.get("freddy");
     }
 
     /**
      * @param freddy freddy
      */
     public void setFreddy(Location freddy) {
-        this.freddy = freddy;
+        arena.put("freddy", freddy);
     }
 
     /**
      * @return chica
      */
     public Location getChica() {
-        return chica;
+        return arena.get("chica");
     }
 
     /**
      * @param chica chica
      */
     public void setChica(Location chica) {
-        this.chica = chica;
+        arena.put("chica", chica);
     }
 
     /**
      * @return bonnie
      */
     public Location getBonnie() {
-        return bonnie;
+        return arena.get("bonnie");
     }
 
     /**
      * @param bonnie bonnie
      */
     public void setBonnie(Location bonnie) {
-        this.bonnie = bonnie;
+        arena.put("bonnie", bonnie);
     }
 
     /**
      * @return foxy
      */
     public Location getFoxy() {
-        return foxy;
+        return arena.get("foxy");
     }
 
     /**
      * @param foxy foxy
      */
     public void setFoxy(Location foxy) {
-        this.foxy = foxy;
+        arena.put("foxy", foxy);
     }
 }

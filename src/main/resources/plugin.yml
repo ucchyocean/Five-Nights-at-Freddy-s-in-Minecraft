@@ -23,6 +23,10 @@ commands:
            /<command> cancel - Cancel game.
            /<command> set <lobby|player|spectate|freddy|chica|bonny|foxy> - Set each respawn point.
            /<command> sign - Register new Join Sign.
+           /<command> switch - Show currently arena name.
+           /<command> switch (arena name) - Switch to the arena setting of the specified name.
+           /<command> switch random - Switch to the arena setting randomly.
+           /<command> switch default - Switch to the default arena setting.
            /<command> reload - Reload config data.
     permission: fnafim.command
     permission-message: 'You don''t have a permission "<permission>".'
@@ -64,6 +68,9 @@ permissions:
   fnafim.sign:
     description: Permission of sign command.
     default: op
+  fnafim.switch:
+    description: Permission of switch command.
+    default: op
   fnafim.reload:
     description: Permission of reload command.
     default: op
@@ -82,4 +89,5 @@ permissions:
       fnafim.start: true
       fnafim.cancel: true
       fnafim.set: true
+      fnafim.switch: true
       fnafim.reload: true
