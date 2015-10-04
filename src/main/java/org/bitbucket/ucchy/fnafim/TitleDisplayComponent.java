@@ -5,9 +5,10 @@
  */
 package org.bitbucket.ucchy.fnafim;
 
+import java.lang.reflect.Constructor;
+
 import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.command.CommandSender;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 /**
@@ -25,30 +26,55 @@ public class TitleDisplayComponent {
         }
 
         String[] temp = text.split("\n");
+        String title = Utility.replaceColorCode(temp[0]);
+        String subtitle = temp.length >= 2 ? Utility.replaceColorCode(temp[1]) : null;
 
-        // sendCommandFeedbackの状態を取得、有効だったなら一旦無効にする。
-        World world = player.getWorld();
-        boolean pre = Boolean.parseBoolean(
-                world.getGameRuleValue("sendCommandFeedback"));
-        if ( pre ) world.setGameRuleValue("sendCommandFeedback", "false");
+        sendTitle(player, fadein, duration, fadeout, title, subtitle);
+    }
 
-        // titleコマンドを実行
-        CommandSender sender = Bukkit.getConsoleSender();
-        String command = String.format("title %s times %d %d %d",
-                player.getName(), fadein, duration, fadeout);
-        Bukkit.dispatchCommand(sender, command);
+    private static void sendTitle(Player player, Integer fadeIn, Integer stay, Integer fadeOut, String title, String subtitle) {
+        try {
+            if (title != null) {
+                title = ChatColor.translateAlternateColorCodes('&', title);
+                title = title.replaceAll("%player%", player.getDisplayName());
+                Object enumTitle = getNMSClass("PacketPlayOutTitle").getDeclaredClasses()[0].getField("TITLE").get(null);
+                Object chatTitle = getNMSClass("IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, "{\"text\":\"" + title + "\"}");
+                Constructor<?> titleConstructor = getNMSClass("PacketPlayOutTitle").getConstructor(getNMSClass("PacketPlayOutTitle").getDeclaredClasses()[0], getNMSClass("IChatBaseComponent"), int.class, int.class, int.class);
+                Object titlePacket = titleConstructor.newInstance(enumTitle, chatTitle, fadeIn, stay, fadeOut);
+                sendPacket(player, titlePacket);
+            }
 
-        if ( temp.length >= 2 ) {
-            command = String.format("title %s subtitle {text:\"%s\"}",
-                    player.getName(), Utility.replaceColorCode(temp[1]));
-            Bukkit.dispatchCommand(sender, command);
+            if (subtitle != null) {
+                subtitle = ChatColor.translateAlternateColorCodes('&', subtitle);
+                subtitle = subtitle.replaceAll("%player%", player.getDisplayName());
+                Object enumSubtitle = getNMSClass("PacketPlayOutTitle").getDeclaredClasses()[0].getField("SUBTITLE").get(null);
+                Object chatSubtitle = getNMSClass("IChatBaseComponent").getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, "{\"text\":\"" + subtitle + "\"}");
+                Constructor<?> subtitleConstructor = getNMSClass("PacketPlayOutTitle").getConstructor(getNMSClass("PacketPlayOutTitle").getDeclaredClasses()[0], getNMSClass("IChatBaseComponent"), int.class, int.class, int.class);
+                Object subtitlePacket = subtitleConstructor.newInstance(enumSubtitle, chatSubtitle, fadeIn, stay, fadeOut);
+                sendPacket(player, subtitlePacket);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
 
-        command = String.format("title %s title {text:\"%s\"}",
-                player.getName(), Utility.replaceColorCode(temp[0]));
-        Bukkit.dispatchCommand(sender, command);
+    private static void sendPacket(Player player, Object packet) {
+        try {
+            Object handle = player.getClass().getMethod("getHandle").invoke(player);
+            Object playerConnection = handle.getClass().getField("playerConnection").get(handle);
+            playerConnection.getClass().getMethod("sendPacket", getNMSClass("Packet")).invoke(playerConnection, packet);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-        // sendCommandFeedbackの状態を戻す。
-        if ( pre ) world.setGameRuleValue("sendCommandFeedback", "true");
+    private static Class<?> getNMSClass(String name) {
+        String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+        try {
+            return Class.forName("net.minecraft.server." + version + "." + name);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
