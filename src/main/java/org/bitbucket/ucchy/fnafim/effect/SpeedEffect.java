@@ -36,15 +36,12 @@ public class SpeedEffect implements SpecialEffect {
         if ( player == null ) return;
         player.addPotionEffect(new PotionEffect(
                 PotionEffectType.SPEED, Integer.MAX_VALUE, value, true));
-        player.addPotionEffect(new PotionEffect(
-                PotionEffectType.JUMP, Integer.MAX_VALUE, value, true));
     }
 
     @Override
     public void end() {
         if ( player == null ) return;
         player.removePotionEffect(PotionEffectType.SPEED);
-        player.removePotionEffect(PotionEffectType.JUMP);
     }
 
     @Override
