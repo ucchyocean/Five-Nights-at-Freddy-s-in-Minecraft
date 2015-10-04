@@ -5,8 +5,6 @@
  */
 package org.bitbucket.ucchy.fnafim.game;
 
-import java.util.HashMap;
-
 import org.bitbucket.ucchy.fnafim.Messages;
 import org.bitbucket.ucchy.fnafim.Utility;
 import org.bukkit.Bukkit;
@@ -28,14 +26,16 @@ public class ScoreboardDisplay {
 
     private static final String OBJECTIVE_NAME = "fnafim";
 
-    private HashMap<String, Scoreboard> scoreboards;
+    private Scoreboard scoreboard;
     private String title;
 
     /**
      * コンストラクタ
      */
     public ScoreboardDisplay() {
-        scoreboards = new HashMap<String, Scoreboard>();
+        scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        Objective sidebar = scoreboard.registerNewObjective(OBJECTIVE_NAME, "dummy");
+        sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
         title = "";
     }
 
@@ -44,11 +44,7 @@ public class ScoreboardDisplay {
      * @param player プレイヤー
      */
     public void setShowPlayer(Player player) {
-        Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective sidebar = scoreboard.registerNewObjective(OBJECTIVE_NAME, "dummy");
-        sidebar.setDisplaySlot(DisplaySlot.SIDEBAR);
         player.setScoreboard(scoreboard);
-        scoreboards.put(player.getName(), scoreboard);
     }
 
     /**
@@ -59,9 +55,8 @@ public class ScoreboardDisplay {
         if ( !Utility.isCB180orLater() && title.length() > 32 ) {
             title = title.substring(0, 32);
         }
-        for ( Scoreboard sb : scoreboards.values() ) {
-            Objective obj = sb.getObjective(OBJECTIVE_NAME);
-            if ( obj == null ) continue;
+        Objective obj = scoreboard.getObjective(OBJECTIVE_NAME);
+        if ( obj != null ) {
             obj.setDisplayName(title);
         }
         this.title = title;
@@ -73,13 +68,11 @@ public class ScoreboardDisplay {
      * @param point 項目のスコア
      */
     public void setScore(String name, int point) {
-        for ( Scoreboard sb : scoreboards.values() ) {
-            Objective obj = sb.getObjective(OBJECTIVE_NAME);
-            if ( point == 0 ) {
-                getScoreItem(obj, name).setScore(1); // NOTE: set temporary.
-            }
-            getScoreItem(obj, name).setScore(point);
+        Objective obj = scoreboard.getObjective(OBJECTIVE_NAME);
+        if ( point == 0 ) {
+            getScoreItem(obj, name).setScore(1); // NOTE: set temporary.
         }
+        getScoreItem(obj, name).setScore(point);
     }
 
     /**
@@ -88,24 +81,20 @@ public class ScoreboardDisplay {
      * @param amount 加算する値
      */
     public void addScore(String name, int amount) {
-        for ( Scoreboard sb : scoreboards.values() ) {
-            Objective obj = sb.getObjective(OBJECTIVE_NAME);
-            Score score = getScoreItem(obj, name);
-            int point = score.getScore();
-            score.setScore(point + amount);
-        }
+        Objective obj = scoreboard.getObjective(OBJECTIVE_NAME);
+        Score score = getScoreItem(obj, name);
+        int point = score.getScore();
+        score.setScore(point + amount);
     }
 
     /**
      * スコアボードを削除する。
      */
     public void remove() {
-        for ( Scoreboard scoreboard : scoreboards.values() ) {
-            if ( scoreboard.getObjective(DisplaySlot.SIDEBAR) != null ) {
-                scoreboard.getObjective(DisplaySlot.SIDEBAR).unregister();
-            }
-            scoreboard.clearSlot(DisplaySlot.SIDEBAR);
+        if ( scoreboard.getObjective(DisplaySlot.SIDEBAR) != null ) {
+            scoreboard.getObjective(DisplaySlot.SIDEBAR).unregister();
         }
+        scoreboard.clearSlot(DisplaySlot.SIDEBAR);
     }
 
     /**
@@ -148,14 +137,14 @@ public class ScoreboardDisplay {
      */
     public void setFreddysTeam(String name) {
         if ( name == null ) return;
-        if ( scoreboards.containsKey(name) ) return;
-        Scoreboard board = scoreboards.get(name);
-        Team team = board.getTeam("Freddys");
+        Team team = scoreboard.getTeam("Freddys");
         if ( team == null ) {
-            team = board.registerNewTeam("Freddys");
+            team = scoreboard.registerNewTeam("Freddys");
             team.setPrefix(ChatColor.RED.toString());
             team.setSuffix(ChatColor.RESET.toString());
-            team.setNameTagVisibility(NameTagVisibility.NEVER);
+            if ( Utility.isCB180orLater() ) {
+                team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
+            }
         }
         addTeamMember(team, name);
     }
@@ -166,14 +155,14 @@ public class ScoreboardDisplay {
      */
     public void setPlayersTeam(String name) {
         if ( name == null ) return;
-        if ( scoreboards.containsKey(name) ) return;
-        Scoreboard board = scoreboards.get(name);
-        Team team = board.getTeam("Players");
+        Team team = scoreboard.getTeam("Players");
         if ( team == null ) {
-            team = board.registerNewTeam("Players");
+            team = scoreboard.registerNewTeam("Players");
             team.setPrefix(ChatColor.BLUE.toString());
             team.setSuffix(ChatColor.RESET.toString());
-            team.setNameTagVisibility(NameTagVisibility.NEVER);
+            if ( Utility.isCB180orLater() ) {
+                team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
+            }
         }
         addTeamMember(team, name);
     }
@@ -184,9 +173,7 @@ public class ScoreboardDisplay {
      */
     public void leavePlayersTeam(String name) {
         if ( name == null ) return;
-        if ( scoreboards.containsKey(name) ) return;
-        Scoreboard board = scoreboards.get(name);
-        Team team = board.getTeam("Players");
+        Team team = scoreboard.getTeam("Players");
         if ( team != null ) {
             removeTeamMember(team, name);
         }
@@ -196,13 +183,12 @@ public class ScoreboardDisplay {
      * 役割を表示する
      * @param name 対象プレイヤー
      * @param role 役割
+     * @deprecated スコアボード統一化により、使用不可
      */
+    @Deprecated
     public void setRole(String name, String role) {
         if ( name == null ) return;
-        if ( !scoreboards.containsKey(name) ) {
-            return;
-        }
-        Objective obj = scoreboards.get(name).getObjective(OBJECTIVE_NAME);
+        Objective obj = scoreboard.getObjective(OBJECTIVE_NAME);
         String msg = Messages.get("Sidebar_Role", "%role", role);
         getScoreItem(obj, msg).setScore(1);
         getScoreItem(obj, msg).setScore(0);
