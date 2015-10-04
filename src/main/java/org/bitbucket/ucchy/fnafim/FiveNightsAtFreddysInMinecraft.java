@@ -17,6 +17,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Five Nights at Freddy's プラグイン
@@ -146,10 +147,16 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
 
         // 自動開始設定なら、そのまま新しいセッションを生成する
         if ( config.isAutoStartTimer() && pre == GameSessionPhase.END ) {
-            if ( config.isAutoStartTimerRandomArenaSwitch() ) {
-                command.switchCommand(Bukkit.getConsoleSender(), null, null, new String[]{"switch", "random"});
-            }
-            command.openCommand(Bukkit.getConsoleSender(), null, null, new String[]{"open", "silent"});
+
+            // 前回のセッションで全員がロビーにテレポートするのを待つため、5秒待つ。
+            new BukkitRunnable() {
+                public void run() {
+                    if ( config.isAutoStartTimerRandomArenaSwitch() ) {
+                        command.switchCommand(Bukkit.getConsoleSender(), null, null, new String[]{"switch", "random"});
+                    }
+                    command.openCommand(Bukkit.getConsoleSender(), null, null, new String[]{"open", "silent"});
+                }
+            }.runTaskLater(this, 5 * 20);
         }
     }
 

@@ -429,7 +429,6 @@ public class GameSession {
      */
     private void onEnd() {
 
-        phase = GameSessionPhase.END;
         FiveNightsAtFreddysInMinecraft.getInstance().getJoinsignManager().updateAll();
 
         // タイマーの停止
@@ -618,6 +617,7 @@ public class GameSession {
      */
     protected void onGameover() {
 
+        phase = GameSessionPhase.END;
         sendInGameTitle(Messages.get("Announce_GameOver1"));
         sendInGameAnnounce(Messages.get("Announce_GameOver2"));
         onEnd();
@@ -717,6 +717,7 @@ public class GameSession {
             sendInGameAnnounce(Messages.get("Announce_GameClear2", "%players", winners.toString()));
 
             // onEnd() を呼んで終了処理をしておく。
+            phase = GameSessionPhase.END;
             onEnd();
         }
     }

@@ -613,8 +613,13 @@ public class FNAFIMCommand implements TabExecutor {
             // 引数randomが指定された場合は、ランダムに選択して設定する。
 
             ArrayList<String> temp = manager.getReadyArenaNames();
-            int index = (int)(Math.random() * temp.size());
-            arena = temp.get(index);
+            temp.remove(manager.getArenaName());
+            if ( temp.size() == 0 ) {
+                arena = manager.getArenaName();
+            } else {
+                int index = (int)(Math.random() * temp.size());
+                arena = temp.get(index);
+            }
 
         } else {
             // そのほかの場合は、指定されたアリーナ名に切り替える。
