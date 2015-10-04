@@ -108,6 +108,7 @@ Error_ParameterTooLessPlayerName: 'Parameter is not enough. Please specify the p
 Error_NotFoundPlayer: 'The specified player %arg is not found.'
 Error_AlreadyJoinEntrant: 'The specified player %arg is the participant of game already.'
 Error_AlreadyJoinReservation: 'The specified player %arg is joined as reservation already.'
+Error_NoArenaCannotSwitchRandom: 'Because there are no arena setting, you cannot use the random switching.'
 
 JoinSign_Line1: '[FNAF]'
 JoinSign_Line2: '%num / %max'

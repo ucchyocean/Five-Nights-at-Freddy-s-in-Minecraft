@@ -601,6 +601,12 @@ public class FNAFIMCommand implements TabExecutor {
             return;
         }
 
+        // ランダム選択で、有効なアリーナが一つも無いなら、エラーにする。
+        if ( args[1].equalsIgnoreCase("random") && manager.getReadyArenaNames().size() <= 0 ) {
+            sendErrorMessage(sender, Messages.get("Error_NoArenaCannotSwitchRandom"));
+            return;
+        }
+
         String arena;
 
         if ( args[1].equalsIgnoreCase("random") ) {

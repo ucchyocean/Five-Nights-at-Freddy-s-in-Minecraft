@@ -108,6 +108,7 @@ Error_ParameterTooLessPlayerName: 'パラメータが足りません。参加予
 Error_NotFoundPlayer: '指定されたプレイヤー %arg が見つかりません。'
 Error_AlreadyJoinEntrant: '指定されたプレイヤー %arg は、既にゲームに参加しています。'
 Error_AlreadyJoinReservation: '指定されたプレイヤー %arg は、既に参加予約者です。'
+Error_NoArenaCannotSwitchRandom: '有効なアリーナ設定が一つも無いため、ランダム選択はできません。'
 
 JoinSign_Line1: '[FNAF]'
 JoinSign_Line2: '%num / %max'
