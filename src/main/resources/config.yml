@@ -159,6 +159,40 @@ scorePlayerOverNight: 3
 scoreAnimatronicsCatch: 1
 
 
+# =============== Armor Contents Settings ===============
+
+# Armor contents settings of Animatronics. These settings are only for looks.
+# If you want to use 3D resource pack, please use this setting section.
+# If you want to know the item names, please refer the following URL.
+# https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+
+armorContentsFreddy:
+  helmet: 'LEATHER_HELMET'
+  chestplate: 'LEATHER_CHESTPLATE'
+  leggings: 'LEATHER_LEGGINGS'
+  boots: 'LEATHER_BOOTS'
+armorContentsChica:
+  helmet: 'GOLD_HELMET'
+  chestplate: 'GOLD_CHESTPLATE'
+  leggings: 'GOLD_LEGGINGS'
+  boots: 'GOLD_BOOTS'
+armorContentsBonnie:
+  helmet: 'DIAMOND_HELMET'
+  chestplate: 'DIAMOND_CHESTPLATE'
+  leggings: 'DIAMOND_LEGGINGS'
+  boots: 'DIAMOND_BOOTS'
+armorContentsFoxy:
+  helmet: 'IRON_HELMET'
+  chestplate: 'IRON_CHESTPLATE'
+  leggings: 'IRON_LEGGINGS'
+  boots: 'IRON_BOOTS'
+armorContentsFredBear:
+  helmet: 'LEATHER_HELMET'
+  chestplate: 'LEATHER_CHESTPLATE'
+  leggings: 'LEATHER_LEGGINGS'
+  boots: 'LEATHER_BOOTS'
+
+
 # =============== Sound Settings ===============
 
 # Using flash light.

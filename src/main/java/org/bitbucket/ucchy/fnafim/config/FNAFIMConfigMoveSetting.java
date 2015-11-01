@@ -3,7 +3,7 @@
  * @license    LGPLv3
  * @copyright  Copyright ucchy 2015
  */
-package org.bitbucket.ucchy.fnafim;
+package org.bitbucket.ucchy.fnafim.config;
 
 import org.bukkit.configuration.ConfigurationSection;
 

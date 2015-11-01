@@ -3,11 +3,15 @@
  * @license    LGPLv3
  * @copyright  Copyright ucchy 2015
  */
-package org.bitbucket.ucchy.fnafim;
+package org.bitbucket.ucchy.fnafim.config;
 
 import java.io.File;
 
+import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
+import org.bitbucket.ucchy.fnafim.SoundComponent;
+import org.bitbucket.ucchy.fnafim.Utility;
 import org.bitbucket.ucchy.fnafim.game.Night;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 
 /**
@@ -97,6 +101,21 @@ public class FNAFIMConfig {
     /** スコア - Freddy's陣営が、プレイヤーを一人捕まえるたびに与えられるスコア */
     private int scoreAnimatronicsCatch;
 
+    /** Freddyの防具設定 */
+    private FNAFIMConfigArmorContents armorContentsFreddy;
+
+    /** Chicaの防具設定 */
+    private FNAFIMConfigArmorContents armorContentsChica;
+
+    /** Bonnieの防具設定 */
+    private FNAFIMConfigArmorContents armorContentsBonnie;
+
+    /** Foxyの防具設定 */
+    private FNAFIMConfigArmorContents armorContentsFoxy;
+
+    /** FredBearの防具設定 */
+    private FNAFIMConfigArmorContents armorContentsFredBear;
+
     /** 効果音 - 懐中電灯のオンオフ */
     private SoundComponent soundUseFlashLight;
 
@@ -141,7 +160,7 @@ public class FNAFIMConfig {
         // コンフィグファイルが無いなら生成する
         File configFile = new File(plugin.getDataFolder(), "config.yml");
         if ( !configFile.exists() ) {
-            if ( FiveNightsAtFreddysInMinecraft.getDefaultLocaleLanguage().equals("ja") ) {
+            if ( Utility.getDefaultLocaleLanguage().equals("ja") ) {
                 Utility.copyFileFromJar(
                         plugin.getPluginJarFile(), configFile, "config_ja.yml", false);
             } else {
@@ -192,6 +211,27 @@ public class FNAFIMConfig {
                 config, "night6MoveSpeed", 2, 2, 2, 4, 2, 4, 3);
         customNightMoveSpeed = FNAFIMConfigMoveSetting.load(
                 config, "customNightMoveSpeed", 4, 4, 4, 5, 3, 5, 4);
+
+        armorContentsFreddy = FNAFIMConfigArmorContents.load(
+                config, "armorContentsFreddy",
+                Material.LEATHER_HELMET, Material.LEATHER_CHESTPLATE,
+                Material.LEATHER_LEGGINGS, Material.LEATHER_BOOTS);
+        armorContentsChica = FNAFIMConfigArmorContents.load(
+                config, "armorContentsChica",
+                Material.GOLD_HELMET, Material.GOLD_CHESTPLATE,
+                Material.GOLD_LEGGINGS, Material.GOLD_BOOTS);
+        armorContentsBonnie = FNAFIMConfigArmorContents.load(
+                config, "armorContentsBonnie",
+                Material.DIAMOND_HELMET, Material.DIAMOND_CHESTPLATE,
+                Material.DIAMOND_LEGGINGS, Material.DIAMOND_BOOTS);
+        armorContentsFoxy = FNAFIMConfigArmorContents.load(
+                config, "armorContentsFoxy",
+                Material.IRON_HELMET, Material.IRON_CHESTPLATE,
+                Material.IRON_LEGGINGS, Material.IRON_BOOTS);
+        armorContentsFredBear = FNAFIMConfigArmorContents.load(
+                config, "armorContentsFredBear",
+                Material.LEATHER_HELMET, Material.LEATHER_CHESTPLATE,
+                Material.LEATHER_LEGGINGS, Material.LEATHER_BOOTS);
 
         soundUseFlashLight = SoundComponent.getComponentFromString(
                 config.getString("soundUseFlashLight"));
@@ -412,6 +452,41 @@ public class FNAFIMConfig {
      */
     public int getFredbearSpeedUp() {
         return fredbearSpeedUp;
+    }
+
+    /**
+     * @return armorContentsFreddy
+     */
+    public FNAFIMConfigArmorContents getArmorContentsFreddy() {
+        return armorContentsFreddy;
+    }
+
+    /**
+     * @return armorContentsChica
+     */
+    public FNAFIMConfigArmorContents getArmorContentsChica() {
+        return armorContentsChica;
+    }
+
+    /**
+     * @return armorContentsBonnie
+     */
+    public FNAFIMConfigArmorContents getArmorContentsBonnie() {
+        return armorContentsBonnie;
+    }
+
+    /**
+     * @return armorContentsFoxy
+     */
+    public FNAFIMConfigArmorContents getArmorContentsFoxy() {
+        return armorContentsFoxy;
+    }
+
+    /**
+     * @return armorContentsFredBear
+     */
+    public FNAFIMConfigArmorContents getArmorContentsFredBear() {
+        return armorContentsFredBear;
     }
 
     /**

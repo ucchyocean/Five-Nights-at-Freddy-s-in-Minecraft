@@ -160,6 +160,40 @@ scorePlayerOverNight: 3
 scoreAnimatronicsCatch: 1
 
 
+# =============== 装備品の設定 ===============
+
+# Freddy's陣営側の、プレイヤーの装備を変更します。見た目のみで、性能に変化はありません。
+# 3Dリソースパックを利用する場合に、ご利用ください。
+# アイテム表記は、こちらのリストから選んでください。
+# https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+
+armorContentsFreddy:
+  helmet: 'LEATHER_HELMET'
+  chestplate: 'LEATHER_CHESTPLATE'
+  leggings: 'LEATHER_LEGGINGS'
+  boots: 'LEATHER_BOOTS'
+armorContentsChica:
+  helmet: 'GOLD_HELMET'
+  chestplate: 'GOLD_CHESTPLATE'
+  leggings: 'GOLD_LEGGINGS'
+  boots: 'GOLD_BOOTS'
+armorContentsBonnie:
+  helmet: 'DIAMOND_HELMET'
+  chestplate: 'DIAMOND_CHESTPLATE'
+  leggings: 'DIAMOND_LEGGINGS'
+  boots: 'DIAMOND_BOOTS'
+armorContentsFoxy:
+  helmet: 'IRON_HELMET'
+  chestplate: 'IRON_CHESTPLATE'
+  leggings: 'IRON_LEGGINGS'
+  boots: 'IRON_BOOTS'
+armorContentsFredBear:
+  helmet: 'LEATHER_HELMET'
+  chestplate: 'LEATHER_CHESTPLATE'
+  leggings: 'LEATHER_LEGGINGS'
+  boots: 'LEATHER_BOOTS'
+
+
 # =============== 効果音の設定 ===============
 
 # 懐中電灯のオンオフ

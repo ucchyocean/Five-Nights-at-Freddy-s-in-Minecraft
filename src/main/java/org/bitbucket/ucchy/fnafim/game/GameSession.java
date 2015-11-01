@@ -11,13 +11,14 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.bitbucket.ucchy.fnafim.DelayedTeleportTask;
-import org.bitbucket.ucchy.fnafim.FNAFIMConfig;
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bitbucket.ucchy.fnafim.LocationManager;
 import org.bitbucket.ucchy.fnafim.Messages;
 import org.bitbucket.ucchy.fnafim.SoundComponent;
 import org.bitbucket.ucchy.fnafim.TitleDisplayComponent;
 import org.bitbucket.ucchy.fnafim.Utility;
+import org.bitbucket.ucchy.fnafim.config.FNAFIMConfig;
+import org.bitbucket.ucchy.fnafim.config.FNAFIMConfigArmorContents;
 import org.bitbucket.ucchy.fnafim.effect.BindEffect;
 import org.bitbucket.ucchy.fnafim.effect.BlindnessEffect;
 import org.bitbucket.ucchy.fnafim.effect.ChangeDisplayNameEffect;
@@ -1476,10 +1477,12 @@ public class GameSession {
         if ( player == null || !player.isOnline() ) {
             return;
         }
-        player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-        player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-        player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-        player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+
+        FNAFIMConfigArmorContents armors = config.getArmorContentsFredBear();
+        player.getInventory().setHelmet(new ItemStack(armors.getHelmet()));
+        player.getInventory().setChestplate(new ItemStack(armors.getChestplate()));
+        player.getInventory().setLeggings(new ItemStack(armors.getLeggings()));
+        player.getInventory().setBoots(new ItemStack(armors.getBoots()));
 
         giveThreatItemToChica(name);
 
@@ -1508,10 +1511,12 @@ public class GameSession {
         if ( player == null || !player.isOnline() ) {
             return;
         }
-        player.getInventory().setHelmet(new ItemStack(Material.LEATHER_HELMET));
-        player.getInventory().setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-        player.getInventory().setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-        player.getInventory().setBoots(new ItemStack(Material.LEATHER_BOOTS));
+
+        FNAFIMConfigArmorContents armors = config.getArmorContentsFreddy();
+        player.getInventory().setHelmet(new ItemStack(armors.getHelmet()));
+        player.getInventory().setChestplate(new ItemStack(armors.getChestplate()));
+        player.getInventory().setLeggings(new ItemStack(armors.getLeggings()));
+        player.getInventory().setBoots(new ItemStack(armors.getBoots()));
     }
 
     private void sendChicaInventory(String name) {
@@ -1520,10 +1525,12 @@ public class GameSession {
         if ( player == null || !player.isOnline() ) {
             return;
         }
-        player.getInventory().setHelmet(new ItemStack(Material.GOLD_HELMET));
-        player.getInventory().setChestplate(new ItemStack(Material.GOLD_CHESTPLATE));
-        player.getInventory().setLeggings(new ItemStack(Material.GOLD_LEGGINGS));
-        player.getInventory().setBoots(new ItemStack(Material.GOLD_BOOTS));
+
+        FNAFIMConfigArmorContents armors = config.getArmorContentsChica();
+        player.getInventory().setHelmet(new ItemStack(armors.getHelmet()));
+        player.getInventory().setChestplate(new ItemStack(armors.getChestplate()));
+        player.getInventory().setLeggings(new ItemStack(armors.getLeggings()));
+        player.getInventory().setBoots(new ItemStack(armors.getBoots()));
 
         giveThreatItemToChica(name);
     }
@@ -1534,10 +1541,12 @@ public class GameSession {
         if ( player == null || !player.isOnline() ) {
             return;
         }
-        player.getInventory().setHelmet(new ItemStack(Material.DIAMOND_HELMET));
-        player.getInventory().setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE));
-        player.getInventory().setLeggings(new ItemStack(Material.DIAMOND_LEGGINGS));
-        player.getInventory().setBoots(new ItemStack(Material.DIAMOND_BOOTS));
+
+        FNAFIMConfigArmorContents armors = config.getArmorContentsBonnie();
+        player.getInventory().setHelmet(new ItemStack(armors.getHelmet()));
+        player.getInventory().setChestplate(new ItemStack(armors.getChestplate()));
+        player.getInventory().setLeggings(new ItemStack(armors.getLeggings()));
+        player.getInventory().setBoots(new ItemStack(armors.getBoots()));
     }
 
     private void sendFoxyInventory(String name) {
@@ -1546,10 +1555,12 @@ public class GameSession {
         if ( player == null || !player.isOnline() ) {
             return;
         }
-        player.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET));
-        player.getInventory().setChestplate(new ItemStack(Material.IRON_CHESTPLATE));
-        player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS));
-        player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS));
+
+        FNAFIMConfigArmorContents armors = config.getArmorContentsFoxy();
+        player.getInventory().setHelmet(new ItemStack(armors.getHelmet()));
+        player.getInventory().setChestplate(new ItemStack(armors.getChestplate()));
+        player.getInventory().setLeggings(new ItemStack(armors.getLeggings()));
+        player.getInventory().setBoots(new ItemStack(armors.getBoots()));
 
         int amount = FiveNightsAtFreddysInMinecraft.getInstance()
                 .getFNAFIMConfig().getMoveSpeed(night).getFoxyMovement();

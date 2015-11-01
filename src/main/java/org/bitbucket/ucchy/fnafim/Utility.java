@@ -17,6 +17,7 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
@@ -355,5 +356,15 @@ public class Utility {
     public static boolean isUUID(String source) {
         if ( source == null ) return false;
         return source.toUpperCase().matches("[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}");
+    }
+
+    /**
+     * 動作環境の言語設定を取得する。日本語環境なら ja、英語環境なら en が返される。
+     * @return 動作環境の言語
+     */
+    public static String getDefaultLocaleLanguage() {
+        Locale locale = Locale.getDefault();
+        if ( locale == null ) return "en";
+        return locale.getLanguage();
     }
 }

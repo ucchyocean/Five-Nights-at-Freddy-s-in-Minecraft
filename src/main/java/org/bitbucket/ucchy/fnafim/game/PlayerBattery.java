@@ -5,9 +5,9 @@
  */
 package org.bitbucket.ucchy.fnafim.game;
 
-import org.bitbucket.ucchy.fnafim.FNAFIMConfig;
 import org.bitbucket.ucchy.fnafim.FiveNightsAtFreddysInMinecraft;
 import org.bitbucket.ucchy.fnafim.Utility;
+import org.bitbucket.ucchy.fnafim.config.FNAFIMConfig;
 import org.bukkit.entity.Player;
 
 
