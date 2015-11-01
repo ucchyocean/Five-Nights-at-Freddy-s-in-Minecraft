@@ -332,9 +332,8 @@ public class Utility {
      */
     @SuppressWarnings("deprecation")
     public static OfflinePlayer getOfflinePlayer(String name) {
-        OfflinePlayer player = Bukkit.getOfflinePlayer(name);
-        if (player == null || (!player.hasPlayedBefore() && !player.isOnline()))
-            return null;
+        OfflinePlayer player = Bukkit.getPlayerExact(name);
+        if ( player == null ) player = Bukkit.getOfflinePlayer(name);
         return player;
     }
 
@@ -346,5 +345,15 @@ public class Utility {
     @SuppressWarnings("deprecation")
     public static Player getPlayerExact(String name) {
         return Bukkit.getPlayerExact(name);
+    }
+
+    /**
+     * 指定された文字列がUUIDかどうかを判定する
+     * @param source 文字列
+     * @return UUIDかどうか
+     */
+    public static boolean isUUID(String source) {
+        if ( source == null ) return false;
+        return source.toUpperCase().matches("[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}");
     }
 }

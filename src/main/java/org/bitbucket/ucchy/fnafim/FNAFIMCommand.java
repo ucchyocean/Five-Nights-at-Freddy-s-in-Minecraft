@@ -11,6 +11,7 @@ import java.util.List;
 import org.bitbucket.ucchy.fnafim.game.GameSession;
 import org.bitbucket.ucchy.fnafim.game.GameSessionPhase;
 import org.bitbucket.ucchy.fnafim.game.Night;
+import org.bitbucket.ucchy.fnafim.ranking.PlayerScoreData;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -50,6 +51,9 @@ public class FNAFIMCommand implements TabExecutor {
             return true;
         } else if ( args[0].equalsIgnoreCase("info") ) {
             infoCommand(sender, command, label, args);
+            return true;
+        } else if ( args[0].equalsIgnoreCase("ranking") ) {
+            rankingCommand(sender, command, label, args);
             return true;
         } else if ( args[0].equalsIgnoreCase("reserve") ) {
             reserveCommand(sender, command, label, args);
@@ -289,6 +293,88 @@ public class FNAFIMCommand implements TabExecutor {
             }
         }
         sendInformationMessage(sender, buffer.toString());
+    }
+
+    public void rankingCommand(
+            CommandSender sender, Command command, String label, String[] args) {
+
+        // パーミッションチェック
+        if ( !sender.hasPermission(PERMISSION_PREFIX + "ranking") ) {
+            sendErrorMessage(sender, Messages.get("Error_Permission"));
+            return;
+        }
+
+        ArrayList<PlayerScoreData> data = PlayerScoreData.getAllData();
+        ArrayList<Integer> scores = new ArrayList<Integer>();
+        String kind = "";
+
+        if ( args.length >= 2 && args[1].equalsIgnoreCase("win") ) {
+            // 勝利数順
+            PlayerScoreData.sortByGameWin(data);
+            kind = Messages.get("Ranking_KindWin");
+            for ( PlayerScoreData d : data ) {
+                scores.add(d.getPlayerGameWin() + d.getAnimatronicsGameWin());
+            }
+
+        } else if ( args.length >= 2 && args[1].equalsIgnoreCase("lose") ) {
+            // 敗北数順
+            PlayerScoreData.sortByGameLose(data);
+            kind = Messages.get("Ranking_KindLose");
+            for ( PlayerScoreData d : data ) {
+                scores.add(d.getPlayerGameLose() + d.getAnimatronicsGameLose());
+            }
+
+        } else if ( args.length >= 2 && args[1].equalsIgnoreCase("catch") ) {
+            // 捕まえた回数順
+            PlayerScoreData.sortByAnimatronicsCatchPlayers(data);
+            kind = Messages.get("Ranking_KindCatch");
+            for ( PlayerScoreData d : data ) {
+                scores.add(d.getAnimatronicsCatchPlayers());
+            }
+
+        } else {
+            // スコア順
+            PlayerScoreData.sortByScore(data);
+            kind = Messages.get("Ranking_KindScore");
+            for ( PlayerScoreData d : data ) {
+                scores.add(d.getScore());
+            }
+
+        }
+
+        sender.sendMessage(Messages.get("Ranking_TopMessage", "%kind", kind));
+
+        String format = Messages.get("Ranking_Line");
+
+        for ( int i=0; i<10; i++ ) {
+            if ( data.size() <= i ) {
+                break;
+            }
+            PlayerScoreData d = data.get(i);
+            String message = format
+                    .replace("%num", (i + 1) + "")
+                    .replace("%score", scores.get(i) + "")
+                    .replace("%name", d.getName());
+            sender.sendMessage(message);
+        }
+
+        int yourRank = -1;
+        for ( int i=0; i<data.size(); i++ ) {
+            PlayerScoreData d = data.get(i);
+            if ( d.getName().equals(sender.getName()) ) {
+                yourRank = i;
+                break;
+            }
+        }
+
+        if ( yourRank >= 0 ) {
+            sender.sendMessage(Messages.get("Ranking_YourScore"));
+            String message = format
+                    .replace("%num", (yourRank + 1) + "")
+                    .replace("%score", scores.get(yourRank) + "")
+                    .replace("%name", sender.getName());
+            sender.sendMessage(message);
+        }
     }
 
     private void reserveCommand(

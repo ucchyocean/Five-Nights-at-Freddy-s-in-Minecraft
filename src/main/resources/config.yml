@@ -149,6 +149,16 @@ chicaThreatCooldownSeconds: 20
 # The speed up amount of FredBear's speed up skill.
 fredbearSpeedUp: 3
 
+
+# =============== Score Settings ===============
+
+# Score that a player wins a night.
+scorePlayerOverNight: 3
+
+# Score that an Animatronics catches a guard.
+scoreAnimatronicsCatch: 1
+
+
 # =============== Sound Settings ===============
 
 # Using flash light.

@@ -12,6 +12,7 @@ import java.util.Locale;
 import org.bitbucket.ucchy.fnafim.game.GameSession;
 import org.bitbucket.ucchy.fnafim.game.GameSessionListener;
 import org.bitbucket.ucchy.fnafim.game.GameSessionPhase;
+import org.bitbucket.ucchy.fnafim.ranking.PlayerScoreData;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -52,6 +53,9 @@ public class FiveNightsAtFreddysInMinecraft extends JavaPlugin {
         // 地点管理のロード
         locationManager = LocationManager.load(new File(getDataFolder(), "location.yml"));
         joinsignManager = JoinSignManager.load(new File(getDataFolder(), "joinsign.yml"));
+
+        // スコアデータのロード
+        PlayerScoreData.initCache(new File(getDataFolder(), "score"));
 
         // リスナーの登録
         getServer().getPluginManager().registerEvents(new GameSessionListener(), this);

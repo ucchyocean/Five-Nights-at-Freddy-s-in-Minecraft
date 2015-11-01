@@ -16,6 +16,7 @@ commands:
            /<command> leave - Leave the game.
            /<command> spectate - join/leave the game as spactator.
            /<command> info - Show game session status.
+           /<command> ranking [win|lose|catch] - View score ranking.
            /<command> reserve (player) - Add player as reservation player.
            /<command> open - Open player invitation.
            /<command> close - Close player invitation.
@@ -46,6 +47,9 @@ permissions:
     default: true
   fnafim.info:
     description: Permission of info command.
+    default: true
+  fnafim.ranking:
+    description: Permission of ranking command.
     default: true
   fnafim.reserve:
     description: Permission of reserve command.
@@ -83,6 +87,7 @@ permissions:
       fnafim.leave: true
       fnafim.spectate: true
       fnafim.info: true
+      fnafim.ranking: true
       fnafim.reserve: true
       fnafim.open: true
       fnafim.close: true

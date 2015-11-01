@@ -23,6 +23,7 @@ import org.bitbucket.ucchy.fnafim.effect.BlindnessEffect;
 import org.bitbucket.ucchy.fnafim.effect.ChangeDisplayNameEffect;
 import org.bitbucket.ucchy.fnafim.effect.InvisibleEffect;
 import org.bitbucket.ucchy.fnafim.effect.SpeedEffect;
+import org.bitbucket.ucchy.fnafim.ranking.PlayerScoreData;
 import org.bitbucket.ucchy.fnafim.task.AutoStartTimerTask;
 import org.bitbucket.ucchy.fnafim.task.ChicaThreatCooldownTimeTask;
 import org.bitbucket.ucchy.fnafim.task.FoxyMovementTask;
@@ -63,6 +64,8 @@ public class GameSession {
     private List<String> players;
     private List<String> spectators;
     private List<String> reservations;
+    private List<String> playCountIncreased;
+
     private String freddy;
     private String chica;
     private String bonnie;
@@ -101,6 +104,7 @@ public class GameSession {
         players = new ArrayList<String>();
         spectators = new ArrayList<String>();
         reservations = new ArrayList<String>();
+        playCountIncreased = new ArrayList<String>();
 
         storage = new TemporaryStorage();
         effectManager = new EffectManager();
@@ -388,6 +392,22 @@ public class GameSession {
         scoreboardDisplay.setFreddysTeam(bonnie);
         scoreboardDisplay.setFreddysTeam(foxy);
 
+        // スコアを付ける（プレイ回数を +1する）
+        for ( String name : players ) {
+            if ( !playCountIncreased.contains(name) ) {
+                PlayerScoreData data = PlayerScoreData.getData(name);
+                if ( data != null ) data.increasePlayerGamePlayed(1);
+                playCountIncreased.add(name);
+            }
+        }
+        for ( String name : new String[]{freddy, chica, bonnie, foxy, fredbear} ) {
+            if ( name != null && !playCountIncreased.contains(name) ) {
+                PlayerScoreData data = PlayerScoreData.getData(name);
+                if ( data != null ) data.increaseAnimatronicsGamePlayed(1);
+                playCountIncreased.add(name);
+            }
+        }
+
         // プレイヤー人数 x TELEPORT_WAIT＋α だけ待ってから、ゲームを開始する。
         int delay = entrants.size() * TELEPORT_WAIT_TICKS + 10;
         new BukkitRunnable() {
@@ -579,6 +599,13 @@ public class GameSession {
             scoreboardDisplay.leavePlayersTeam(player.getName());
         }
 
+        // スコアを付ける
+        PlayerScoreData.getData(player.getUniqueId()).increasePlayerGameLose(1);
+        if ( caught != null ) {
+            PlayerScoreData.getData(caught.getUniqueId()).increaseAnimatronicsCatchPlayers(1);
+            PlayerScoreData.getData(caught.getUniqueId()).increaseScore(config.getScoreAnimatronicsCatch());
+        }
+
         // 捕まえたのがfreddyで、行動不能のnightなら、リスポーン地点に戻して行動不能にする
         if ( caught != null && freddy != null && freddy.equals(caught.getName()) && freddyReturn ) {
             freddyReturn = false;
@@ -620,6 +647,13 @@ public class GameSession {
         phase = GameSessionPhase.END;
         sendInGameTitle(Messages.get("Announce_GameOver1"));
         sendInGameAnnounce(Messages.get("Announce_GameOver2"));
+
+        // スコアを付ける
+        for ( String loser : new String[]{freddy, chica, bonnie, foxy, fredbear} ) {
+            PlayerScoreData data = PlayerScoreData.getData(loser);
+            if ( data != null ) data.increaseAnimatronicsGameWin(1);
+        }
+
         onEnd();
     }
 
@@ -661,6 +695,11 @@ public class GameSession {
         }
         for ( String name : spectators ) {
             removeInventoryAll(name);
+        }
+
+        // スコアを付ける
+        for ( String name : players ) {
+            PlayerScoreData.getData(name).increaseScore(config.getScorePlayerOverNight());
         }
 
         // Night1-4は、次の夜の準備。その他は終了。
@@ -715,6 +754,16 @@ public class GameSession {
             }
             sendInGameAnnounce(Messages.get("Announce_GameClear"));
             sendInGameAnnounce(Messages.get("Announce_GameClear2", "%players", winners.toString()));
+
+            // スコアを付ける
+            for ( String winner : players ) {
+                PlayerScoreData data = PlayerScoreData.getData(winner);
+                if ( data != null ) data.increasePlayerGameWin(1);
+            }
+            for ( String loser : new String[]{freddy, chica, bonnie, foxy, fredbear} ) {
+                PlayerScoreData data = PlayerScoreData.getData(loser);
+                if ( data != null ) data.increaseAnimatronicsGameLose(1);
+            }
 
             // onEnd() を呼んで終了処理をしておく。
             phase = GameSessionPhase.END;

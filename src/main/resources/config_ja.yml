@@ -150,6 +150,16 @@ chicaThreatCooldownSeconds: 20
 # FredBearが、高速行動アイテムを利用したときのスピード上昇量を指定します。
 fredbearSpeedUp: 3
 
+
+# =============== スコア設定 ===============
+
+# プレイヤーがNightを勝ちのびたときに与えられるスコア
+scorePlayerOverNight: 3
+
+# Freddy's陣営が、プレイヤーを一人捕まえるたびに与えられるスコア
+scoreAnimatronicsCatch: 1
+
+
 # =============== 効果音の設定 ===============
 
 # 懐中電灯のオンオフ

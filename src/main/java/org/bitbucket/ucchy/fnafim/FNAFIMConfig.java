@@ -91,6 +91,12 @@ public class FNAFIMConfig {
     /** FredBearの高速行動のスピード上昇量 */
     private int fredbearSpeedUp;
 
+    /** スコア - プレイヤーがNightを勝ちのびたときに与えられるスコア */
+    private int scorePlayerOverNight;
+
+    /** スコア - Freddy's陣営が、プレイヤーを一人捕まえるたびに与えられるスコア */
+    private int scoreAnimatronicsCatch;
+
     /** 効果音 - 懐中電灯のオンオフ */
     private SoundComponent soundUseFlashLight;
 
@@ -168,6 +174,9 @@ public class FNAFIMConfig {
         playerLogoutTrackingSeconds = config.getInt("playerLogoutTrackingSeconds", 20);
         chicaThreatCooldownSeconds = config.getInt("chicaThreatCooldownSeconds", 20);
         fredbearSpeedUp = config.getInt("fredbearSpeedUp", 3);
+
+        scorePlayerOverNight = config.getInt("scorePlayerOverNight", 3);
+        scoreAnimatronicsCatch = config.getInt("scoreAnimatronicsCatch", 1);
 
         night1MoveSpeed = FNAFIMConfigMoveSetting.load(
                 config, "night1MoveSpeed", -99, -3, -3, 1, -1, 1, 1);
@@ -403,6 +412,20 @@ public class FNAFIMConfig {
      */
     public int getFredbearSpeedUp() {
         return fredbearSpeedUp;
+    }
+
+    /**
+     * @return scorePlayerOverNight
+     */
+    public int getScorePlayerOverNight() {
+        return scorePlayerOverNight;
+    }
+
+    /**
+     * @return scoreAnimatronicsCatch
+     */
+    public int getScoreAnimatronicsCatch() {
+        return scoreAnimatronicsCatch;
     }
 
     /**
