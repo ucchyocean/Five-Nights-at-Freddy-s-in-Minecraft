@@ -22,7 +22,7 @@ commands:
            /<command> close - Close player invitation.
            /<command> start night<1-7> - Start new game.
            /<command> cancel - Cancel game.
-           /<command> set <lobby|player|spectate|freddy|chica|bonny|foxy> - Set each respawn point.
+           /<command> set <lobby|player|spectate|freddy|chica|bonnie|foxy> - Set each respawn point.
            /<command> sign - Register new Join Sign.
            /<command> switch - Show currently arena name.
            /<command> switch (arena name) - Switch to the arena setting of the specified name.
