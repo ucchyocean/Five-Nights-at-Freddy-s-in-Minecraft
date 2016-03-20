@@ -220,7 +220,7 @@ public class LocationManager {
      * @return spectate
      */
     public Location getSpectate() {
-        return arena.get("spactate");
+        return arena.get("spectate");
     }
 
     /**

@@ -1614,6 +1614,7 @@ public class GameSession {
         if ( chica != null ) targets.add(chica);
         if ( bonnie != null ) targets.add(bonnie);
         if ( foxy != null ) targets.add(foxy);
+        if ( fredbear != null ) targets.add(fredbear);
         targets.addAll(players);
 
         for ( String name : targets ) {
