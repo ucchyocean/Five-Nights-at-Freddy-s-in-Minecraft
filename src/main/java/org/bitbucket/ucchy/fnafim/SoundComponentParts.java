@@ -107,13 +107,7 @@ public class SoundComponentParts {
     }
 
     private static Sound getSoundFromString(String source) {
-        if ( source == null ) return null;
-        for ( Sound s : Sound.values() ) {
-            if ( s.name().equalsIgnoreCase(source) ) {
-                return s;
-            }
-        }
-        return null;
+        return SoundEnum.getSoundFromString(source);
     }
 
     private static float tryToParseDouble(String source) {

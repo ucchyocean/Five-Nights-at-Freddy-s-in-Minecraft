@@ -12,7 +12,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
@@ -142,9 +141,7 @@ public class ScoreboardDisplay {
             team = scoreboard.registerNewTeam("Freddys");
             team.setPrefix(ChatColor.RED.toString());
             team.setSuffix(ChatColor.RESET.toString());
-            if ( Utility.isCB180orLater() ) {
-                team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
-            }
+            setTeamOption(team);
         }
         addTeamMember(team, name);
     }
@@ -160,9 +157,7 @@ public class ScoreboardDisplay {
             team = scoreboard.registerNewTeam("Players");
             team.setPrefix(ChatColor.BLUE.toString());
             team.setSuffix(ChatColor.RESET.toString());
-            if ( Utility.isCB180orLater() ) {
-                team.setNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
-            }
+            setTeamOption(team);
         }
         addTeamMember(team, name);
     }
@@ -215,6 +210,11 @@ public class ScoreboardDisplay {
         setScore(Messages.get("Sidebar_RemainingPlayers"), remain);
     }
 
+    /**
+     * 指定したチームに、指定した名前のプレイヤーを加える
+     * @param team チーム
+     * @param name プレイヤー名
+     */
     @SuppressWarnings("deprecation")
     private void addTeamMember(Team team, String name) {
         if ( Utility.isCB186orLater() ) {
@@ -227,6 +227,11 @@ public class ScoreboardDisplay {
         }
     }
 
+    /**
+     * 指定したチームから、指定した名前のプレイヤーを離脱させる
+     * @param team チーム
+     * @param name プレイヤー名
+     */
     @SuppressWarnings("deprecation")
     private void removeTeamMember(Team team, String name) {
         if ( Utility.isCB186orLater() ) {
@@ -236,6 +241,21 @@ public class ScoreboardDisplay {
             if ( player != null && player.isOnline() ) {
                 team.removePlayer(player);
             }
+        }
+    }
+
+    /**
+     * 指定したチームに、ネームタグ非表示(CB1.8以降)と、プレイヤー間の衝突無効(CB1.9以降)を設定します。
+     * @param team チーム
+     */
+    @SuppressWarnings("deprecation")
+    private void setTeamOption(Team team) {
+
+        if ( Utility.isCB19orLater() ) {
+            team.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER);
+            team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+        } else if ( Utility.isCB180orLater() ) {
+            team.setNameTagVisibility(org.bukkit.scoreboard.NameTagVisibility.NEVER);
         }
     }
 }

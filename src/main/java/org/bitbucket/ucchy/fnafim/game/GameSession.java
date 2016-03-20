@@ -780,7 +780,7 @@ public class GameSession {
     protected boolean onEntrantInteract(final Player player) {
 
         // 表示名のないアイテムを持っていたなら無視。
-        ItemStack item = player.getItemInHand();
+        ItemStack item = getItemInHand(player);
         String name = getDisplayName(item);
         if ( name == null ) {
             return true;
@@ -797,10 +797,10 @@ public class GameSession {
                 batteries.get(player.getName()).setUsingFlashlight(isOn);
             }
             if ( isOn ) {
-                player.setItemInHand(flashlightOn.clone());
+                setItemInHand(player, flashlightOn.clone());
                 effectManager.removeEffect(player.getName(), BlindnessEffect.TYPE);
             } else {
-                player.setItemInHand(flashlightOff.clone());
+                setItemInHand(player, flashlightOff.clone());
                 effectManager.applyEffect(player.getName(), new BlindnessEffect(player));
             }
             config.getSoundUseFlashLight().playSoundToPlayer(player);
@@ -853,12 +853,12 @@ public class GameSession {
                 batteries.get(player.getName()).setUsingShutter(isOn);
             }
             if ( isOn ) {
-                player.setItemInHand(new ItemStack(Material.AIR));
+                setItemInHand(player, new ItemStack(Material.AIR));
                 player.getInventory().setItem(3, shutterOn.clone());
                 updateInventory(player);
                 effectManager.applyEffect(player.getName(), new InvisibleEffect(player));
             } else {
-                player.setItemInHand(new ItemStack(Material.AIR));
+                setItemInHand(player, new ItemStack(Material.AIR));
                 player.getInventory().setItem(2, shutterOff.clone());
                 updateInventory(player);
                 effectManager.removeEffect(player.getName(), InvisibleEffect.TYPE);
@@ -880,9 +880,9 @@ public class GameSession {
             // 1つ消費する
             int amount = item.getAmount() - 1;
             if ( amount > 0 ) {
-                player.getItemInHand().setAmount(amount);
+                getItemInHand(player).setAmount(amount);
             } else {
-                player.setItemInHand(new ItemStack(Material.AIR));
+                setItemInHand(player, new ItemStack(Material.AIR));
             }
 
             // 行動不可を解いて、30秒間の行動時間を与える
@@ -914,9 +914,9 @@ public class GameSession {
             // 1つ消費する
             int amount = item.getAmount() - 1;
             if ( amount > 0 ) {
-                player.getItemInHand().setAmount(amount);
+                getItemInHand(player).setAmount(amount);
             } else {
-                player.setItemInHand(new ItemStack(Material.AIR));
+                setItemInHand(player, new ItemStack(Material.AIR));
             }
 
             // 30秒間のスピード上昇+3を与える
@@ -964,7 +964,7 @@ public class GameSession {
             }
 
             // アイテム消費
-            player.setItemInHand(new ItemStack(Material.AIR));
+            setItemInHand(player, new ItemStack(Material.AIR));
 
             return false;
         }
@@ -976,7 +976,7 @@ public class GameSession {
             config.getSoundChicaThreat().playSoundToWorld(player.getLocation());
 
             // アイテム消費
-            player.setItemInHand(new ItemStack(Material.AIR));
+            setItemInHand(player, new ItemStack(Material.AIR));
 
             // クールダウンタイムを開始する
             int seconds = config.getChicaThreatCooldownSeconds();
@@ -1876,6 +1876,34 @@ public class GameSession {
             effectManager.applyEffect(name, new BindEffect(player));
         } else {
             effectManager.applyEffect(name, new SpeedEffect(player, setting));
+        }
+    }
+
+    /**
+     * プレイヤーが手（メインハンド）に持っているアイテムを取得します。
+     * @param player プレイヤー
+     * @return 手に持っているアイテム
+     */
+    @SuppressWarnings("deprecation")
+    private static ItemStack getItemInHand(Player player) {
+        if ( Utility.isCB19orLater() ) {
+            return player.getInventory().getItemInMainHand();
+        } else {
+            return player.getItemInHand();
+        }
+    }
+
+    /**
+     * 指定したプレイヤーの手に持っているアイテムを設定します。
+     * @param player プレイヤー
+     * @param item アイテム
+     */
+    @SuppressWarnings("deprecation")
+    private static void setItemInHand(Player player, ItemStack item) {
+        if ( Utility.isCB19orLater() ) {
+            player.getInventory().setItemInMainHand(item);
+        } else {
+            player.setItemInHand(item);
         }
     }
 }
